@@ -47,7 +47,7 @@
             // Check that the password is validated
             var isValidated = validatePassword(password)
 
-            if (isValidated) {
+            if (!isValidated) {
                 password.className = 'invalid';
                 isValid = false;
             } else {
@@ -55,7 +55,7 @@
             }
 
             // Check that the passwords match
-            if (isValidated && password.value !== confirmPassword.value) {
+            if (!isValidated && password.value !== confirmPassword.value) {
                 confirmPassword.className = 'invalid';
                 isValid = false;
             } else {
