@@ -45,7 +45,7 @@
             }
 
             // Check that the password is validated
-            var isValidated = validatePassword(password)
+            var isValidated = validatePassword(password.value)
 
             if (!isValidated) {
                 password.className = 'invalid';
