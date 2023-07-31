@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{ template "head" . }}
+</head>
+
+<body>
+    <div class="navbar-fixed">
+        <nav>
+            <div class="nav-wrapper">
+                <a href="#!" class="brand-logo left">
+                    <!-- <img src="/static/logo.png" alt="CulinaryAI" id="logo" class="img-fluid mx-auto d-block"> -->
+                    <img src="/static/logo.png" alt="CulinaryAI">
+                </a>
+                <!-- <a href="#" data-target="slide-out" class="right sidenav-trigger"><i class="material-icons">menu</i></a> -->
+                {{ if .User }}
+                <!-- Dropdown for logged in user -->
+                <ul class="right">
+                    <li>
+                        <a class="dropdown-trigger" href="#!" data-target="nav-dropdown">
+                            <i class="material-icons right">menu</i>
+                        </a>
+                    </li>
+                </ul>
+                <ul id="nav-dropdown" class="dropdown-content">
+                    <li>
+                        <a href=""><i class="material-icons right">settings</i>Settings</a>
+                    </li>
+                    <li>
+                        <a href=""><i class="material-icons right">logout</i>Logout</a>
+                    </li>
+                </ul>
+                {{ else }}
+                <!-- Dropdown for guest -->
+                <ul class="right">
+                    <li><a href="#!"><i class="material-icons right">person</i>Sign up</a></li>
+                    <li><a href="#!"><i class="material-icons right">login</i>Login</a></li>
+                </ul>
+                {{ end }}
+            </div>
+        </nav>
+    </div>
+
+    <div class="container">
+        <!-- Inactive (not saved) state -->
+        <i class="material-icons toggle-symbols">favorite_border</i>
+
+        <!-- Active (saved) state -->
+        <i class="material-icons toggle-symbols">favorite</i>
+
+        <!-- Inactive (not deleted) state -->
+        <i class="material-icons toggle-symbols">delete</i>
+
+        <!-- Active (deleted) state -->
+        <i class="material-icons toggle-symbols">auto_delete</i>
+
+        <!-- Active (in history) state -->
+        <i class="material-icons toggle-symbols">history</i>
+
+        <!-- Main App -->
+        <div class="input-group mb-3">
+            <label for="userPromptInput">Supplimental prompt (optional):</label><br>
+            <input type="text" id="userPromptInput" placeholder="ex: Something with beef, Five-course meal"
+                aria-label="ex: Something with beef, Five-course meal" aria-describedby="button-addon2">
+            <div class="input-group-append">
+                <button class="btn" type="button" id="button1">Button 1</button>
+                <button class="btn" type="button" id="button2">Button 2</button>
+            </div>
+        </div>
+        <div id="markdown-display" class="markdown-display rounded p-3 bg-black">
+            <!-- Markdown content will be inserted here -->
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

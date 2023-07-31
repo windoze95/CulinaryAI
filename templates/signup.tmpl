@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    {{ template "head" . }}
+    <style>
+        /* Hide the second page by default */
+        /* #mfa-section {
+            display: none;
+        } */
+
+        /* Style for indicating valid and invalid input */
+        .valid {
+            background-color: #d4edda;
+        }
+
+        .invalid {
+            background-color: #f8d7da;
+        }
+    </style>
+    <script>
+        function validatePassword(password) {
+            var hasUppercase = /[A-Z]/.test(password);
+            var hasLowercase = /[a-z]/.test(password);
+            var hasNumber = /\d/.test(password);
+            var hasSpecialChar = /[!@#$%^&*]/.test(password);
+
+            return password.length >= 8 && hasUppercase && hasLowercase && hasNumber && hasSpecialChar;
+        }
+
+        function validateSignupFields() {
+            var username = document.getElementById('username');
+            var password = document.getElementById('password');
+            var confirmPassword = document.getElementById('confirm-password');
+            var submitButton = document.getElementById('signup-submit');
+
+            var isValid = true;  // Track the validity of all fields
+
+            // Check that the username is long enough
+            if (username.value.length < 3) {
+                username.className = 'invalid';
+                isValid = false;
+            } else {
+                username.className = 'valid';
+            }
+
+            // Check that the password is validated
+            var isValidated = validatePassword(password)
+
+            if (isValidated) {
+                password.className = 'invalid';
+                isValid = false;
+            } else {
+                password.className = 'valid';
+            }
+
+            // Check that the passwords match
+            if (isValidated && password.value !== confirmPassword.value) {
+                confirmPassword.className = 'invalid';
+                isValid = false;
+            } else {
+                confirmPassword.className = 'valid';
+            }
+
+            // Set the disabled property of the submit button based on the validity of all fields
+            submitButton.disabled = !isValid;
+        }
+    </script>
+</head>
+
+<body>
+    <header>
+        {{ template "header" . }}
+    </header>
+    <div class="container">
+        <h2>Create an account</h2>
+        <form id="signup-form">
+            <label for="username">Username:</label><br>
+            <input type="text" id="username" name="username" required oninput="validateSignupFields()"><br>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password" required oninput="validateSignupFields()"><br>
+            <label for="confirm-password">Confirm Password:</label><br>
+            <input type="password" id="confirm-password" name="confirm-password" required
+                oninput="validateSignupFields()"><br>
+            <input type="submit" id="signup-submit" value="Sign up">
+        </form>
+    </div>
+    <script>
+        var password = document.getElementById('password');
+        var submitButton = document.getElementById('signup-submit');
+        if (password.value.length == 0) {
+            submitButton.disabled = true;
+        }
+
+        document.getElementById('signup-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            fetch('/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value,
+                }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Handle successful sign up (e.g., redirect to login page, show success message, etc.).
+                })
+                .catch(error => {
+                    // Insert the error message into the "error-message" div.
+                    document.getElementById('error-message').innerText = error.message;
+                });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,10 @@
+{
+    "title": "CulinaryAI",
+    "env": {
+        "port": "PORT",
+        "databaseUrl": "DATABASE_URL",
+        "secretKey": "SECRET_KEY",
+        "sessionKey": "SESSION_KEY"
+    },
+    "mfaIssuer": "culinaryai"
+}
