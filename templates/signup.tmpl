@@ -12,10 +12,22 @@
         /* Style for indicating valid and invalid input */
         .valid {
             background-color: #d4edda;
+            border-bottom-color: rgb(54, 125, 57);
+            box-shadow: rgb(61 140 64) 0px 1px 0px 0px;
+        }
+
+        label.valid {
+            color: rgb(54, 125, 57);
         }
 
         .invalid {
             background-color: #f8d7da;
+            border-bottom-color: rgb(157, 19, 9);
+            box-shadow: rgb(169 20 9) 0px 1px 0px 0px;
+        }
+
+        label.invalid {
+            color: rgb(157, 19, 9);
         }
     </style>
     <script>
@@ -34,36 +46,48 @@
             var confirmPassword = document.getElementById('confirm-password');
             var submitButton = document.getElementById('signup-submit');
 
+            var usernameLabel = document.getElementById('username-label');
+            var passwordLabel = document.getElementById('password-label');
+            var confirmPasswordLabel = document.getElementById('confirm-password-label');
+
             var isValid = true;  // Track the validity of all fields
 
             // Check that the username is long enough
             if (username.value.length < 3) {
                 username.className = 'invalid';
+                usernameLabel.className = 'invalid';
                 isValid = false;
             } else {
                 username.className = 'valid';
+                usernameLabel.className = 'valid';
             }
 
-            // Check that the password is validated
-            var isValidated = validatePassword(password.value)
+            if (password.value !== "" || confirmPassword.value !== "") {
+                // Check that the password is validated
+                var isValidated = validatePassword(password.value)
 
-            if (isValidated) {
-                password.className = 'valid';
-            } else {
-                password.className = 'invalid';
-                isValid = false;
+                if (isValidated) {
+                    password.className = 'valid';
+                    passwordLabel.className = 'valid';
+                } else {
+                    password.className = 'invalid';
+                    passwordLabel.className = 'invalid';
+                    isValid = false;
+                }
+
+                // Check that the passwords are valid and match
+                if (isValidated && password.value === confirmPassword.value) {
+                    confirmPassword.className = 'valid';
+                    confirmPasswordLabel.className = 'valid';
+                } else {
+                    confirmPassword.className = 'invalid';
+                    confirmPasswordLabel.className = 'invalid';
+                    isValid = false;
+                }
+
+                // Set the disabled property of the submit button based on the validity of all fields
+                submitButton.disabled = !isValid;
             }
-
-            // Check that the passwords are valid and match
-            if (isValidated && password.value === confirmPassword.value) {
-                confirmPassword.className = 'valid';
-            } else {
-            confirmPassword.className = 'invalid';
-                isValid = false;   
-            }
-
-            // Set the disabled property of the submit button based on the validity of all fields
-            submitButton.disabled = !isValid;
         }
     </script>
 </head>
