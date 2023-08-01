@@ -47,19 +47,19 @@
             // Check that the password is validated
             var isValidated = validatePassword(password.value)
 
-            if (!isValidated) {
+            if (isValidated) {
+                password.className = 'valid';
+            } else {
                 password.className = 'invalid';
                 isValid = false;
-            } else {
-                password.className = 'valid';
             }
 
-            // Check that the passwords match
-            if (!isValidated && password.value !== confirmPassword.value) {
-                confirmPassword.className = 'invalid';
-                isValid = false;
-            } else {
+            // Check that the passwords are valid and match
+            if (isValidated && password.value === confirmPassword.value) {
                 confirmPassword.className = 'valid';
+            } else {
+            confirmPassword.className = 'invalid';
+                isValid = false;   
             }
 
             // Set the disabled property of the submit button based on the validity of all fields
