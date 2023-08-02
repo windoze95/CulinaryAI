@@ -56,7 +56,20 @@
         input[type=tel]:not(.browser-default):focus.valid~label,
         input[type=number]:not(.browser-default):focus.valid~label,
         input[type=search]:not(.browser-default):focus.valid~label,
-        textarea.materialize-textarea:focus.valid~label {
+        textarea.materialize-textarea:focus.valid~label,
+        input:not([type]):focus.invalid~label,
+        input[type=text]:not(.browser-default):focus.invalid~label,
+        input[type=password]:not(.browser-default):focus.invalid~label,
+        input[type=email]:not(.browser-default):focus.invalid~label,
+        input[type=url]:not(.browser-default):focus.invalid~label,
+        input[type=time]:not(.browser-default):focus.invalid~label,
+        input[type=date]:not(.browser-default):focus.invalid~label,
+        input[type=datetime]:not(.browser-default):focus.invalid~label,
+        input[type=datetime-local]:not(.browser-default):focus.invalid~label,
+        input[type=tel]:not(.browser-default):focus.invalid~label,
+        input[type=number]:not(.browser-default):focus.invalid~label,
+        input[type=search]:not(.browser-default):focus.invalid~label,
+        textarea.materialize-textarea:focus.invalid~label {
             color: #9e9e9e !important;
         }
     </style>
