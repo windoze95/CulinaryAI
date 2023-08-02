@@ -63,10 +63,16 @@ body {
     width: 100%;
     padding-right: 15px;
     padding-left: 15px;
+    padding-bottom: 2.3733333333rem;
     margin-right: auto;
     margin-left: auto;
     max-width: 768px;
     background-color: rgb(77, 84, 87);
+}
+
+h2 {
+    margin: 0;
+    padding: 2.3733333333rem 0 1.424rem 0;
 }
 
 [type=button]:not(:disabled),
