@@ -3,33 +3,6 @@
 
 <head>
     {{ template "head" . }}
-    <script>
-        function validateLoginForm() {
-            var username = document.getElementById('username');
-            var password = document.getElementById('password');
-            var loginButton = document.getElementById('login-submit');
-
-            var isValid = true;
-
-            // Check that the username is long enough
-            if (username.value.length < 3) {
-                username.className = 'invalid';
-                isValid = false;
-            } else {
-                username.className = 'valid';
-            }
-
-            // Check that the password is long enough
-            if (password.value.length < 8) {
-                password.className = 'invalid';
-                isValid = false;
-            } else {
-                password.className = 'valid';
-            }
-
-            loginButton.disabled = !isValid;
-        }
-    </script>
 </head>
 
 <body>
