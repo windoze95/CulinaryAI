@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    {{ template "head" . }}
+    <script>
+        function validateLoginForm() {
+            var username = document.getElementById('username');
+            var password = document.getElementById('password');
+            var loginButton = document.getElementById('login-submit');
+
+            var isValid = true;
+
+            // Check that the username is long enough
+            if (username.value.length < 3) {
+                username.className = 'invalid';
+                isValid = false;
+            } else {
+                username.className = 'valid';
+            }
+
+            // Check that the password is long enough
+            if (password.value.length < 8) {
+                password.className = 'invalid';
+                isValid = false;
+            } else {
+                password.className = 'valid';
+            }
+
+            loginButton.disabled = !isValid;
+        }
+    </script>
+</head>
+
+<body>
+    <header>
+        {{ template "header" . }}
+    </header>
+
+    <div class="container">
+        <h2>Log in</h2>
+        <form id="login-form" spellcheck="false">
+            <label for="username">Username:</label><br>
+            <input type="text" id="username" name="username" required oninput="validateLoginForm()"><br>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password" required oninput="validateLoginForm()"><br>
+            <input type="submit" id="login-submit" value="Log in">
+        </form>
+    </div>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value,
+                }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Handle successful login (e.g., redirect to home page, show success message, etc.).
+                })
+                .catch(error => {
+                    // Insert the error message into the "error-message" div.
+                    document.getElementById('error-message').innerText = error.message;
+                });
+        });
+    </script>
+</body>
+
+</html>

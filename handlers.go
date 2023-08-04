@@ -84,6 +84,37 @@ func collectRecipeHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Recipe collected"})
 }
 
+// Handler for logging in a user
+func loginUserHandler(c *gin.Context) {
+	var userCredentials struct {
+		Username string `json:"username" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
+
+	// Returns error if a required field is not included
+	if err := c.ShouldBindJSON(&userCredentials); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var user User
+	if err := db.Where("username = ?", userCredentials.Username).First(&user).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(userCredentials.Password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		return
+	}
+
+	session := c.MustGet("session").(*sessions.Session)
+	session.Values["user_id"] = user.ID
+	session.Save(c.Request, c.Writer)
+
+	c.JSON(http.StatusOK, gin.H{"message": "User logged in successfully"})
+}
+
 func signupUserHandler(c *gin.Context) {
 	var newUser struct {
 		Username string `json:"username" binding:"required"`

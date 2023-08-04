@@ -71,7 +71,7 @@ func startGin() {
 	})
 
 	// User login
-	router.POST("/login", UserMiddleware(), func(c *gin.Context) {})
+	router.POST("/login", UserMiddleware(), loginUserHandler)
 
 	// User settings
 	router.PUT("/users/:id/settings", UserMiddleware(), UserOwnerMiddleware(), func(c *gin.Context) {})

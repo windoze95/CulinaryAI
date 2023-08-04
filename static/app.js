@@ -59,33 +59,33 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Handle the Settings form submission
-document.getElementById('settingsForm').addEventListener('submit', function (e) {
-    e.preventDefault();
+// document.getElementById('settingsForm').addEventListener('submit', function (e) {
+//     e.preventDefault();
 
-    var apiKey = document.getElementById('apiKeyInput').value;
+//     var apiKey = document.getElementById('apiKeyInput').value;
 
-    // Create a new FormData object
-    var formData = new FormData();
-    formData.append('OpenAIKey', apiKey);
+//     // Create a new FormData object
+//     var formData = new FormData();
+//     formData.append('OpenAIKey', apiKey);
 
-    // Send a POST request to the server
-    fetch('/settings', {
-        method: 'POST',
-        body: formData
-    }).then(response => {
-        // Check if the request was successful
-        if (response.ok) {
-            console.log('OpenAI API Key was saved successfully');
-        } else {
-            console.error('Failed to save the OpenAI API Key');
-        }
-    }).catch(error => {
-        console.error('An error occurred:', error);
-    });
+//     // Send a POST request to the server
+//     fetch('/settings', {
+//         method: 'POST',
+//         body: formData
+//     }).then(response => {
+//         // Check if the request was successful
+//         if (response.ok) {
+//             console.log('OpenAI API Key was saved successfully');
+//         } else {
+//             console.error('Failed to save the OpenAI API Key');
+//         }
+//     }).catch(error => {
+//         console.error('An error occurred:', error);
+//     });
 
-    // Clear the input field and hide the modal
-    document.getElementById('apiKeyInput').value = '';
-    modal.style.display = "none";
-});
+//     // Clear the input field and hide the modal
+//     document.getElementById('apiKeyInput').value = '';
+//     modal.style.display = "none";
+// });
 
-window.scrollTo(0, 1);
+// window.scrollTo(0, 1);
