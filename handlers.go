@@ -11,7 +11,6 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
-	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,29 +22,6 @@ type HTTPError struct {
 
 func (e *HTTPError) Error() string {
 	return e.Message
-}
-
-func collectRecipe(db *gorm.DB, userID uint, recipeID uint) error {
-	var user User
-	var recipe Recipe
-
-	// Find the user and recipe
-	if err := db.First(&user, userID).Error; err != nil {
-		return err
-	}
-	if err := db.First(&recipe, recipeID).Error; err != nil {
-		return err
-	}
-
-	// Add the recipe to the user's collected recipes
-	user.CollectedRecipes = append(user.CollectedRecipes, recipe)
-
-	// Save the user
-	if err := db.Save(&user).Error; err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // Handler for collecting a recipe
