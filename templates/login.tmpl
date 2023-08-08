@@ -42,10 +42,13 @@
                 })
                 .then(data => {
                     // Handle successful login (e.g., redirect to home page, show success message, etc.).
+                    M.toast({ html: 'Success!' })
+                    window.location.href = '/';
                 })
                 .catch(error => {
                     // Insert the error message into the "error-message" div.
-                    document.getElementById('error-message').innerText = error.message;
+                    // document.getElementById('error-message').innerText = error.message;
+                    M.toast({ html: error.message })
                 });
         });
     </script>

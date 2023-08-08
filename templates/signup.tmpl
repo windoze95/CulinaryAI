@@ -181,10 +181,13 @@
                 })
                 .then(data => {
                     // Handle successful sign up (e.g., redirect to login page, show success message, etc.).
+                    M.toast({ html: 'Success!' })
+                    window.location.href = '/login';
                 })
                 .catch(error => {
                     // Insert the error message into the "error-message" div.
-                    document.getElementById('error-message').innerText = error.message;
+                    // document.getElementById('error-message').innerText = error.message;
+                    M.toast({ html: error.message })
                 });
         });
     </script>
