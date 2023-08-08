@@ -99,7 +99,7 @@ func signupUserHandler(c *gin.Context) {
 
 	// Returns error if a required field is not included
 	if err := c.ShouldBindJSON(&newUser); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "All fields are required"})
 		return
 	}
 
@@ -131,7 +131,7 @@ var forbiddenUsernames = []string{
 	"admin",
 	"administrator",
 	"root",
-	"julian",
+	// "julian",
 	"yana",
 	"sys",
 	"sysadmin",
