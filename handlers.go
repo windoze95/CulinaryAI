@@ -89,6 +89,7 @@ func loginUserHandler(c *gin.Context) {
 	session.Save(c.Request, c.Writer)
 
 	c.JSON(http.StatusOK, gin.H{"message": "User logged in successfully"})
+	fmt.Println(c.Keys)
 }
 
 func signupUserHandler(c *gin.Context) {
