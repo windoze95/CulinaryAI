@@ -154,13 +154,13 @@ func updateUserSettingsHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
 		return
 	}
-	fmt.Println(val)
+
 	user, ok := val.(*User)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
 		return
 	}
-	fmt.Println(user)
+
 	// Parse the new OpenAI key from the request body
 	var newSettings struct {
 		OpenAIKey string `json:"apikey"`
@@ -169,7 +169,7 @@ func updateUserSettingsHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Println(newSettings.OpenAIKey)
+
 	// Update the user's OpenAI key in the database
 	user.Settings.OpenAIKey = newSettings.OpenAIKey
 	if err := db.Save(&user).Error; err != nil {
