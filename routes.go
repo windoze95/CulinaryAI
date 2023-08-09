@@ -258,9 +258,9 @@ func UserOwnerMiddleware() gin.HandlerFunc {
 func UserMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := getSessionUser(c)
+		fmt.Println(user)
 		if user == nil {
 			c.Set("user", nil)
-			fmt.Println(user)
 		} else {
 			c.Set("user", user)
 		}

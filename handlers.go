@@ -70,7 +70,7 @@ func getSettingsHandler(c *gin.Context) {
 	// Retrieve the user from the session
 	val, ok := session.Values["user"]
 	fmt.Println(val)
-	fmt.Println(val.(*User))
+	// fmt.Println(val.(*User))
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
 		return
@@ -306,6 +306,7 @@ func getSessionUser(c *gin.Context) *User {
 		// If no user is found in the database, return nil
 		return nil
 	}
+	fmt.Println(user)
 
 	return user
 }
