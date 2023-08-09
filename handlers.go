@@ -65,10 +65,11 @@ func collectRecipeHandler(c *gin.Context) {
 
 func getSettingsHandler(c *gin.Context) {
 	// Retrieve the session
-	session := c.MustGet("session").(*sessions.Session)
+	// session := c.MustGet("session").(*sessions.Session)
 
 	// Retrieve the user from the session
-	val, ok := session.Values["user"]
+	val, ok := c.Get("user")
+	// val, ok := session.Values["user"]
 	fmt.Println(val)
 	// fmt.Println(val.(*User))
 	if !ok {
@@ -306,7 +307,6 @@ func getSessionUser(c *gin.Context) *User {
 		// If no user is found in the database, return nil
 		return nil
 	}
-	fmt.Println(user)
 
 	return user
 }
