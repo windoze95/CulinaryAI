@@ -77,7 +77,7 @@ func startGin() {
 	router.GET("/settings", settingsHandler)
 
 	// User settings
-	router.PUT("/users/:id/settings", UserMiddleware(), UserOwnerMiddleware(), func(c *gin.Context) {})
+	router.PUT("/users/settings", UserMiddleware(), UserOwnerMiddleware(), updateUserSettingsHandler)
 
 	// Recipe generation
 	// router.POST("/users/:id/recipes", func(c *gin.Context) {})
