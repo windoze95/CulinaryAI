@@ -60,6 +60,34 @@ func collectRecipeHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Recipe collected"})
 }
 
+func settingsHandler(c *gin.Context) {
+	// // Retrieve the session
+	// session := c.MustGet("session").(*sessions.Session)
+
+	// // Retrieve the user from the session
+	// val, ok := session.Values["user"]
+	// if !ok {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
+	// 	return
+	// }
+
+	// user, ok := val.(*User)
+	// if !ok {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
+	// 	return
+	// }
+
+	// // Prepare data for the template
+	// data := struct {
+	// 	User *User
+	// }{
+	// 	User: user,
+	// }
+
+	// Render the settings modal template
+	c.HTML(http.StatusOK, "settings.tmpl", nil)
+}
+
 // Handler for logging in a user
 func loginUserHandler(c *gin.Context) {
 	var userCredentials struct {

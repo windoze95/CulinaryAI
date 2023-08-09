@@ -89,3 +89,16 @@ document.addEventListener('DOMContentLoaded', function () {
 // });
 
 // window.scrollTo(0, 1);
+
+$(document).ready(function () {
+    $('#openSettings').click(function () {
+        $.get("/settings", function (data) {
+            $('#settingsModal').html(data);
+            var modalInstance = M.Modal.getInstance($('#settingsModal'));
+            if (!modalInstance) {
+                modalInstance = M.Modal.init($('#settingsModal')[0]);
+            }
+            modalInstance.open();
+        });
+    });
+});
