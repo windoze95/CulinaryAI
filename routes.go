@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"reflect"
 	"strconv"
 	"sync"
 	"time"
@@ -24,6 +25,22 @@ type limiterInfo struct {
 	lastSeen time.Time
 }
 
+func printStruct(s interface{}) {
+	v := reflect.ValueOf(s).Elem()
+	t := v.Type()
+
+	for i := 0; i < v.NumField(); i++ {
+		f := v.Field(i)
+
+		switch f.Kind() {
+		case reflect.Ptr:
+			fmt.Printf("%s: %v\n", t.Field(i).Name, f.Elem())
+		default:
+			fmt.Printf("%s: %v\n", t.Field(i).Name, f.Interface())
+		}
+	}
+}
+
 func startGin() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -34,7 +51,7 @@ func startGin() {
 	router.Static("/static", "static")
 	router.Use(SessionMiddleware())
 	router.GET("/", func(c *gin.Context) {
-		fmt.Println(c.Keys["session"])
+		printStruct(c.Keys["session"])
 		val, _ := c.Get("user")
 		fmt.Println(val)
 		// if !exists {
