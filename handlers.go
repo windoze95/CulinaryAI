@@ -70,13 +70,13 @@ func getSettingsHandler(c *gin.Context) {
 	// Retrieve the user from the session
 	val, ok := session.Values["user"]
 	if !ok {
-		c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": false})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
 		return
 	}
 
 	user, ok := val.(*User)
 	if !ok {
-		c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": false})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
 		return
 	}
 
