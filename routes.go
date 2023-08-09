@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -259,6 +260,7 @@ func UserMiddleware() gin.HandlerFunc {
 		user := getSessionUser(c)
 		if user == nil {
 			c.Set("user", nil)
+			fmt.Println(user)
 		} else {
 			c.Set("user", user)
 		}
