@@ -85,7 +85,7 @@ func settingsHandler(c *gin.Context) {
 	// }
 
 	// Render the settings modal template
-	c.HTML(http.StatusOK, "settings.tmpl", nil)
+	c.HTML(http.StatusOK, "settings.tmpl", gin.H{})
 }
 
 // Handler for logging in a user
