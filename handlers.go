@@ -294,8 +294,8 @@ var forbiddenUsernames = []string{
 
 func getSessionUser(c *gin.Context) *User {
 	session := c.MustGet("session").(*sessions.Session)
-	userID := session.Values["user_id"]
-	if userID == nil {
+	userID, ok := session.Values["user_id"].(uint) // Adjust the type as needed
+	if !ok || userID == 0 {
 		return nil
 	}
 
