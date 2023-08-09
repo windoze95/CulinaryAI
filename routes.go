@@ -34,8 +34,9 @@ func startGin() {
 	router.Static("/static", "static")
 	router.Use(SessionMiddleware())
 	router.GET("/", func(c *gin.Context) {
-		fmt.Println(c.Keys)
+		fmt.Println(c.Keys["session"])
 		val, _ := c.Get("user")
+		fmt.Println(val)
 		// if !exists {
 		// 	// This may be nil, in some cases that will simply be replaced with a cheesy placeholder
 		// 	// This means the UserMiddleware did not run or did not find a user
@@ -45,6 +46,7 @@ func startGin() {
 		// }
 
 		user, _ := val.(*User)
+		fmt.Println(user)
 		// if !ok {
 		// 	// This means the user was not of type *User
 		// 	// This should not happen if UserMiddleware is functioning correctly
