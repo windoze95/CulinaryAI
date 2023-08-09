@@ -90,15 +90,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // window.scrollTo(0, 1);
 
-$(document).ready(function () {
-    $('#openSettings').click(function () {
-        $.get("/settings", function (data) {
-            $('#settingsModal').html(data);
-            var modalInstance = M.Modal.getInstance($('#settingsModal'));
+document.getElementById('openSettings').addEventListener('click', function (e) {
+    e.preventDefault(); // Prevent the default link behavior
+
+    fetch('/settings')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('settingsModal').innerHTML = data;
+            var modalInstance = M.Modal.getInstance(document.getElementById('settingsModal'));
             if (!modalInstance) {
-                modalInstance = M.Modal.init($('#settingsModal')[0]);
+                modalInstance = M.Modal.init(document.getElementById('settingsModal'));
             }
             modalInstance.open();
-        });
-    });
+        })
+        .catch(error => console.error('An error occurred:', error));
 });
