@@ -150,6 +150,7 @@ func updateUserSettingsHandler(c *gin.Context) {
 	// Retrieve the user from the session
 	val, ok := session.Values["user"]
 	if !ok {
+		fmt.Println("notokay")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
 		return
 	}
