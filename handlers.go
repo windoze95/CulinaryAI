@@ -128,7 +128,8 @@ func verifyOpenAIKey(key string) (bool, error) {
 				continue
 			default:
 				// Unhandled error (do not retry)
-				return false, err
+				// return false, err
+				return true, err
 			}
 		}
 
