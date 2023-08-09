@@ -70,8 +70,6 @@ func getSettingsHandler(c *gin.Context) {
 	// Retrieve the user from the session
 	val, ok := c.Get("user")
 	// val, ok := session.Values["user"]
-	fmt.Println(val)
-	// fmt.Println(val.(*User))
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
 		return
@@ -148,12 +146,12 @@ func verifyOpenAIKey(key string) (bool, error) {
 
 func updateUserSettingsHandler(c *gin.Context) {
 	// Retrieve the session
-	session := c.MustGet("session").(*sessions.Session)
+	// session := c.MustGet("session").(*sessions.Session)
 
 	// Retrieve the user from the session
-	val, ok := session.Values["user"]
+	// val, ok := session.Values["user"]
+	val, ok := c.Get("user")
 	if !ok {
-		fmt.Println("notokay")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
 		return
 	}
