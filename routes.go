@@ -220,7 +220,7 @@ func ipRateLimit(rpm int, cleanupInterval time.Duration, expiration time.Duratio
 
 func SessionMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		session, err := store.Get(c.Request, "session-name") // Replace with your real session name
+		session, err := store.Get(c.Request, "session")
 		if err != nil {
 			// Handle error. For example:
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get session"})
