@@ -6,8 +6,12 @@
     <form id="settingsForm">
         <div class="input-field">
             <label for="apikey">OpenAI API Key:</label>
+            {{ if and .isValid .User.Settings.OpenAIKey }}
             <!-- <input id="apikey" type="password" value="{{ .User.Settings.OpenAIKey }}"> -->
             <input id="apikey" type="password" value="OpenAI key">
+            {{ else }}
+            <input id="apikey" type="password">
+            {{ end }}
         </div>
     </form>
 </div>
