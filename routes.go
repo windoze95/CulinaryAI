@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -33,6 +34,7 @@ func startGin() {
 	router.Static("/static", "static")
 	router.Use(SessionMiddleware())
 	router.GET("/", func(c *gin.Context) {
+		fmt.Println(c.Keys)
 		val, _ := c.Get("user")
 		// if !exists {
 		// 	// This may be nil, in some cases that will simply be replaced with a cheesy placeholder
