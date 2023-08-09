@@ -74,10 +74,10 @@ func startGin() {
 	router.POST("/login", UserMiddleware(), loginUserHandler)
 
 	// Settings modal
-	router.GET("/settings", settingsHandler)
+	router.GET("/settings", UserMiddleware(), getSettingsHandler)
 
 	// User settings
-	router.PUT("/users/settings", UserMiddleware(), UserOwnerMiddleware(), updateUserSettingsHandler)
+	router.PUT("/users/settings", UserMiddleware(), updateUserSettingsHandler)
 
 	// Recipe generation
 	// router.POST("/users/:id/recipes", func(c *gin.Context) {})

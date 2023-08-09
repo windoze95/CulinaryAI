@@ -1,8 +1,14 @@
 <div class="modal-content">
     <h4>User Settings</h4>
+    {{ if not .isValid }}
+    <p class="error">Your OpenAI key is not valid. Please enter a valid key.</p>
+    {{ end }}
     <form id="settingsForm">
-        <label for="apikey">OpenAI API Key:</label><br>
-        <input type="password" id="apikey" name="apikey"><br>
+        <div class="input-field">
+            <label for="apikey">OpenAI API Key:</label>
+            <!-- <input id="apikey" type="password" value="{{ .User.Settings.OpenAIKey }}"> -->
+            <input id="apikey" type="password" value="OpenAI key">
+        </div>
     </form>
 </div>
 <div class="modal-footer">

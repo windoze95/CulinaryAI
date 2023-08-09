@@ -1,16 +1,19 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
 	goaway "github.com/TwiN/go-away"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
+	openai "github.com/sashabaranov/go-openai"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -60,32 +63,83 @@ func collectRecipeHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Recipe collected"})
 }
 
-func settingsHandler(c *gin.Context) {
-	// // Retrieve the session
-	// session := c.MustGet("session").(*sessions.Session)
+func getSettingsHandler(c *gin.Context) {
+	// Retrieve the session
+	session := c.MustGet("session").(*sessions.Session)
 
-	// // Retrieve the user from the session
-	// val, ok := session.Values["user"]
-	// if !ok {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
-	// 	return
-	// }
+	// Retrieve the user from the session
+	val, ok := session.Values["user"]
+	if !ok {
+		c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": false})
+		return
+	}
 
-	// user, ok := val.(*User)
-	// if !ok {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
-	// 	return
-	// }
+	user, ok := val.(*User)
+	if !ok {
+		c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": false})
+		return
+	}
 
-	// // Prepare data for the template
-	// data := struct {
-	// 	User *User
-	// }{
-	// 	User: user,
-	// }
+	// Check the validity of the OpenAI key by making a test API call
+	isValid, err := verifyOpenAIKey(user.Settings.OpenAIKey)
+	if err != nil || !isValid {
+		c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": false, "User": user})
+		return
+	}
 
-	// Render the settings modal template
-	c.HTML(http.StatusOK, "settings.tmpl", gin.H{})
+	// Render the settings modal template with valid key and user data
+	c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": true, "User": user})
+}
+
+func verifyOpenAIKey(key string) (bool, error) {
+	// Set up OpenAI client with the given key
+	client := openai.NewClient(key)
+	ctx := context.Background()
+
+	// Maximum number of retries
+	const maxRetries = 3
+
+	// Delay between retries
+	const retryDelay = 10 * time.Second
+
+	// Attempt the verification with retries
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		// Make a test API call using a minimal completion request
+		req := openai.CompletionRequest{
+			Model:     openai.GPT3Ada,
+			MaxTokens: 5,
+			Prompt:    "Test",
+		}
+		_, err := client.CreateCompletion(ctx, req)
+
+		// Check for specific API errors
+		e := &openai.APIError{}
+		if errors.As(err, &e) {
+			switch e.HTTPStatusCode {
+			case 401:
+				// Invalid auth or key (do not retry)
+				return false, nil
+			case 429:
+				// Rate limiting or engine overload (wait and retry)
+				time.Sleep(retryDelay)
+				continue
+			case 500:
+				// OpenAI server error (retry)
+				continue
+			default:
+				// Unhandled error (do not retry)
+				return false, err
+			}
+		}
+
+		// If the call was successful, the key is valid
+		if err == nil {
+			return true, nil
+		}
+	}
+
+	// If all attempts failed, return false
+	return false, errors.New("failed to verify OpenAI key after multiple attempts")
 }
 
 func updateUserSettingsHandler(c *gin.Context) {
