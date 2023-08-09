@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"reflect"
 	"strconv"
 	"sync"
 	"time"
@@ -25,22 +24,6 @@ type limiterInfo struct {
 	lastSeen time.Time
 }
 
-func printStruct(s interface{}) {
-	v := reflect.ValueOf(s).Elem()
-	t := v.Type()
-
-	for i := 0; i < v.NumField(); i++ {
-		f := v.Field(i)
-
-		switch f.Kind() {
-		case reflect.Ptr:
-			fmt.Printf("%s: %v\n", t.Field(i).Name, f.Elem())
-		default:
-			fmt.Printf("%s: %v\n", t.Field(i).Name, f.Interface())
-		}
-	}
-}
-
 func startGin() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -50,8 +33,7 @@ func startGin() {
 	router.LoadHTMLGlob("templates/*.tmpl")
 	router.Static("/static", "static")
 	router.Use(SessionMiddleware())
-	router.GET("/", func(c *gin.Context) {
-		printStruct(c.Keys["session"])
+	router.GET("/", UserMiddleware(), func(c *gin.Context) {
 		val, _ := c.Get("user")
 		fmt.Println(val)
 		// if !exists {
@@ -256,7 +238,7 @@ func UserOwnerMiddleware() gin.HandlerFunc {
 		session := c.MustGet("session").(*sessions.Session)
 
 		// Extract authenticated user's ID from the session
-		authenticatedUserID := session.Values["userID"]
+		authenticatedUserID := session.Values["user_id"]
 
 		// Extract user ID from URL
 		userID := c.Param("id")

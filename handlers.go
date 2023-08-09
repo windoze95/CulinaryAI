@@ -86,6 +86,7 @@ func loginUserHandler(c *gin.Context) {
 
 	session := c.MustGet("session").(*sessions.Session)
 	session.Values["user_id"] = user.ID
+	// session.Values["user"] = user
 	session.Save(c.Request, c.Writer)
 
 	c.JSON(http.StatusOK, gin.H{"message": "User logged in successfully"})
