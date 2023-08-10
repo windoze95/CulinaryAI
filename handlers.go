@@ -145,12 +145,48 @@ func verifyOpenAIKey(key string) (bool, error) {
 	return false, errors.New("failed to verify OpenAI key after multiple attempts")
 }
 
-func updateUserSettingsHandler(c *gin.Context) {
-	// Retrieve the session
-	// session := c.MustGet("session").(*sessions.Session)
+// func updateUserSettingsHandler(c *gin.Context) {
+// 	// Retrieve the session
+// 	// session := c.MustGet("session").(*sessions.Session)
 
+// 	// Retrieve the user from the session
+// 	// val, ok := session.Values["user"]
+// 	val, ok := c.Get("user")
+// 	if !ok {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
+// 		return
+// 	}
+
+// 	user, ok := val.(*User)
+// 	if !ok {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
+// 		return
+// 	}
+
+// 	// Parse the new OpenAI key from the request body
+// 	var newSettings struct {
+// 		OpenAIKey string `json:"apikey"`
+// 	}
+// 	if err := c.ShouldBindJSON(&newSettings); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
+
+// 	fmt.Println(newSettings.OpenAIKey)
+
+// 	// Update the user's OpenAI key in the database
+// 	user.Settings.OpenAIKey = newSettings.OpenAIKey
+// 	fmt.Println(user.Settings.OpenAIKey)
+// 	if err := db.Save(&user).Error; err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, gin.H{"message": "Settings updated successfully"})
+// }
+
+func updateUserSettingsHandler(c *gin.Context) {
 	// Retrieve the user from the session
-	// val, ok := session.Values["user"]
 	val, ok := c.Get("user")
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
@@ -172,12 +208,9 @@ func updateUserSettingsHandler(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(newSettings.OpenAIKey)
-
-	// Update the user's OpenAI key in the database
+	// Update the user's OpenAI key in the UserSettings
 	user.Settings.OpenAIKey = newSettings.OpenAIKey
-	fmt.Println(user.Settings.OpenAIKey)
-	if err := db.Save(&user).Error; err != nil {
+	if err := db.Model(&user.Settings).Update("OpenAIKey", user.Settings.OpenAIKey).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
 		return
 	}
