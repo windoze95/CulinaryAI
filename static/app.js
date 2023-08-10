@@ -65,7 +65,7 @@ document.getElementById('openSettings').addEventListener('click', function (e) {
         .then(response => response.text())
         .then(data => {
             // Update the content of the modal
-            document.getElementById('settingsContent').innerHTML = data;
+            // document.getElementById('settingsContent').innerHTML = data;
 
             var modalInstance = M.Modal.getInstance(document.getElementById('settingsModal'));
             if (!modalInstance) {
