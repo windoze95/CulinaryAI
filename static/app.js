@@ -64,7 +64,10 @@ document.getElementById('openSettings').addEventListener('click', function (e) {
     fetch('/settings')
         .then(response => response.text())
         .then(data => {
-            document.getElementById('settingsModal').innerHTML = data;
+            // Update the content of the modal
+            document.getElementById('settingsContent').innerHTML = data;
+
+            // Initialize and open the modal
             var modalInstance = M.Modal.getInstance(document.getElementById('settingsModal'));
             if (!modalInstance) {
                 modalInstance = M.Modal.init(document.getElementById('settingsModal'));
