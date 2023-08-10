@@ -172,8 +172,11 @@ func updateUserSettingsHandler(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(newSettings.OpenAIKey)
+
 	// Update the user's OpenAI key in the database
 	user.Settings.OpenAIKey = newSettings.OpenAIKey
+	fmt.Println(user.Settings.OpenAIKey)
 	if err := db.Save(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
 		return
