@@ -241,14 +241,20 @@ func updateUserSettingsHandler(c *gin.Context) {
 		return
 	}
 
+	var openAIKeyChanged = newSettings.OpenAIKey != ""
+
 	// Check if the OpenAI key has been entered
-	if newSettings.OpenAIKey != "" {
+	if openAIKeyChanged {
 		// Update the user's OpenAI key in the UserSettings
 		user.Settings.OpenAIKey = newSettings.OpenAIKey
 		if err := db.Model(&user.Settings).Update("OpenAIKey", user.Settings.OpenAIKey).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
 			return
 		}
+	}
+
+	// This won't seem as redundant when more settings are && added
+	if openAIKeyChanged {
 		c.JSON(http.StatusOK, gin.H{"message": "Settings updated successfully"})
 	} else {
 		c.JSON(http.StatusOK, gin.H{"message": "No changes made"})

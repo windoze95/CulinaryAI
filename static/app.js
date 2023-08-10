@@ -56,48 +56,48 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     var elemsTabs = document.querySelectorAll('.tabs');
     var instancesTabs = M.Tabs.init(elemsTabs);
+});
 
-    document.getElementById('openSettings').addEventListener('click', function (e) {
-        e.preventDefault(); // Prevent the default link behavior
+document.getElementById('openSettings').addEventListener('click', function (e) {
+    e.preventDefault(); // Prevent the default link behavior
 
-        fetch('/settings')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('settingsModal').innerHTML = data;
-                var modalInstance = M.Modal.getInstance(document.getElementById('settingsModal'));
-                if (!modalInstance) {
-                    modalInstance = M.Modal.init(document.getElementById('settingsModal'));
-                }
-                modalInstance.open();
+    fetch('/settings')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('settingsModal').innerHTML = data;
+            var modalInstance = M.Modal.getInstance(document.getElementById('settingsModal'));
+            if (!modalInstance) {
+                modalInstance = M.Modal.init(document.getElementById('settingsModal'));
+            }
+            modalInstance.open();
 
-                document.getElementById('saveSettings').addEventListener('click', function () {
-                    // Retrieve the API key from the form
-                    var apikey = document.getElementById('apikey').value;
+            document.getElementById('saveSettings').addEventListener('click', function () {
+                // Retrieve the API key from the form
+                var apikey = document.getElementById('apikey').value;
 
-                    // Send the PUT request to the server
-                    fetch('/users/settings', {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ apikey: apikey })
+                // Send the PUT request to the server
+                fetch('/users/settings', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ apikey: apikey })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Assuming the response has a 'message' property
+                        if (data.message) {
+                            M.toast({ html: data.message });
+                        }
                     })
-                        .then(response => response.json())
-                        .then(data => {
-                            // Assuming the response has a 'message' property
-                            if (data.message) {
-                                M.toast({ html: data.message });
-                            }
-                        })
-                        .catch(error => M.toast({ html: error.message }));
+                    .catch(error => M.toast({ html: error.message }));
 
-                    // Close the modal
-                    var modalInstance = M.Modal.getInstance(document.getElementById('settingsModal'));
-                    modalInstance.close();
-                });
-            })
-            .catch(error => M.toast({ html: error.message }));
-    });
+                // Close the modal
+                var modalInstance = M.Modal.getInstance(document.getElementById('settingsModal'));
+                modalInstance.close();
+            });
+        })
+        .catch(error => M.toast({ html: error.message }));
 });
 
 // Handle the Settings form submission
