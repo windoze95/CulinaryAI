@@ -5,11 +5,12 @@
     {{ end }}
     <form id="settingsForm">
         <div class="input-field">
-            <label for="apikey">OpenAI API Key:</label>
             {{ if and .isValid .User.Settings.OpenAIKey }}
             <!-- <input id="apikey" type="password" value="{{ .User.Settings.OpenAIKey }}"> -->
-            <input id="apikey" type="password" value="OpenAI key">
+            <label for="apikey" class="active">OpenAI API Key:</label>
+            <input id="apikey" type="password" placeholder="OpenAI key is already valid">
             {{ else }}
+            <label for="apikey">OpenAI API Key:</label>
             <input id="apikey" type="password">
             {{ end }}
         </div>
@@ -17,4 +18,7 @@
 </div>
 <div class="modal-footer">
     <button id="saveSettings" class="waves-effect waves-green btn-flat">Save</button>
+    <!-- <script>
+
+    </script> -->
 </div>

@@ -69,34 +69,33 @@ document.addEventListener('DOMContentLoaded', function () {
                     modalInstance = M.Modal.init(document.getElementById('settingsModal'));
                 }
                 modalInstance.open();
+                document.getElementById('saveSettings').addEventListener('click', function () {
+                    // Retrieve the API key from the form
+                    var apikey = document.getElementById('apikey').value;
+
+                    // Send the PUT request to the server
+                    fetch('/users/settings', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ apikey: apikey })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            // Assuming the response has a 'message' property
+                            if (data.message) {
+                                M.toast({ html: data.message });
+                            }
+                        })
+                        .catch(error => M.toast({ html: error.message }));
+
+                    // Close the modal
+                    var modalInstance = M.Modal.getInstance(document.getElementById('settingsModal'));
+                    modalInstance.close();
+                });
             })
             .catch(error => M.toast({ html: error.message }));
-    });
-
-    document.getElementById('saveSettings').addEventListener('click', function () {
-        // Retrieve the API key from the form
-        var apikey = document.getElementById('apikey').value;
-
-        // Send the PUT request to the server
-        fetch('/users/settings', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ apikey: apikey })
-        })
-            .then(response => response.json())
-            .then(data => {
-                // Assuming the response has a 'message' property
-                if (data.message) {
-                    M.toast({ html: data.message });
-                }
-            })
-            .catch(error => M.toast({ html: error.message }));
-
-        // Close the modal
-        var modalInstance = M.Modal.getInstance(document.getElementById('settingsModal'));
-        modalInstance.close();
     });
 });
 
