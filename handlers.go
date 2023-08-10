@@ -185,6 +185,39 @@ func verifyOpenAIKey(key string) (bool, error) {
 // 	c.JSON(http.StatusOK, gin.H{"message": "Settings updated successfully"})
 // }
 
+// func updateUserSettingsHandler(c *gin.Context) {
+// 	// Retrieve the user from the session
+// 	val, ok := c.Get("user")
+// 	if !ok {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
+// 		return
+// 	}
+
+// 	user, ok := val.(*User)
+// 	if !ok {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
+// 		return
+// 	}
+
+// 	// Parse the new OpenAI key from the request body
+// 	var newSettings struct {
+// 		OpenAIKey string `json:"apikey"`
+// 	}
+// 	if err := c.ShouldBindJSON(&newSettings); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
+
+// 	// Update the user's OpenAI key in the UserSettings
+// 	user.Settings.OpenAIKey = newSettings.OpenAIKey
+// 	if err := db.Model(&user.Settings).Update("OpenAIKey", user.Settings.OpenAIKey).Error; err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, gin.H{"message": "Settings updated successfully"})
+// }
+
 func updateUserSettingsHandler(c *gin.Context) {
 	// Retrieve the user from the session
 	val, ok := c.Get("user")
@@ -208,14 +241,18 @@ func updateUserSettingsHandler(c *gin.Context) {
 		return
 	}
 
-	// Update the user's OpenAI key in the UserSettings
-	user.Settings.OpenAIKey = newSettings.OpenAIKey
-	if err := db.Model(&user.Settings).Update("OpenAIKey", user.Settings.OpenAIKey).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
-		return
+	// Check if the OpenAI key has been entered
+	if newSettings.OpenAIKey != "" {
+		// Update the user's OpenAI key in the UserSettings
+		user.Settings.OpenAIKey = newSettings.OpenAIKey
+		if err := db.Model(&user.Settings).Update("OpenAIKey", user.Settings.OpenAIKey).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Settings updated successfully"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"message": "No changes made"})
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Settings updated successfully"})
 }
 
 // Handler for logging in a user

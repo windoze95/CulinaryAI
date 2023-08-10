@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     modalInstance = M.Modal.init(document.getElementById('settingsModal'));
                 }
                 modalInstance.open();
+
                 document.getElementById('saveSettings').addEventListener('click', function () {
                     // Retrieve the API key from the form
                     var apikey = document.getElementById('apikey').value;
