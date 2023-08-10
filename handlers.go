@@ -83,6 +83,7 @@ func getSettingsHandler(c *gin.Context) {
 
 	// Check the validity of the OpenAI key by making a test API call
 	isValid, err := verifyOpenAIKey(user.Settings.OpenAIKey)
+	fmt.Println(user.Settings.OpenAIKey)
 	if err != nil || !isValid {
 		c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": false, "User": user})
 		return
