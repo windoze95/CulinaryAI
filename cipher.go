@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -17,12 +18,16 @@ type CipherConfig struct {
 }
 
 func GetOpenAIKeyCipherConfig() *CipherConfig {
-	encryptionKey := os.Getenv(gc.Env.OpenAIKeyEncryptionKey)
-	if encryptionKey == "" {
-		log.Fatalf("%s must be set", gc.Env.OpenAIKeyEncryptionKey)
+	encryptionKeyHex := os.Getenv(gc.Env.OpenAIKeyEncryptionKey)
+	if encryptionKeyHex == "" {
+		log.Fatal("Openai key encryption key must be set")
+	}
+	encryptionKey, err := hex.DecodeString(encryptionKeyHex)
+	if err != nil {
+		log.Fatalf("Unable to decode openai key encryption key hex")
 	}
 	return &CipherConfig{
-		EncryptionKey: []byte(encryptionKey),
+		EncryptionKey: encryptionKey,
 	}
 }
 
