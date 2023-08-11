@@ -24,10 +24,10 @@ type GlobalConfig struct {
 }
 
 type Env struct {
-	Port        string `json:"port"`
-	DatabaseUrl string `json:"databaseUrl"`
-	SecretKey   string `json:"secretKey"`
-	SessionKey  string `json:"sessionKey"`
+	Port                   string `json:"port"`
+	DatabaseUrl            string `json:"databaseUrl"`
+	OpenAIKeyEncryptionKey string `json:"openAIKeyEncryptionKey"`
+	SessionKey             string `json:"sessionKey"`
 }
 
 var (

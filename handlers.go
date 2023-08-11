@@ -81,9 +81,15 @@ func getSettingsHandler(c *gin.Context) {
 		return
 	}
 
+	// Decrypt the OpenAI key
+	key, err := decryptOpenAIKey(user.Settings.EncryptedOpenAIKey)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to encrypt OpenAI key"})
+		return
+	}
 	// Check the validity of the OpenAI key by making a test API call
-	isValid, err := verifyOpenAIKey(user.Settings.OpenAIKey)
-	fmt.Println(user.Settings.OpenAIKey)
+	isValid, err := verifyOpenAIKey(key)
+	fmt.Println(user.Settings.EncryptedOpenAIKey)
 	if err != nil || !isValid {
 		c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": false, "User": user})
 		return
@@ -245,9 +251,15 @@ func updateUserSettingsHandler(c *gin.Context) {
 
 	// Check if the OpenAI key has been entered
 	if openAIKeyChanged {
+		// Encrypt the OpenAI key before storing
+		encryptedOpenAIKey, err := encryptOpenAIKey(newSettings.OpenAIKey)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to encrypt OpenAI key"})
+			return
+		}
 		// Update the user's OpenAI key in the UserSettings
-		user.Settings.OpenAIKey = newSettings.OpenAIKey
-		if err := db.Model(&user.Settings).Update("OpenAIKey", user.Settings.OpenAIKey).Error; err != nil {
+		user.Settings.EncryptedOpenAIKey = encryptedOpenAIKey
+		if err := db.Model(&user.Settings).Update("OpenAIKey", user.Settings.EncryptedOpenAIKey).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
 			return
 		}

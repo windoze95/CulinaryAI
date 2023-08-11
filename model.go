@@ -16,8 +16,8 @@ type User struct {
 
 type UserSettings struct {
 	gorm.Model
-	UserID    uint `gorm:"index"`
-	OpenAIKey string
+	UserID             uint `gorm:"index"`
+	EncryptedOpenAIKey string
 	// MFASecret string
 }
 

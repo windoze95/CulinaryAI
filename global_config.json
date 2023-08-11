@@ -3,7 +3,7 @@
     "env": {
         "port": "PORT",
         "databaseUrl": "DATABASE_URL",
-        "secretKey": "SECRET_KEY",
+        "openAIKeyEncryptionKey": "OPENAI_KEY_ENCRYPTION_KEY",
         "sessionKey": "SESSION_KEY"
     },
     "mfaIssuer": "culinaryai"

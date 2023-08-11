@@ -12,22 +12,30 @@ import (
 )
 
 type CipherConfig struct {
-	SecretKey []byte
+	EncryptionKey []byte
 }
 
-func NewCipherConfig() *CipherConfig {
-	secretKey := os.Getenv(gc.Env.SecretKey)
-	if secretKey == "" {
-		log.Fatalf("%s must be set", gc.Env.SecretKey)
+func GetOpenAIKeyCipherConfig() *CipherConfig {
+	encryptionKey := os.Getenv(gc.Env.OpenAIKeyEncryptionKey)
+	if encryptionKey == "" {
+		log.Fatalf("%s must be set", gc.Env.OpenAIKeyEncryptionKey)
 	}
 	return &CipherConfig{
-		SecretKey: []byte(secretKey),
+		EncryptionKey: []byte(encryptionKey),
 	}
+}
+
+func encryptOpenAIKey(plaintext string) (string, error) {
+	return encrypt(GetOpenAIKeyCipherConfig(), plaintext)
+}
+
+func decryptOpenAIKey(ciphertext string) (string, error) {
+	return decrypt(GetOpenAIKeyCipherConfig(), ciphertext)
 }
 
 // Encrypt encrypts the plaintext with the secret key
-func Encrypt(config *CipherConfig, plaintext string) (string, error) {
-	block, err := aes.NewCipher(config.SecretKey)
+func encrypt(config *CipherConfig, plaintext string) (string, error) {
+	block, err := aes.NewCipher(config.EncryptionKey)
 	if err != nil {
 		return "Error creating block cipher", err
 	}
@@ -45,8 +53,8 @@ func Encrypt(config *CipherConfig, plaintext string) (string, error) {
 }
 
 // Decrypt decrypts the ciphertext with the secret key
-func Decrypt(config *CipherConfig, ciphertext string) (string, error) {
-	block, err := aes.NewCipher(config.SecretKey)
+func decrypt(config *CipherConfig, ciphertext string) (string, error) {
+	block, err := aes.NewCipher(config.EncryptionKey)
 	if err != nil {
 		return "", err
 	}
