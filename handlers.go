@@ -109,6 +109,7 @@ func verifyOpenAIKey(encryptedOpenAIKey string) (bool, error) {
 	// Decrypt the OpenAI key
 	key, err := decryptOpenAIKey(encryptedOpenAIKey)
 	if err != nil {
+		fmt.Println("decryptfailed:", err.Error())
 		return false, errors.New("Failed to decrypt OpenAI key")
 	}
 
