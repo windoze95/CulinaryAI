@@ -262,24 +262,25 @@ func updateUserSettingsHandler(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(newSettings.OpenAIKey)
-
 	var openAIKeyChanged = newSettings.OpenAIKey != ""
 
 	// Check if the OpenAI key has been entered
 	if openAIKeyChanged {
+		fmt.Println("this should happen on first save")
 		// Encrypt the OpenAI key before storing
 		encryptedOpenAIKey, err := encryptOpenAIKey(newSettings.OpenAIKey)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to encrypt OpenAI key"})
 			return
 		}
+		fmt.Println("encrypted key:", encryptedOpenAIKey)
 		// Update the user's OpenAI key in the UserSettings
 		user.Settings.EncryptedOpenAIKey = encryptedOpenAIKey
 		if err := db.Model(&user.Settings).Update("OpenAIKey", user.Settings.EncryptedOpenAIKey).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
 			return
 		}
+		fmt.Println("enc key saved to db")
 	}
 
 	// This won't seem as redundant when more settings are && added
