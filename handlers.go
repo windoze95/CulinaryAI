@@ -317,10 +317,14 @@ func signupUserHandler(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("signup - required fields pass")
+
 	if err := validateUsername(newUser.Username); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	fmt.Println("signup - username validated")
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -328,15 +332,21 @@ func signupUserHandler(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("signup - password hashed")
+
 	user := User{
 		Username:       newUser.Username,
 		HashedPassword: string(hashedPassword),
 	}
 
+	fmt.Println("signup - user structured")
+
 	if err := db.Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user"})
 		return
 	}
+
+	fmt.Println("signup - user stored")
 
 	c.JSON(http.StatusOK, gin.H{"message": "User signed up successfully"})
 }
