@@ -262,6 +262,8 @@ func updateUserSettingsHandler(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(newSettings.OpenAIKey)
+
 	var openAIKeyChanged = newSettings.OpenAIKey != ""
 
 	// Check if the OpenAI key has been entered
