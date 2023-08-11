@@ -75,15 +75,13 @@ func getSettingsHandler(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("getSettings: got user")
-
 	user, ok := val.(*User)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
 		return
 	}
 
-	fmt.Println("getSettings: user typed")
+	fmt.Println("getSettings: got user")
 
 	// Check the validity of the OpenAI key by making a test API call
 	isValid, err := verifyOpenAIKey(user.Settings.EncryptedOpenAIKey)
@@ -103,6 +101,7 @@ func getSettingsHandler(c *gin.Context) {
 func verifyOpenAIKey(encryptedOpenAIKey string) (bool, error) {
 	// Set as invalid if no key exists yet
 	if encryptedOpenAIKey == "" {
+		fmt.Println("enc key:", encryptedOpenAIKey)
 		return false, nil
 	}
 
@@ -426,6 +425,8 @@ func getSessionUser(c *gin.Context) *User {
 		// If no user is found in the database, return nil
 		return nil
 	}
+
+	fmt.Println(user.Settings.EncryptedOpenAIKey)
 
 	return user
 }
