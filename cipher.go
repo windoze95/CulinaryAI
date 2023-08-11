@@ -36,8 +36,12 @@ func decryptOpenAIKey(ciphertext string) (string, error) {
 
 // Encrypt encrypts the plaintext with the secret key
 func encrypt(config *CipherConfig, plaintext string) (string, error) {
+	fmt.Println("key:", plaintext)
+	fmt.Println("encrypted key:", config.EncryptionKey)
+
 	block, err := aes.NewCipher(config.EncryptionKey)
 	if err != nil {
+		fmt.Println("error creating cipher:", err)
 		return "Error creating block cipher", err
 	}
 
