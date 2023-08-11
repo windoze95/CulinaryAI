@@ -94,12 +94,12 @@ func getSettingsHandler(c *gin.Context) {
 	}
 	if !isValid {
 		fmt.Println("getSettings: key invalid")
-		c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": false, "User": user})
+		c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": false, "UserSettings": user.Settings})
 		return
 	}
 
 	// Render the settings modal template with valid key and user data
-	c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": true, "User": user})
+	c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": true, "UserSettings": user.Settings})
 }
 
 func verifyOpenAIKey(encryptedOpenAIKey string) (bool, error) {

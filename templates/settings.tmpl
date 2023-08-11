@@ -5,8 +5,8 @@
 {{ end }}
 <form id="settingsForm">
     <div class="input-field">
-        {{ if and .isValid .User.Settings.OpenAIKey }}
-        <!-- <input id="apikey" type="password" value="{{ .User.Settings.OpenAIKey }}"> -->
+        {{ if and .isValid .UserSettings.EncryptedOpenAIKey }}
+        <!-- <input id="apikey" type="password" value="{{ .UserSettings.EncryptedOpenAIKey }}"> -->
         <label for="apikey" class="active">OpenAI API Key:</label>
         <input id="apikey" type="password" placeholder="OpenAI key is already valid">
         {{ else }}
