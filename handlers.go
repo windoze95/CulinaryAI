@@ -81,25 +81,33 @@ func getSettingsHandler(c *gin.Context) {
 		return
 	}
 
-	// Decrypt the OpenAI key
-	key, err := decryptOpenAIKey(user.Settings.EncryptedOpenAIKey)
+	// Check the validity of the OpenAI key by making a test API call
+	isValid, err := verifyOpenAIKey(user.Settings.EncryptedOpenAIKey)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to encrypt OpenAI key"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	// Check the validity of the OpenAI key by making a test API call
-	isValid, err := verifyOpenAIKey(key)
-	fmt.Println(user.Settings.EncryptedOpenAIKey)
-	if err != nil || !isValid {
-		c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": false, "User": user})
+	if !isValid {
+		c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": false, "UserSettings": user.Settings})
 		return
 	}
 
 	// Render the settings modal template with valid key and user data
-	c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": true, "User": user})
+	c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": true, "UserSettings": user.Settings})
 }
 
-func verifyOpenAIKey(key string) (bool, error) {
+func verifyOpenAIKey(encryptedOpenAIKey string) (bool, error) {
+	// Set as invalid if no key exists yet
+	if encryptedOpenAIKey == "" {
+		return false, nil
+	}
+
+	// Decrypt the OpenAI key
+	key, err := decryptOpenAIKey(encryptedOpenAIKey)
+	if err != nil {
+		return false, errors.New("Failed to encrypt OpenAI key")
+	}
+
 	// Set up OpenAI client with the given key
 	client := openai.NewClient(key)
 	ctx := context.Background()
