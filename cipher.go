@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -58,9 +59,10 @@ func decrypt(config *CipherConfig, ciphertext string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
+	fmt.Println("openai decrypt 1")
 	decodedCiphertext, err := base64.URLEncoding.DecodeString(ciphertext)
 	if err != nil {
+		fmt.Println("openai decrypt err 1")
 		return "", err
 	}
 
