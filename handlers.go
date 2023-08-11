@@ -92,8 +92,6 @@ func getSettingsHandler(c *gin.Context) {
 		return
 	}
 	if !isValid {
-		fmt.Println("getSettings: key invalid")
-		fmt.Println("error:", err)
 		c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": false, "user": user})
 		return
 	}
@@ -113,6 +111,8 @@ func verifyOpenAIKey(encryptedOpenAIKey string) (bool, error) {
 	if err != nil {
 		return false, errors.New("Failed to decrypt OpenAI key")
 	}
+
+	fmt.Println("key:", key)
 
 	// Set up OpenAI client with the given key
 	client := openai.NewClient(key)
