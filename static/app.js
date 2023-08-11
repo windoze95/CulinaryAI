@@ -1,5 +1,5 @@
-document.querySelectorAll('.toggle-symbols').forEach(function (icon) {
-    icon.addEventListener('click', function () {
+document.querySelectorAll('.toggle-symbols').forEach(function(icon) {
+    icon.addEventListener('click', function() {
         switch (this.textContent) {
             case 'favorite':
                 this.textContent = 'favorite_border';
@@ -19,11 +19,9 @@ document.querySelectorAll('.toggle-symbols').forEach(function (icon) {
     });
 });
 
-document.getElementById('button1').addEventListener('click', function () {
-});
+document.getElementById('button1').addEventListener('click', function() {});
 
-document.getElementById('button2').addEventListener('click', function () {
-});
+document.getElementById('button2').addEventListener('click', function() {});
 
 // Markdown processing function
 function processMarkdown(text) {
@@ -31,11 +29,11 @@ function processMarkdown(text) {
     document.getElementById('markdown-display').innerHTML = html;
 }
 
-$(document).ready(function () {
+$(document).ready(function() {
     $(".dropdown-trigger").dropdown();
 });
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     var elems = document.querySelectorAll('.sidenav');
     var html = document.documentElement;
     var body = document.body;
@@ -43,14 +41,14 @@ document.addEventListener('DOMContentLoaded', function () {
         edge: 'right',
         draggable: true,
         preventScrolling: true,
-        onOpenStart: function () {
+        onOpenStart: function() {
             // document.getElementById('menu-icon').textContent = 'close';
             body.classList.add('overlay-active');
         },
-        onCloseStart: function () {
+        onCloseStart: function() {
             body.classList.remove('overlay-active');
         },
-        onCloseEnd: function () {
+        onCloseEnd: function() {
             // document.getElementById('menu-icon').textContent = 'menu';  // Change icon back to 'menu' when sidenav is closed
         }
     });
@@ -58,14 +56,14 @@ document.addEventListener('DOMContentLoaded', function () {
     var instancesTabs = M.Tabs.init(elemsTabs);
 });
 
-document.getElementById('openSettings').addEventListener('click', function (e) {
+document.getElementById('openSettings').addEventListener('click', function(e) {
     e.preventDefault(); // Prevent the default link behavior
 
     fetch('/settings')
         .then(response => response.text())
         .then(data => {
             // Update the content of the modal
-            // document.getElementById('settingsContent').innerHTML = data;
+            document.getElementById('settingsContent').innerHTML = data;
 
             var modalInstance = M.Modal.getInstance(document.getElementById('settingsModal'));
             if (!modalInstance) {
@@ -76,18 +74,18 @@ document.getElementById('openSettings').addEventListener('click', function (e) {
         .catch(error => M.toast({ html: error.message }));
 });
 
-document.getElementById('saveSettings').addEventListener('click', function () {
+document.getElementById('saveSettings').addEventListener('click', function() {
     // Retrieve the API key from the form
     var apikey = document.getElementById('apikey').value;
 
     // Send the PUT request to the server
     fetch('/users/settings', {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ apikey: apikey })
-    })
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ apikey: apikey })
+        })
         .then(response => response.json())
         .then(data => {
             // Assuming the response has a 'message' property
