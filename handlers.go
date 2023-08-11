@@ -75,19 +75,25 @@ func getSettingsHandler(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("getSettings: got user")
+
 	user, ok := val.(*User)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
 		return
 	}
 
+	fmt.Println("getSettings: user typed")
+
 	// Check the validity of the OpenAI key by making a test API call
 	isValid, err := verifyOpenAIKey(user.Settings.EncryptedOpenAIKey)
 	if err != nil {
+		fmt.Println("getSettings: key validation error:", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	if !isValid {
+		fmt.Println("getSettings: key invalid")
 		c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": false, "User": user})
 		return
 	}
