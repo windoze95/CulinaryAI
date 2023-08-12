@@ -280,7 +280,7 @@ func updateUserSettingsHandler(c *gin.Context) {
 
 		// Update the user's OpenAI key in the UserSettings
 		user.Settings.EncryptedOpenAIKey = encryptedOpenAIKey
-		if err := db.Model(&user.Settings).Update("OpenAIKey", user.Settings.EncryptedOpenAIKey).Error; err != nil {
+		if err := db.Model(&user.Settings).Update("EncryptedOpenAIKey", user.Settings.EncryptedOpenAIKey).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
 			return
 		}
