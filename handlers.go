@@ -82,6 +82,11 @@ func getSettingsHandler(c *gin.Context) {
 	}
 
 	fmt.Println("getSettings: got user")
+	fmt.Println("enc key:", user.Settings.EncryptedOpenAIKey)
+	if err := db.Where("user_id = ?", user.ID).First(&user.Settings).Error; err != nil {
+		fmt.Println("enc key:", err.Error())
+	}
+	fmt.Println("enc key:", user.Settings.EncryptedOpenAIKey)
 
 	// Check the validity of the OpenAI key by making a test API call
 	isValid, err := verifyOpenAIKey(user.Settings.EncryptedOpenAIKey)
@@ -101,7 +106,6 @@ func getSettingsHandler(c *gin.Context) {
 func verifyOpenAIKey(encryptedOpenAIKey string) (bool, error) {
 	// Set as invalid if no key exists yet
 	if encryptedOpenAIKey == "" {
-		fmt.Println("enc key:", encryptedOpenAIKey)
 		return false, nil
 	}
 
