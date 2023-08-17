@@ -45,4 +45,5 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/lib/pq v1.10.9
 	go.uber.org/ratelimit v0.3.0
+	golang.org/x/time v0.3.0
 )
