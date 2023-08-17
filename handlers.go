@@ -113,7 +113,7 @@ func verifyOpenAIKey(encryptedOpenAIKey string) (bool, error) {
 	key, err := decryptOpenAIKey(encryptedOpenAIKey)
 	if err != nil {
 		fmt.Println("decryptfailed:", err.Error())
-		return false, errors.New("Failed to decrypt OpenAI key")
+		return false, errors.New("failed to decrypt OpenAI key")
 	}
 
 	fmt.Println("key:", key)
@@ -343,14 +343,10 @@ func signupUserHandler(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("signup - required fields pass")
-
 	if err := validateUsername(newUser.Username); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	fmt.Println("signup - username validated")
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -358,21 +354,24 @@ func signupUserHandler(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("signup - password hashed")
-
 	user := User{
 		Username:       newUser.Username,
 		HashedPassword: string(hashedPassword),
 	}
-
-	fmt.Println("signup - user structured")
 
 	if err := db.Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user"})
 		return
 	}
 
-	fmt.Println("signup - user stored")
+	userSettings := UserSettings{
+		UserID: user.ID, // Use the ID of the newly created user
+	}
+
+	if err := db.Create(&userSettings).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user settings"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "User signed up successfully"})
 }
