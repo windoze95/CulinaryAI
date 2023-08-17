@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"github.com/jinzhu/gorm"
 )
 
@@ -29,7 +27,6 @@ type Recipe struct {
 	GeneratedBy *User `gorm:"foreignKey:UserID"`
 	UserID      uint
 	UserPrompt  *string
-	DeletedAt   *time.Time
 }
 
 type Tag struct {
