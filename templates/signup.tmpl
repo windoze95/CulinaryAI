@@ -185,9 +185,13 @@
                     window.location.href = '/login';
                 })
                 .catch(error => {
-                    // Insert the error message into the "error-message" div.
-                    // document.getElementById('error-message').innerText = error.message;
-                    M.toast({ html: error.message })
+                    if (error.message === "") {
+                        M.toast({ html: "an unknown error occurred" })
+                    } else {
+                        // Insert the error message into the "error-message" div.
+                        // document.getElementById('error-message').innerText = error.message;
+                        M.toast({ html: error.message })
+                    }
                 });
         });
     </script>
