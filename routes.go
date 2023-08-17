@@ -35,22 +35,9 @@ func startGin() {
 	router.Static("/static", "static")
 	router.Use(SessionMiddleware())
 	router.GET("/", UserMiddleware(), func(c *gin.Context) {
-		val, _ := c.Get("user")
-		// if !exists {
-		// 	// This may be nil, in some cases that will simply be replaced with a cheesy placeholder
-		// 	// This means the UserMiddleware did not run or did not find a user
-		// 	// You may decide to return an error or handle this situation differently
-		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
-		// 	return
-		// }
+		val, _ := c.Get("user") // it's okay if no value exists
 
-		user, _ := val.(*User)
-		// if !ok {
-		// 	// This means the user was not of type *User
-		// 	// This should not happen if UserMiddleware is functioning correctly
-		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
-		// 	return
-		// }
+		user, _ := val.(*User) // if not 'ok', 'user' is nil struct as expected
 
 		pageData := PageData{
 			TitlePrefix: gc.Title,
@@ -82,11 +69,9 @@ func startGin() {
 	router.PUT("/users/settings", UserMiddleware(), updateUserSettingsHandler)
 
 	// Recipe generation
-	// router.POST("/users/:id/recipes", func(c *gin.Context) {})
 	router.POST("/recipes", UserMiddleware(), func(c *gin.Context) {
 		// Retrieve the user from the session
 		val, ok := c.Get("user")
-		// val, ok := session.Values["user"]
 		if !ok {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
 			return
@@ -102,23 +87,8 @@ func startGin() {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch user settings: " + err.Error()})
 		}
 
-		// Check the validity of the OpenAI key by making a test API call
-		// isValid, err := verifyOpenAIKey(user.Settings.EncryptedOpenAIKey)
-		// if err != nil {
-		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		// 	return
-		// }
-		// if !isValid {
-		// 	c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": false, "user": user})
-		// 	return
-		// }
-
-		// Render the settings modal template with valid key and user data
-		// c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": true, "user": user})
-
 		if user.Settings.EncryptedOpenAIKey == "" {
 			// Apply rate limiting and use shared key
-			// limiter := rate.NewLimiter(1, 5) // 1 request per second with a burst of 5
 			if !publicOpenAIKeyRateLimiter.Allow() {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "429: Too many requests"})
 				// c.Abort()
@@ -155,7 +125,6 @@ func startGin() {
 
 	// Deleting a recipe by the user who generated it
 	router.DELETE("/users/:id/recipes/:recipe_id", func(c *gin.Context) {
-		// userID := c.Param("id")
 		userID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
