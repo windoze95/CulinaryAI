@@ -64,9 +64,6 @@ func collectRecipeHandler(c *gin.Context) {
 }
 
 func getSettingsHandler(c *gin.Context) {
-	// Retrieve the session
-	// session := c.MustGet("session").(*sessions.Session)
-
 	// Retrieve the user from the session
 	val, ok := c.Get("user")
 	// val, ok := session.Values["user"]
@@ -81,12 +78,9 @@ func getSettingsHandler(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("getSettings: got user")
-	fmt.Println("enc key:", user.Settings.EncryptedOpenAIKey)
 	if err := db.Where("user_id = ?", user.ID).First(&user.Settings).Error; err != nil {
-		fmt.Println("enc key:", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch user settings: " + err.Error()})
 	}
-	fmt.Println("enc key:", user.Settings.EncryptedOpenAIKey)
 
 	// Check the validity of the OpenAI key by making a test API call
 	isValid, err := verifyOpenAIKey(user.Settings.EncryptedOpenAIKey)
@@ -112,11 +106,8 @@ func verifyOpenAIKey(encryptedOpenAIKey string) (bool, error) {
 	// Decrypt the OpenAI key
 	key, err := decryptOpenAIKey(encryptedOpenAIKey)
 	if err != nil {
-		fmt.Println("decryptfailed:", err.Error())
-		return false, errors.New("failed to decrypt OpenAI key")
+		return false, errors.New("failed to decrypt OpenAI key:" + err.Error())
 	}
-
-	fmt.Println("key:", key)
 
 	// Set up OpenAI client with the given key
 	client := openai.NewClient(key)
@@ -169,79 +160,6 @@ func verifyOpenAIKey(encryptedOpenAIKey string) (bool, error) {
 	return false, errors.New("failed to verify OpenAI key after multiple attempts")
 }
 
-// func updateUserSettingsHandler(c *gin.Context) {
-// 	// Retrieve the session
-// 	// session := c.MustGet("session").(*sessions.Session)
-
-// 	// Retrieve the user from the session
-// 	// val, ok := session.Values["user"]
-// 	val, ok := c.Get("user")
-// 	if !ok {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
-// 		return
-// 	}
-
-// 	user, ok := val.(*User)
-// 	if !ok {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
-// 		return
-// 	}
-
-// 	// Parse the new OpenAI key from the request body
-// 	var newSettings struct {
-// 		OpenAIKey string `json:"apikey"`
-// 	}
-// 	if err := c.ShouldBindJSON(&newSettings); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-
-// 	fmt.Println(newSettings.OpenAIKey)
-
-// 	// Update the user's OpenAI key in the database
-// 	user.Settings.OpenAIKey = newSettings.OpenAIKey
-// 	fmt.Println(user.Settings.OpenAIKey)
-// 	if err := db.Save(&user).Error; err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, gin.H{"message": "Settings updated successfully"})
-// }
-
-// func updateUserSettingsHandler(c *gin.Context) {
-// 	// Retrieve the user from the session
-// 	val, ok := c.Get("user")
-// 	if !ok {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
-// 		return
-// 	}
-
-// 	user, ok := val.(*User)
-// 	if !ok {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
-// 		return
-// 	}
-
-// 	// Parse the new OpenAI key from the request body
-// 	var newSettings struct {
-// 		OpenAIKey string `json:"apikey"`
-// 	}
-// 	if err := c.ShouldBindJSON(&newSettings); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-
-// 	// Update the user's OpenAI key in the UserSettings
-// 	user.Settings.OpenAIKey = newSettings.OpenAIKey
-// 	if err := db.Model(&user.Settings).Update("OpenAIKey", user.Settings.OpenAIKey).Error; err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, gin.H{"message": "Settings updated successfully"})
-// }
-
 func updateUserSettingsHandler(c *gin.Context) {
 	// Retrieve the user from the session
 	val, ok := c.Get("user")
@@ -269,12 +187,10 @@ func updateUserSettingsHandler(c *gin.Context) {
 
 	// Check if the OpenAI key has been entered
 	if openAIKeyChanged {
-		fmt.Println("this should happen on first save")
 		// Encrypt the OpenAI key before storing
 		encryptedOpenAIKey, err := encryptOpenAIKey(newSettings.OpenAIKey)
 		if err != nil {
-			fmt.Println("error during encryption:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to encrypt OpenAI key"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to encrypt OpenAI key: " + err.Error()})
 			return
 		}
 
@@ -288,7 +204,6 @@ func updateUserSettingsHandler(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
 			return
 		}
-		fmt.Println("enc key saved to db")
 	}
 
 	// This won't seem as redundant when more settings are && added
@@ -432,8 +347,6 @@ func getSessionUser(c *gin.Context) *User {
 		// If no user is found in the database, return nil
 		return nil
 	}
-
-	fmt.Println(user.Settings.EncryptedOpenAIKey)
 
 	return user
 }
