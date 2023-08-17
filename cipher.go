@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -41,12 +40,8 @@ func decryptOpenAIKey(ciphertext string) (string, error) {
 
 // Encrypt encrypts the plaintext with the secret key
 func encrypt(config *CipherConfig, plaintext string) (string, error) {
-	fmt.Println("key:", plaintext)
-	fmt.Println("encrypted key:", config.EncryptionKey)
-
 	block, err := aes.NewCipher(config.EncryptionKey)
 	if err != nil {
-		fmt.Println("error creating cipher:", err)
 		return "Error creating block cipher", err
 	}
 
@@ -68,10 +63,8 @@ func decrypt(config *CipherConfig, ciphertext string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("openai decrypt 1")
 	decodedCiphertext, err := base64.URLEncoding.DecodeString(ciphertext)
 	if err != nil {
-		fmt.Println("openai decrypt err 1")
 		return "", err
 	}
 
