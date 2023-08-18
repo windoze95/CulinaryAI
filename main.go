@@ -28,6 +28,7 @@ type Env struct {
 	DatabaseUrl            string `json:"databaseUrl"`
 	OpenAIKeyEncryptionKey string `json:"openAIKeyEncryptionKey"`
 	SessionKey             string `json:"sessionKey"`
+	PublicOpenAIKey        string `json:"publicOpenAIKey"`
 }
 
 var (
@@ -59,6 +60,19 @@ func init() {
 	err = CheckEnvironmentVariables(&gc.Env)
 	if err != nil {
 		log.Fatalf("Environment variable error: %v", err)
+	}
+
+	// Check that env are valid
+	encryptedKey, err := encryptOpenAIKey(os.Getenv(gc.Env.PublicOpenAIKey))
+	if err != nil {
+		log.Fatalf("Unable to encrypt public openai key: %v", err)
+	}
+	isValid, err := verifyOpenAIKey(encryptedKey)
+	if err != nil {
+		log.Fatalf("Error during public openai key verification: %v", err)
+	}
+	if !isValid {
+		log.Fatalf("Invalid public openai key: %v", err)
 	}
 
 	// Connect to the database

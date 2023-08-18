@@ -85,6 +85,7 @@ func startGin() {
 
 		if err := db.Where("user_id = ?", user.ID).First(&user.Settings).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch user settings: " + err.Error()})
+			return
 		}
 
 		if user.Settings.EncryptedOpenAIKey == "" {

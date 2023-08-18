@@ -56,6 +56,45 @@ document.addEventListener('DOMContentLoaded', function() {
     var instancesTabs = M.Tabs.init(elemsTabs);
 });
 
+document.querySelector("#generate-recipe-button").addEventListener("click", function(e) {
+    e.preventDefault(); // Prevent the default form submission
+
+    // Get the user's prompt from the input field
+    const userPrompt = document.querySelector("#user-prompt-input").value;
+
+    // Define the URL for your endpoint
+    const url = "/recipes"; // Change this to the actual URL of your endpoint
+
+    // Make the fetch call
+    fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ userPrompt: userPrompt })
+        })
+        .then((response) => {
+            if (!response.ok) {
+                // Handle error response from server
+                response.json().then((data) => {
+                    // Display the error message using Materialize toast
+                    M.toast({ html: data.error || "An error occurred" });
+                });
+                throw new Error("Server error");
+            }
+            return response.json();
+        })
+        .then((data) => {
+            // Insert the recipe (markdown) into an element on the same page
+            document.querySelector("#markdown-display").innerHTML = data.recipe;
+        })
+        .catch((error) => {
+            // Handle any other errors
+            console.error(error);
+            M.toast({ html: error.message });
+        });
+});
+
 document.getElementById('openSettings').addEventListener('click', function(e) {
     e.preventDefault(); // Prevent the default link behavior
 

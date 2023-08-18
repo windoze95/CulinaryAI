@@ -11,34 +11,22 @@
     </header>
 
     <div class="container">
-        <!-- Inactive (not saved) state -->
-        <i class="material-icons toggle-symbols">favorite_border</i>
-
-        <!-- Active (saved) state -->
-        <i class="material-icons toggle-symbols">favorite</i>
-
-        <!-- Inactive (not deleted) state -->
-        <i class="material-icons toggle-symbols">delete</i>
-
-        <!-- Active (deleted) state -->
-        <i class="material-icons toggle-symbols">auto_delete</i>
-
-        <!-- Active (in history) state -->
-        <i class="material-icons toggle-symbols">history</i>
-
         <!-- Main App -->
+        {{ if .User }}
         <div class="input-group mb-3">
-            <label for="userPromptInput">Supplimental prompt (optional):</label><br>
-            <input type="text" id="userPromptInput" placeholder="ex: Something with beef, Five-course meal"
-                aria-label="ex: Something with beef, Five-course meal" aria-describedby="button-addon2">
-            <div class="input-group-append">
-                <button class="btn" type="button" id="button1">Button 1</button>
-                <button class="btn" type="button" id="button2">Button 2</button>
-            </div>
+            <form>
+                <label for="user-prompt-input">Supplimental prompt (optional):</label><br>
+                <input type="text" id="user-prompt-input" placeholder="ex: Something with beef, Five-course meal" aria-label="ex: Something with beef, Five-course meal" aria-describedby="button-addon2">
+                <div class="input-group-append">
+                    <button class="btn" type="button" id="generate-recipe-button">Button 1</button>
+                    <!-- <button class="btn" type="button" id="button2">Button 2</button> -->
+                </div>
+            </form>
         </div>
         <div id="markdown-display" class="markdown-display rounded p-3 bg-black">
             <!-- Markdown content will be inserted here -->
         </div>
+        {{ end }}
     </div>
 
     <div id="settingsModal" class="modal">

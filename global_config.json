@@ -4,7 +4,8 @@
         "port": "PORT",
         "databaseUrl": "DATABASE_URL",
         "openAIKeyEncryptionKey": "OPENAI_KEY_ENCRYPTION_KEY",
-        "sessionKey": "SESSION_KEY"
+        "sessionKey": "SESSION_KEY",
+        "publicOpenAIKey": "PUBLIC_OPENAI_KEY"
     },
     "mfaIssuer": "culinaryai"
 }
