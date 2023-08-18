@@ -71,12 +71,25 @@ document.querySelector("#generate-recipe-button").addEventListener("click", func
         })
         .then((response) => {
             if (!response.ok) {
-                // Handle error response from server
-                response.json().then((data) => {
-                    // Display the error message using Materialize toast
-                    M.toast({ html: data.error || "An error occurred" });
-                });
-                throw new Error("Server error");
+                // Check if the response has a JSON content type
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    // Parse the JSON response
+                    return response.json().then((data) => {
+                        // Display the error message using Materialize toast
+                        M.toast({ html: data.error || "An error occurred" });
+                        throw new Error("Server error");
+                    });
+                } else {
+                    // If not JSON, just throw an error
+                    throw new Error("Server error");
+                }
+                // // Handle error response from server
+                // response.json().then((data) => {
+                //     // Display the error message using Materialize toast
+                //     M.toast({ html: data.error || "An error occurred" });
+                // });
+                // throw new Error("Server error");
             }
             return response.json();
         })
