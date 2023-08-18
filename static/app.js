@@ -65,17 +65,16 @@ document.querySelector("#generate-recipe-button").addEventListener("click", func
                 prompt: document.querySelector("#user-prompt-input").value,
             }),
         })
-        .then(response => {
+        .then(async response => {
             const contentType = response.headers.get("content-type");
             if (contentType && contentType.includes("application/json")) {
-                return response.json().then(data => {
-                    if (!response.ok) {
-                        console.log(data.error);
-                        M.toast({ html: data.error || "An error occurred" });
-                        throw new Error(data.error || response.statusText);
-                    }
-                    return data;
-                });
+                const data = await response.json();
+                if (!response.ok) {
+                    console.log(data.error);
+                    M.toast({ html: data.error || "An error occurred" });
+                    throw new Error(data.error || response.statusText);
+                }
+                return data;
             } else {
                 console.log(response.text());
                 M.toast({ html: "An error occurred" });
