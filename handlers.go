@@ -72,7 +72,7 @@ func generateRecipeHandler(c *gin.Context) {
 	}
 
 	// Create a new chat service instance with the user's decrypted key
-	chatService, err := NewChatService(key, "PrePrompt Message Here")
+	chatService, err := NewChatService(key, placeholderPrePrompt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create chat service: " + err.Error()})
 		return
