@@ -63,53 +63,55 @@ func generateRecipeStreamHandler(c *gin.Context) {
 		key = os.Getenv(gc.Env.PublicOpenAIKey)
 	}
 
-	// Initialize OpenAI client
-	openaiClient := openai.NewClient(key)
-	ctx := context.Background()
+	go func() {
+		// Initialize OpenAI client
+		openaiClient := openai.NewClient(key)
+		ctx := context.Background()
 
-	// Retrieve the user's prompt from the query parameters
-	userPrompt := c.DefaultQuery("prompt", "")
+		// Retrieve the user's prompt from the query parameters
+		userPrompt := c.DefaultQuery("prompt", "")
 
-	// Setup request with userPrompt
-	req := openai.ChatCompletionRequest{
-		Model:     openai.GPT4,
-		MaxTokens: 20,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: userPrompt,
+		// Setup request with userPrompt
+		req := openai.ChatCompletionRequest{
+			Model:     openai.GPT4,
+			MaxTokens: 20,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: userPrompt,
+				},
 			},
-		},
-		Stream: true,
-	}
-
-	// Create stream
-	stream, err := openaiClient.CreateChatCompletionStream(ctx, req)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("ChatCompletionStream error: %v", err)})
-		return
-	}
-	defer stream.Close()
-
-	// Stream the response back to the client
-	for {
-		response, err := stream.Recv()
-		if errors.Is(err, io.EOF) {
-			break
+			Stream: true,
 		}
 
+		// Create stream
+		stream, err := openaiClient.CreateChatCompletionStream(ctx, req)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Stream error: %v", err)})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("ChatCompletionStream error: %v", err)})
 			return
 		}
+		defer stream.Close()
 
-		// Write the content to the client as an SSE message
-		_, err = c.Writer.Write([]byte("data: " + response.Choices[0].Delta.Content + "\n\n"))
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Write error: %v", err)})
-			return
+		// Stream the response back to the client
+		for {
+			response, err := stream.Recv()
+			if errors.Is(err, io.EOF) {
+				break
+			}
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Stream error: %v", err)})
+				return
+			}
+
+			// Write the content to the client as an SSE message
+			_, err = c.Writer.Write([]byte("data: " + response.Choices[0].Delta.Content + "\n\n"))
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Write error: %v", err)})
+				return
+			}
 		}
-	}
+	}()
 
 	// Stream the response back to the client
 	// c.Writer.Header().Set("Content-Type", "text/plain")
