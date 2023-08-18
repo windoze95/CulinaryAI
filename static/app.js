@@ -67,15 +67,17 @@ document.querySelector("#generate-recipe-button").addEventListener("click", func
         })
         .then(response => {
             if (!response.ok) {
+                // const data = await response.json();
+                console.log(data.error)
                 throw new Error(response.statusText);
             }
             return response.json();
-            // if (!response.ok) {
+            //     if (!response.ok) {
             //     // Check if the response has a JSON content type
             //     const contentType = response.headers.get("content-type");
             //     if (contentType && contentType.includes("application/json")) {
-            //         // Parse the JSON response
-            //         const data = await response.json();
+            // Parse the JSON response
+            // const data = await response.json();
             //         // Display the error message using Materialize toast
             //         M.toast({ html: data.error || "An error occurred" });
             //         throw new Error("Server error");
@@ -84,17 +86,17 @@ document.querySelector("#generate-recipe-button").addEventListener("click", func
             //         throw new Error("Server error");
             //     }
 
-            // // Handle error response from server
+            // Handle error response from server
             // response.json().then((data) => {
-            //     // Display the error message using Materialize toast
-            //     M.toast({ html: data.error || "An error occurred" });
-            // });
-            // throw new Error("Server error");
-
-            // }
-            // return response.json();
+            // Display the error message using Materialize toast
+            // M.toast({ html: data.error || "An error occurred" });
         })
-        .then(data => {
+        // throw new Error("Server error");
+
+    // }
+    // return response.json();
+    // })
+    .then(data => {
             // Insert the recipe (markdown) into an element on the same page
             document.querySelector("#markdown-display").innerHTML = data.recipe;
         })
