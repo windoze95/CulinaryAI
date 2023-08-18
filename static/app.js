@@ -52,47 +52,72 @@ document.addEventListener('DOMContentLoaded', function() {
     var instancesTabs = M.Tabs.init(elemsTabs);
 });
 
-document.querySelector("#generate-recipe-button").addEventListener("click", function(e) {
-    e.preventDefault(); // Prevent the default form submission
+// document.querySelector("#generate-recipe-button").addEventListener("click", function(e) {
+//     e.preventDefault(); // Prevent the default form submission
 
-    // Make the fetch call
-    fetch("/recipes", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                prompt: document.querySelector("#user-prompt-input").value,
-            }),
-        })
-        .then(async response => {
-            const contentType = response.headers.get("content-type");
-            if (contentType && contentType.includes("application/json")) {
-                const data = await response.json();
-                if (!response.ok) {
-                    console.log(data.error);
-                    M.toast({ html: data.error || "An error occurred" });
-                    throw new Error(data.error || response.statusText);
-                }
-                return data;
-            } else {
-                console.log(response.text());
-                M.toast({ html: "An error occurred" });
-                throw new Error("Invalid content type");
-            }
-        })
-        .then(data => {
-            // Insert the recipe (markdown) into an element on the same page
-            document.querySelector("#markdown-display").innerHTML = data.recipe;
-        })
-        .catch(error => {
-            // Handle any other errors
-            if (error.message === "") {
-                M.toast({ html: "An unknown error occurred" });
-            } else {
-                M.toast({ html: error.message });
-            }
-        });
+//     // Make the fetch call
+//     fetch("/recipes", {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json"
+//             },
+//             body: JSON.stringify({
+//                 prompt: document.querySelector("#user-prompt-input").value,
+//             }),
+//         })
+//         .then(async response => {
+//             const contentType = response.headers.get("content-type");
+//             if (contentType && contentType.includes("application/json")) {
+//                 const data = await response.json();
+//                 if (!response.ok) {
+//                     console.log(data.error);
+//                     M.toast({ html: data.error || "An error occurred" });
+//                     throw new Error(data.error || response.statusText);
+//                 }
+//                 return data;
+//             } else {
+//                 console.log(response.text());
+//                 M.toast({ html: "An error occurred" });
+//                 throw new Error("Invalid content type");
+//             }
+//         })
+//         .then(data => {
+//             // Insert the recipe (markdown) into an element on the same page
+//             document.querySelector("#markdown-display").innerHTML = data.recipe;
+//         })
+//         .catch(error => {
+//             // Handle any other errors
+//             if (error.message === "") {
+//                 M.toast({ html: "An unknown error occurred" });
+//             } else {
+//                 M.toast({ html: error.message });
+//             }
+//         });
+// });
+
+document.querySelector("#generate-recipe-button").addEventListener("click", function(e) {
+    e.preventDefault(); // Prevent the default action
+
+    // Create an EventSource connected to your server's streaming endpoint
+    const url = "/recipes"; // Update this to your server's endpoint
+    const eventSource = new EventSource(url);
+
+    // Listen for messages from the server
+    eventSource.onmessage = function(event) {
+        // Append the content to the recipe output
+        const recipeOutput = document.querySelector("#markdown-display");
+        recipeOutput.innerHTML += event.data;
+    };
+
+    // Listen for errors
+    eventSource.onerror = function(error) {
+        console.error("EventSource failed:", error);
+        eventSource.close();
+        M.toast({ html: "An error occurred while generating the recipe" });
+    };
+
+    // Optionally, you can add logic to close the connection when you're done
+    // eventSource.close();
 });
 
 // document.querySelector("#generate-recipe-button").addEventListener("click", function(e) {

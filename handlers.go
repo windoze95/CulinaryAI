@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"regexp"
@@ -59,35 +60,111 @@ func generateRecipeHandler(c *gin.Context) {
 		key = os.Getenv(gc.Env.PublicOpenAIKey)
 	}
 
-	// Parse the request body for the user's prompt
-	var request struct {
-		UserPrompt string `json:"userPrompt"`
+	// Initialize OpenAI client
+	openaiClient := openai.NewClient(key)
+	ctx := context.Background()
+
+	// Setup request
+	req := openai.ChatCompletionRequest{
+		Model:     openai.GPT3Dot5Turbo,
+		MaxTokens: 20,
+		Messages: []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleUser,
+				Content: "Lorem ipsum",
+			},
+		},
+		Stream: true,
 	}
 
-	fmt.Println(c.Request.Response)
-
-	if err := c.BindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: " + err.Error()})
-		return
-	}
-
-	// Create a new chat service instance with the user's decrypted key
-	chatService, err := NewChatService(key, placeholderPrePrompt)
+	// Create stream
+	stream, err := openaiClient.CreateChatCompletionStream(ctx, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create chat service: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("ChatCompletionStream error: %v", err)})
 		return
 	}
+	defer stream.Close()
 
-	// Create the chat completion with the user's prompt
-	recipe, err := chatService.CreateChatCompletion(request.UserPrompt)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create recipe: " + err.Error()})
-		return
+	// Stream the response back to the client
+	c.Writer.Header().Set("Content-Type", "text/plain")
+	for {
+		response, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Stream error: %v", err)})
+			return
+		}
+
+		// Write the content to the client
+		_, err = c.Writer.Write([]byte(response.Choices[0].Delta.Content))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Write error: %v", err)})
+			return
+		}
 	}
-
-	// Respond with the chat completion
-	c.JSON(http.StatusOK, gin.H{"recipe": recipe})
 }
+
+// func generateRecipeHandler(c *gin.Context) {
+// 	// Retrieve the user from the context
+// 	val, ok := c.Get("user")
+// 	if !ok {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
+// 		return
+// 	}
+
+// 	user, ok := val.(*User)
+// 	if !ok {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
+// 		return
+// 	}
+
+// 	if err := db.Where("user_id = ?", user.ID).First(&user.Settings).Error; err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch user settings: " + err.Error()})
+// 		return
+// 	}
+
+// 	// Choose an api key
+// 	var key string
+// 	if user.Settings.EncryptedOpenAIKey != "" {
+// 		decryptedKey, err := decryptOpenAIKey(user.Settings.EncryptedOpenAIKey)
+// 		if err != nil {
+// 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to decrypt API key: " + err.Error()})
+// 		}
+// 		key = decryptedKey
+// 	} else {
+// 		key = os.Getenv(gc.Env.PublicOpenAIKey)
+// 	}
+
+// 	// Parse the request body for the user's prompt
+// 	var request struct {
+// 		UserPrompt string `json:"userPrompt"`
+// 	}
+
+// 	if err := c.BindJSON(&request); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: " + err.Error()})
+// 		return
+// 	}
+
+// 	// Create a new chat service instance with the user's decrypted key
+// 	chatService, err := NewChatService(key, placeholderPrePrompt)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create chat service: " + err.Error()})
+// 		return
+// 	}
+
+// 	// Create the chat completion with the user's prompt
+// 	recipe, err := chatService.CreateChatCompletion(request.UserPrompt)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create recipe: " + err.Error()})
+// 		return
+// 	}
+
+// 	// Respond with the chat completion
+// 	c.JSON(http.StatusOK, gin.H{"recipe": recipe})
+// }
 
 // Handler for collecting a recipe
 func collectRecipeHandler(c *gin.Context) {
