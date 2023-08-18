@@ -62,17 +62,25 @@ document.querySelector("#generate-recipe-button").addEventListener("click", func
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                prompt: document.querySelector("#user-prompt-input").value, // Note: use "prompt" as the key, not "userPrompt"
+                prompt: document.querySelector("#user-prompt-input").value,
             }),
         })
-        .then(async response => {
-            if (!response.ok) {
-                const data = await response.json();
-                console.log(data.error);
-                M.toast({ html: data.error || "An error occurred" });
-                throw new Error(data.error || response.statusText);
+        .then(response => {
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                return response.json().then(data => {
+                    if (!response.ok) {
+                        console.log(data.error);
+                        M.toast({ html: data.error || "An error occurred" });
+                        throw new Error(data.error || response.statusText);
+                    }
+                    return data;
+                });
+            } else {
+                console.log(response.text());
+                M.toast({ html: "An error occurred" });
+                throw new Error("Invalid content type");
             }
-            return response.json();
         })
         .then(data => {
             // Insert the recipe (markdown) into an element on the same page
@@ -87,7 +95,6 @@ document.querySelector("#generate-recipe-button").addEventListener("click", func
             }
         });
 });
-
 
 // document.querySelector("#generate-recipe-button").addEventListener("click", function(e) {
 //     e.preventDefault(); // Prevent the default form submission
