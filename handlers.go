@@ -51,11 +51,10 @@ func generateRecipeHandler(c *gin.Context) {
 	var key string
 	if user.Settings.EncryptedOpenAIKey != "" {
 		decryptedKey, err := decryptOpenAIKey(user.Settings.EncryptedOpenAIKey)
-		if err == nil {
-			key = decryptedKey
-		} else {
-			key = os.Getenv(gc.Env.PublicOpenAIKey)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to decrypt API key: " + err.Error()})
 		}
+		key = decryptedKey
 	} else {
 		key = os.Getenv(gc.Env.PublicOpenAIKey)
 	}

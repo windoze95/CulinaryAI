@@ -13,12 +13,11 @@ type ChatService struct {
 	PrePrompt string
 }
 
-func NewChatService(encryptedAPIKey string, prePrompt string) (*ChatService, error) {
+func NewChatService(decryptedAPIKey string, prePrompt string) (*ChatService, error) {
 	// decryptedAPIKey, err := Decrypt(NewCipherConfig(), encryptedAPIKey)
-	decryptedAPIKey, err := decryptOpenAIKey(encryptedAPIKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt API key: %v", err)
-	}
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to decrypt API key: %v", err)
+	// }
 
 	return &ChatService{
 		Client:    openai.NewClient(decryptedAPIKey),
