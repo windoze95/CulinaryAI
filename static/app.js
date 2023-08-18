@@ -55,51 +55,56 @@ document.addEventListener('DOMContentLoaded', function() {
 document.querySelector("#generate-recipe-button").addEventListener("click", function(e) {
     e.preventDefault(); // Prevent the default form submission
 
-    // Get the user's prompt from the input field
-    const userPrompt = document.querySelector("#user-prompt-input").value;
-
-    // Define the URL for your endpoint
-    const url = "/recipes"; // Change this to the actual URL of your endpoint
-
     // Make the fetch call
-    fetch(url, {
+    fetch("/recipes", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ userPrompt: userPrompt })
+            body: JSON.stringify({
+                userPrompt: document.querySelector("#user-prompt-input").value,
+            }),
         })
-        .then(async(response) => {
+        .then(response => {
             if (!response.ok) {
-                // Check if the response has a JSON content type
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    // Parse the JSON response
-                    const data = await response.json();
-                    // Display the error message using Materialize toast
-                    M.toast({ html: data.error || "An error occurred" });
-                    throw new Error("Server error");
-                } else {
-                    // If not JSON, just throw an error
-                    throw new Error("Server error");
-                }
-                // // Handle error response from server
-                // response.json().then((data) => {
-                //     // Display the error message using Materialize toast
-                //     M.toast({ html: data.error || "An error occurred" });
-                // });
-                // throw new Error("Server error");
+                throw new Error(response.statusText);
             }
             return response.json();
+            // if (!response.ok) {
+            //     // Check if the response has a JSON content type
+            //     const contentType = response.headers.get("content-type");
+            //     if (contentType && contentType.includes("application/json")) {
+            //         // Parse the JSON response
+            //         const data = await response.json();
+            //         // Display the error message using Materialize toast
+            //         M.toast({ html: data.error || "An error occurred" });
+            //         throw new Error("Server error");
+            //     } else {
+            //         // If not JSON, just throw an error
+            //         throw new Error("Server error");
+            //     }
+
+            // // Handle error response from server
+            // response.json().then((data) => {
+            //     // Display the error message using Materialize toast
+            //     M.toast({ html: data.error || "An error occurred" });
+            // });
+            // throw new Error("Server error");
+
+            // }
+            // return response.json();
         })
-        .then((data) => {
+        .then(data => {
             // Insert the recipe (markdown) into an element on the same page
             document.querySelector("#markdown-display").innerHTML = data.recipe;
         })
-        .catch((error) => {
+        .catch(error => {
             // Handle any other errors
-            console.error(error);
-            M.toast({ html: error.message });
+            if (error.message === "") {
+                M.toast({ html: "an unknown error occurred" })
+            } else {
+                M.toast({ html: error.message })
+            }
         });
 });
 
