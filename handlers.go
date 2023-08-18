@@ -64,14 +64,17 @@ func generateRecipeHandler(c *gin.Context) {
 	openaiClient := openai.NewClient(key)
 	ctx := context.Background()
 
-	// Setup request
+	// Retrieve the user's prompt from the query parameters
+	userPrompt := c.DefaultQuery("prompt", "")
+
+	// Setup request with userPrompt
 	req := openai.ChatCompletionRequest{
-		Model:     openai.GPT3Dot5Turbo,
+		Model:     openai.GPT4,
 		MaxTokens: 20,
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleUser,
-				Content: "Lorem ipsum",
+				Content: userPrompt,
 			},
 		},
 		Stream: true,
