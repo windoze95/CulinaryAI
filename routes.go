@@ -68,6 +68,45 @@ func startGin() {
 	// User settings
 	router.PUT("/users/settings", UserMiddleware(), updateUserSettingsHandler)
 
+	// Recipe generation stream
+	router.GET("/recipes/stream", UserMiddleware(), func(c *gin.Context) {
+		// Retrieve the user from the session
+		val, ok := c.Get("user")
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
+			return
+		}
+
+		user, ok := val.(*User)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
+			return
+		}
+
+		if err := db.Where("user_id = ?", user.ID).First(&user.Settings).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch user settings: " + err.Error()})
+			return
+		}
+
+		if user.Settings.EncryptedOpenAIKey == "" {
+			// Apply rate limiting and use shared key
+			if !publicOpenAIKeyRateLimiter.Allow() {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "429: Too many requests"})
+				c.Abort()
+				return
+			}
+
+			// Handle the request if the limiter permits
+			// Call public use handler
+			// return
+		}
+
+		generateRecipeStreamHandler(c)
+
+		// Handle the request with no rate limiting
+		// Call personal use handler
+	})
+
 	// Recipe generation
 	router.POST("/recipes", UserMiddleware(), func(c *gin.Context) {
 		// Retrieve the user from the session

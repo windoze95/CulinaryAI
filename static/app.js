@@ -128,7 +128,7 @@ document.querySelector("#generate-recipe-button").addEventListener("click", func
     const userPrompt = document.querySelector("#user-prompt-input").value;
 
     // Create an EventSource connected to your server's streaming endpoint, with the prompt as a query parameter
-    const url = "/recipes?prompt=" + encodeURIComponent(userPrompt);
+    const url = "/recipes/stream?prompt=" + encodeURIComponent(userPrompt);
     const eventSource = new EventSource(url);
 
     // Listen for messages from the server
