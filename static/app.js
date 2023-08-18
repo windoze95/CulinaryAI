@@ -19,10 +19,6 @@ document.querySelectorAll('.toggle-symbols').forEach(function(icon) {
     });
 });
 
-document.getElementById('button1').addEventListener('click', function() {});
-
-document.getElementById('button2').addEventListener('click', function() {});
-
 // Markdown processing function
 function processMarkdown(text) {
     var html = marked(text);
