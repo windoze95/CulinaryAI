@@ -92,14 +92,16 @@ func startGin() {
 			// Apply rate limiting and use shared key
 			if !publicOpenAIKeyRateLimiter.Allow() {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "429: Too many requests"})
-				// c.Abort()
+				c.Abort()
 				return
 			}
 
 			// Handle the request if the limiter permits
 			// Call public use handler
-			return
+			// return
 		}
+
+		generateRecipeHandler(c)
 
 		// Handle the request with no rate limiting
 		// Call personal use handler
