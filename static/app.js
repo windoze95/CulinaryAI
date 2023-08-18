@@ -65,13 +65,12 @@ document.querySelector("#generate-recipe-button").addEventListener("click", func
                 prompt: document.querySelector("#user-prompt-input").value, // Note: use "prompt" as the key, not "userPrompt"
             }),
         })
-        .then(response => {
+        .then(async response => {
             if (!response.ok) {
-                return response.json().then(data => {
-                    console.log(data.error);
-                    M.toast({ html: data.error || "An error occurred" });
-                    throw new Error(data.error || response.statusText);
-                });
+                const data = await response.json();
+                console.log(data.error);
+                M.toast({ html: data.error || "An error occurred" });
+                throw new Error(data.error || response.statusText);
             }
             return response.json();
         })
