@@ -64,10 +64,10 @@ func generateRecipeHandler(c *gin.Context) {
 		UserPrompt string `json:"userPrompt"`
 	}
 
-	fmt.Println(c.Request)
+	fmt.Println(c.Request.Response)
 
 	if err := c.BindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: " + err.Error()})
 		return
 	}
 

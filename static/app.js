@@ -69,17 +69,16 @@ document.querySelector("#generate-recipe-button").addEventListener("click", func
             },
             body: JSON.stringify({ userPrompt: userPrompt })
         })
-        .then((response) => {
+        .then(async(response) => {
             if (!response.ok) {
                 // Check if the response has a JSON content type
                 const contentType = response.headers.get("content-type");
                 if (contentType && contentType.includes("application/json")) {
                     // Parse the JSON response
-                    return response.json().then((data) => {
-                        // Display the error message using Materialize toast
-                        M.toast({ html: data.error || "An error occurred" });
-                        throw new Error("Server error");
-                    });
+                    const data = await response.json();
+                    // Display the error message using Materialize toast
+                    M.toast({ html: data.error || "An error occurred" });
+                    throw new Error("Server error");
                 } else {
                     // If not JSON, just throw an error
                     throw new Error("Server error");
