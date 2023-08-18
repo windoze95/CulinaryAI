@@ -63,6 +63,9 @@ func generateRecipeHandler(c *gin.Context) {
 	var request struct {
 		UserPrompt string `json:"userPrompt"`
 	}
+
+	fmt.Println(c.Request)
+
 	if err := c.BindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
