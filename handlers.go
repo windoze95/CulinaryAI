@@ -30,6 +30,9 @@ func (e *HTTPError) Error() string {
 }
 
 func generateRecipeStreamHandler(c *gin.Context) {
+	// Set the correct content type for SSE
+	c.Writer.Header().Set("Content-Type", "text/event-stream")
+
 	// Retrieve the user from the context
 	val, ok := c.Get("user")
 	if !ok {
@@ -89,7 +92,6 @@ func generateRecipeStreamHandler(c *gin.Context) {
 	defer stream.Close()
 
 	// Stream the response back to the client
-	c.Writer.Header().Set("Content-Type", "text/plain")
 	for {
 		response, err := stream.Recv()
 		if errors.Is(err, io.EOF) {
@@ -101,13 +103,34 @@ func generateRecipeStreamHandler(c *gin.Context) {
 			return
 		}
 
-		// Write the content to the client
-		_, err = c.Writer.Write([]byte(response.Choices[0].Delta.Content))
+		// Write the content to the client as an SSE message
+		_, err = c.Writer.Write([]byte("data: " + response.Choices[0].Delta.Content + "\n\n"))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Write error: %v", err)})
 			return
 		}
 	}
+
+	// Stream the response back to the client
+	// c.Writer.Header().Set("Content-Type", "text/plain")
+	// for {
+	// 	response, err := stream.Recv()
+	// 	if errors.Is(err, io.EOF) {
+	// 		break
+	// 	}
+
+	// 	if err != nil {
+	// 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Stream error: %v", err)})
+	// 		return
+	// 	}
+
+	// 	// Write the content to the client
+	// 	_, err = c.Writer.Write([]byte(response.Choices[0].Delta.Content))
+	// 	if err != nil {
+	// 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Write error: %v", err)})
+	// 		return
+	// 	}
+	// }
 }
 
 func generateRecipeHandler(c *gin.Context) {
