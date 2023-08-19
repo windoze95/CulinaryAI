@@ -95,118 +95,63 @@ document.addEventListener('DOMContentLoaded', function() {
 //         });
 // });
 
-// document.querySelector("#generate-recipe-button").addEventListener("click", function(e) {
-//     e.preventDefault(); // Prevent the default action
-
-//     // Create an EventSource connected to your server's streaming endpoint
-//     const url = "/recipes"; // Update this to your server's endpoint
-//     const eventSource = new EventSource(url);
-
-//     // Listen for messages from the server
-//     eventSource.onmessage = function(event) {
-//         // Append the content to the recipe output
-//         const recipeOutput = document.querySelector("#markdown-display");
-//         recipeOutput.innerHTML += event.data;
-//     };
-
-//     // Listen for errors
-//     eventSource.onerror = function(error) {
-//         console.error("EventSource failed:", error);
-//         eventSource.close();
-//         M.toast({ html: "An error occurred while generating the recipe" });
-//     };
-
-//     // Optionally, you can add logic to close the connection when you're done
-//     // eventSource.close();
-// });
-
-
 document.querySelector("#generate-recipe-button").addEventListener("click", function(e) {
-    e.preventDefault(); // Prevent the default action
+    e.preventDefault(); // Prevent the default form submission
 
-    // Get the user's prompt from an input field
-    const userPrompt = document.querySelector("#user-prompt-input").value;
+    // Make the fetch call
+    fetch("/recipes", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                userPrompt: document.querySelector("#user-prompt-input").value,
+            }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                // const data = await response.json();
+                console.log(data.error)
+                throw new Error(response.statusText);
+            }
+            return response.json();
+            //     if (!response.ok) {
+            //     // Check if the response has a JSON content type
+            //     const contentType = response.headers.get("content-type");
+            //     if (contentType && contentType.includes("application/json")) {
+            // Parse the JSON response
+            // const data = await response.json();
+            //         // Display the error message using Materialize toast
+            //         M.toast({ html: data.error || "An error occurred" });
+            //         throw new Error("Server error");
+            //     } else {
+            //         // If not JSON, just throw an error
+            //         throw new Error("Server error");
+            //     }
 
-    // Create an EventSource connected to your server's streaming endpoint, with the prompt as a query parameter
-    const url = "/recipes/stream?prompt=" + encodeURIComponent(userPrompt);
-    const eventSource = new EventSource(url);
+            // Handle error response from server
+            // response.json().then((data) => {
+            // Display the error message using Materialize toast
+            // M.toast({ html: data.error || "An error occurred" });
+            // })
+            // throw new Error("Server error");
 
-    // Listen for messages from the server
-    eventSource.onmessage = function(event) {
-        // Append the content to the recipe output
-        const recipeOutput = document.querySelector("#markdown-display");
-        recipeOutput.innerHTML += event.data;
-    };
-
-    // Listen for errors
-    eventSource.onerror = function(error) {
-        console.error("EventSource failed:", error);
-        eventSource.close();
-        M.toast({ html: "An error occurred while generating the recipe" });
-    };
+            // }
+            // return response.json();
+        })
+        .then(data => {
+            // Insert the recipe (markdown) into an element on the same page
+            document.querySelector("#markdown-display").innerHTML = data.recipe;
+        })
+        .catch(error => {
+            // Handle any other errors
+            if (error.message === "") {
+                M.toast({ html: "an unknown error occurred" })
+            } else {
+                M.toast({ html: error.message })
+            }
+        });
 });
-
-
-
-
-
-// document.querySelector("#generate-recipe-button").addEventListener("click", function(e) {
-//     e.preventDefault(); // Prevent the default form submission
-
-//     // Make the fetch call
-//     fetch("/recipes", {
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json"
-//             },
-//             body: JSON.stringify({
-//                 userPrompt: document.querySelector("#user-prompt-input").value,
-//             }),
-//         })
-//         .then(response => {
-//             if (!response.ok) {
-//                 // const data = await response.json();
-//                 console.log(data.error)
-//                 throw new Error(response.statusText);
-//             }
-//             return response.json();
-//             //     if (!response.ok) {
-//             //     // Check if the response has a JSON content type
-//             //     const contentType = response.headers.get("content-type");
-//             //     if (contentType && contentType.includes("application/json")) {
-//             // Parse the JSON response
-//             // const data = await response.json();
-//             //         // Display the error message using Materialize toast
-//             //         M.toast({ html: data.error || "An error occurred" });
-//             //         throw new Error("Server error");
-//             //     } else {
-//             //         // If not JSON, just throw an error
-//             //         throw new Error("Server error");
-//             //     }
-
-//             // Handle error response from server
-//             // response.json().then((data) => {
-//             // Display the error message using Materialize toast
-//             // M.toast({ html: data.error || "An error occurred" });
-//         })
-//         // throw new Error("Server error");
-
-//     // }
-//     // return response.json();
-//     // })
-//     .then(data => {
-//             // Insert the recipe (markdown) into an element on the same page
-//             document.querySelector("#markdown-display").innerHTML = data.recipe;
-//         })
-//         .catch(error => {
-//             // Handle any other errors
-//             if (error.message === "") {
-//                 M.toast({ html: "an unknown error occurred" })
-//             } else {
-//                 M.toast({ html: error.message })
-//             }
-//         });
-// });
 
 document.getElementById('openSettings').addEventListener('click', function(e) {
     e.preventDefault(); // Prevent the default link behavior

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"regexp"
@@ -27,112 +26,6 @@ type HTTPError struct {
 
 func (e *HTTPError) Error() string {
 	return e.Message
-}
-
-func generateRecipeStreamHandler(c *gin.Context) {
-	// Set the correct content type for SSE
-	c.Writer.Header().Set("Content-Type", "text/event-stream")
-
-	// Retrieve the user from the context
-	val, ok := c.Get("user")
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
-		return
-	}
-
-	user, ok := val.(*User)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
-		return
-	}
-
-	if err := db.Where("user_id = ?", user.ID).First(&user.Settings).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch user settings: " + err.Error()})
-		return
-	}
-
-	// Choose an api key
-	var key string
-	if user.Settings.EncryptedOpenAIKey != "" {
-		decryptedKey, err := decryptOpenAIKey(user.Settings.EncryptedOpenAIKey)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to decrypt API key: " + err.Error()})
-		}
-		key = decryptedKey
-	} else {
-		key = os.Getenv(gc.Env.PublicOpenAIKey)
-	}
-
-	go func() {
-		// Initialize OpenAI client
-		openaiClient := openai.NewClient(key)
-		ctx := context.Background()
-
-		// Retrieve the user's prompt from the query parameters
-		userPrompt := c.DefaultQuery("prompt", "")
-
-		// Setup request with userPrompt
-		req := openai.ChatCompletionRequest{
-			Model:     openai.GPT4,
-			MaxTokens: 20,
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role:    openai.ChatMessageRoleUser,
-					Content: userPrompt,
-				},
-			},
-			Stream: true,
-		}
-
-		// Create stream
-		stream, err := openaiClient.CreateChatCompletionStream(ctx, req)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("ChatCompletionStream error: %v", err)})
-			return
-		}
-		defer stream.Close()
-
-		// Stream the response back to the client
-		for {
-			response, err := stream.Recv()
-			if errors.Is(err, io.EOF) {
-				break
-			}
-
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Stream error: %v", err)})
-				return
-			}
-
-			// Write the content to the client as an SSE message
-			_, err = c.Writer.Write([]byte("data: " + response.Choices[0].Delta.Content + "\n\n"))
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Write error: %v", err)})
-				return
-			}
-		}
-	}()
-
-	// Stream the response back to the client
-	// c.Writer.Header().Set("Content-Type", "text/plain")
-	// for {
-	// 	response, err := stream.Recv()
-	// 	if errors.Is(err, io.EOF) {
-	// 		break
-	// 	}
-
-	// 	if err != nil {
-	// 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Stream error: %v", err)})
-	// 		return
-	// 	}
-
-	// 	// Write the content to the client
-	// 	_, err = c.Writer.Write([]byte(response.Choices[0].Delta.Content))
-	// 	if err != nil {
-	// 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Write error: %v", err)})
-	// 		return
-	// 	}
-	// }
 }
 
 func generateRecipeHandler(c *gin.Context) {
