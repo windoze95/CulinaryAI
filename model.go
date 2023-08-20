@@ -10,7 +10,7 @@ type User struct {
 	Email            string
 	HashedPassword   string
 	Settings         UserSettings `gorm:"foreignKey:UserID"`
-	CollectedRecipes []Recipe     `gorm:"many2many:user_recipes;"`
+	CollectedRecipes []Recipe     `gorm:"many2many:user_collected_recipes;"`
 }
 
 type UserSettings struct {
@@ -22,12 +22,21 @@ type UserSettings struct {
 
 type Recipe struct {
 	gorm.Model
-	Title       string
-	Content     string
-	Tags        []Tag `gorm:"many2many:recipe_tags;"`
-	GeneratedBy *User `gorm:"foreignKey:UserID"`
-	UserID      uint
-	UserPrompt  *string
+	Title             string
+	Content           string
+	GeneratedBy       *User `gorm:"foreignKey:GeneratedByUserID"`
+	GeneratedByUserID uint
+	Tags              []Tag `gorm:"many2many:recipe_tags;"`
+	UserPrompt        string
+	Status            string
+}
+
+type GuidingContent struct {
+	gorm.Model
+	UserID uint // Reference to the user who created the content
+	// DietaryRestrictions string // Specific dietary restrictions
+	SupportingResearch string // Supporting research to help convey the user's expectations
+	Instructions       string // Additional instructions or guidelines
 }
 
 type Tag struct {

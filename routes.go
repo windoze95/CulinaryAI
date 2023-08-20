@@ -141,7 +141,7 @@ func startGin() {
 			return
 		}
 
-		if recipe.UserID != uint(userID) {
+		if recipe.GeneratedByUserID != uint(userID) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "User not authorized to delete this recipe"})
 			return
 		}
