@@ -403,7 +403,7 @@ func getSessionUser(c *gin.Context) *User {
 	}
 
 	user := &User{}
-	if err := db.Preload("Settings").Where("id = ?", userID).First(user).Error; err != nil {
+	if err := db.Preload("Settings").Where("id = ?", userID).First(&user).Error; err != nil {
 		// If no user is found in the database, return nil
 		return nil
 	}
