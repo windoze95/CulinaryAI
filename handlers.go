@@ -395,7 +395,7 @@ var forbiddenUsernames = []string{
 	"culinaryai-root",
 }
 
-func getSessionUser(c *gin.Context) *User {
+func getPreloadSessionUserOrNil(c *gin.Context) *User {
 	session := c.MustGet("session").(*sessions.Session)
 	userID, ok := session.Values["user_id"].(uint) // Adjust the type as needed
 	if !ok || userID == 0 {

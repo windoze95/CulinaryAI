@@ -279,7 +279,7 @@ func UserOwnerMiddleware() gin.HandlerFunc {
 
 func UserMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user := getSessionUser(c)
+		user := getPreloadSessionUserOrNil(c)
 		if user == nil {
 			c.Set("user", nil)
 		} else {
