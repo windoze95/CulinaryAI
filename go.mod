@@ -40,6 +40,7 @@ require (
 	github.com/TwiN/go-away v1.6.10
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/gin-gonic/gin v1.9.1
+	github.com/google/uuid v1.3.1
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/heroku/x v0.0.59
 	github.com/jinzhu/inflection v1.0.0 // indirect
