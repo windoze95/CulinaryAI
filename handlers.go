@@ -77,7 +77,7 @@ func generateRecipeHandler(c *gin.Context) {
 	}
 
 	// Create the chat completion with the user's prompt
-	recipe, err := chatService.CreateChatCompletion(request.UserPrompt)
+	recipe, err := chatService.CreateRecipeChatCompletion(request.UserPrompt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create recipe: " + err.Error()})
 		return
