@@ -68,23 +68,33 @@ func startGin() {
 	// User settings
 	router.PUT("/users/settings", UserMiddleware(), updateUserSettingsHandler)
 
+	// Viewing a single recipe by its ID
+	router.GET("/recipes/:recipe_id", UserMiddleware(), viewRecipeHandler)
+
 	// Recipe generation
 	router.POST("/recipes", UserMiddleware(), func(c *gin.Context) {
-		// Retrieve the user from the session
-		val, ok := c.Get("user")
-		if !ok {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
-			return
-		}
+		// // Retrieve the user from the session
+		// val, ok := c.Get("user")
+		// if !ok {
+		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "No user information"})
+		// 	return
+		// }
 
-		user, ok := val.(*User)
-		if !ok {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
-			return
-		}
+		// user, ok := val.(*User)
+		// if !ok {
+		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "User information is of the wrong type"})
+		// 	return
+		// }
 
-		if err := db.Where("user_id = ?", user.ID).First(&user.Settings).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch user settings: " + err.Error()})
+		// if err := db.Where("user_id = ?", user.ID).First(&user.Settings).Error; err != nil {
+		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch user settings: " + err.Error()})
+		// 	return
+		// }
+
+		// Retrieve the user from the context
+		user, err := getUserFromContext(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -288,4 +298,20 @@ func UserMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func getPreloadSessionUserOrNil(c *gin.Context) *User {
+	session := c.MustGet("session").(*sessions.Session)
+	userID, ok := session.Values["user_id"].(uint) // Adjust the type as needed
+	if !ok || userID == 0 {
+		return nil
+	}
+
+	user := &User{}
+	if err := db.Preload("Settings").Preload("GuidingContent").Where("id = ?", userID).First(&user).Error; err != nil {
+		// If no user is found in the database, return nil
+		return nil
+	}
+
+	return user
 }

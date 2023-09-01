@@ -80,7 +80,7 @@ func init() {
 	if err != nil {
 		log.Fatalf("Environment variable error: %v", err)
 	}
-	db.AutoMigrate(&User{}, &UserSettings{}, &Recipe{})
+	db.AutoMigrate(&User{}, &UserSettings{}, &Recipe{}, &GuidingContent{}, &Tag{})
 }
 
 func main() {
@@ -125,6 +125,9 @@ func ConnectToDatabaseWithRetry(dbURL string) (*gorm.DB, error) {
 		log.Printf("Could not connect to database, retrying...")
 		time.Sleep(5 * time.Second)
 	}
+
+	// Set a 5-second timeout for all queries in this session
+	db.Exec("SET statement_timeout = 5000")
 
 	return database, err
 }
