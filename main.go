@@ -80,7 +80,7 @@ func init() {
 	if err != nil {
 		log.Fatalf("Environment variable error: %v", err)
 	}
-	db.AutoMigrate(&User{}, &UserSettings{}, &Recipe{}, &GuidingContent{}, &Tag{})
+	// db.AutoMigrate(&User{}, &UserSettings{}, &Recipe{}, &GuidingContent{}, &Tag{})
 }
 
 func main() {
