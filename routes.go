@@ -29,13 +29,14 @@ func startGin() {
 	router := gin.Default()
 
 	// Define constants and variables related to rate limiting
-	var rps int = 1                        // 1 request per second
-	var burst int = 5                      // Burst of 5 requests
-	var cleanupInterval = 10 * time.Minute // Cleanup every 10 minutes
-	var expiration = 1 * time.Hour         // Remove unused limiters after 1 hour
+	var publicOpenAIKeyRps int = 1               // 1 request per second
+	var publicOpenAIKeyBurst int = 5             // Burst of 5 requests
+	var globalRps int = 20                       // 20 request per second
+	var globalCleanupInterval = 10 * time.Minute // Cleanup every 10 minutes
+	var globalExpiration = 1 * time.Hour         // Remove unused limiters after 1 hour
 
 	// Define middleware functions related to rate limiting
-	publicOpenAIKeyRateLimiter := rate.NewLimiter(rate.Limit(rps), burst)
+	publicOpenAIKeyRateLimiter := rate.NewLimiter(rate.Limit(publicOpenAIKeyRps), publicOpenAIKeyBurst)
 	// Rate limiting middleware specific to users with no OpenAI key
 	publicOpenAIKeyRateLimitMiddleware := func(c *gin.Context) {
 		// Retrieve the user from the context
@@ -58,7 +59,7 @@ func startGin() {
 	}
 
 	// Register global middleware functions with router
-	router.Use(RateLimitByIPMiddleware(rps, cleanupInterval, expiration))
+	router.Use(RateLimitByIPMiddleware(globalRps, globalCleanupInterval, globalExpiration))
 	router.Use(SessionMiddleware())
 
 	// Register static files and templates with router
