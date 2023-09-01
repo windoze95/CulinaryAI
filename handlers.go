@@ -624,11 +624,11 @@ func associateTagsWithRecipe(recipe *Recipe) error {
 			// Tag exists; use its ID and Name
 			newTag := Tag{}
 			newTag.ID = existingTag.ID
-			newTag.Name = existingTag.Name
+			newTag.Hashtag = existingTag.Hashtag
 			associatedTags = append(associatedTags, newTag)
 		} else if gorm.IsRecordNotFoundError(err) {
 			// Tag does not exist; create it
-			newTag := Tag{Name: cleanedHashtag}
+			newTag := Tag{Hashtag: cleanedHashtag}
 			if err := db.Create(&newTag).Error; err != nil {
 				return fmt.Errorf("failed to create new tag: %v", err)
 			}
@@ -636,7 +636,7 @@ func associateTagsWithRecipe(recipe *Recipe) error {
 			// Use the newly created tag's ID and Name
 			createdTag := Tag{}
 			createdTag.ID = newTag.ID
-			createdTag.Name = newTag.Name
+			createdTag.Hashtag = newTag.Hashtag
 			associatedTags = append(associatedTags, createdTag)
 		} else {
 			// Log other types of database errors

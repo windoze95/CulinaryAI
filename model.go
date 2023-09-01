@@ -53,7 +53,7 @@ type GuidingContent struct {
 
 type Tag struct {
 	gorm.Model
-	Name string `gorm:"index:idx_name,unique"`
+	Hashtag string `gorm:"index:idx_hashtag;unique"`
 }
 
 type Ingredient struct {
