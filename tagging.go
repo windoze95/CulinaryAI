@@ -38,7 +38,7 @@ func appendTags(tagNames []string) error {
 		canonicalName := strings.ToLower(tagName)
 		var tag Tag
 		if err := db.Where("LOWER(name) = ?", canonicalName).First(&tag).Error; err == gorm.ErrRecordNotFound {
-			tag = Tag{Name: canonicalName}
+			tag = Tag{Hashtag: canonicalName}
 			if err := db.Create(&tag).Error; err != nil {
 				return err
 			}
