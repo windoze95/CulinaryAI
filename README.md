@@ -12,3 +12,4 @@ An AI-powered recipe generator that aligns with predefined dietary restrictions.
 - CAPTCHA on sign up
 - Fix logout
 - Incremental UI updates to accommodate the above
+- Refactor out anti-patterns (this project got bigger than I expected)
