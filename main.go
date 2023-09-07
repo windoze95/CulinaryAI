@@ -63,11 +63,11 @@ func init() {
 	}
 
 	// Check that env are valid
-	encryptedKey, err := encryptOpenAIKey(os.Getenv(gc.Env.PublicOpenAIKey))
-	if err != nil {
-		log.Fatalf("Unable to encrypt public openai key: %v", err)
-	}
-	isValid, err := verifyOpenAIKey(encryptedKey)
+	// encryptedKey, err := encryptOpenAIKey(os.Getenv(gc.Env.PublicOpenAIKey))
+	// if err != nil {
+	// 	log.Fatalf("Unable to encrypt public openai key: %v", err)
+	// }
+	isValid, err := verifyOpenAIKey(os.Getenv(gc.Env.PublicOpenAIKey))
 	if err != nil {
 		log.Fatalf("Error during public openai key verification: %v", err)
 	}
