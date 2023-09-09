@@ -25,6 +25,11 @@ type Env struct {
 	OpenAIKeyEncryptionKey EnvVar `json:"openAIKeyEncryptionKey"`
 	SessionKey             EnvVar `json:"sessionKey"`
 	PublicOpenAIKey        EnvVar `json:"publicOpenAIKey"`
+	AWSRegion              EnvVar `json:"awsRegion"`
+	AWSAccessKeyID         EnvVar `json:"awsAccessKeyId"`
+	AWSSecretAccessKey     EnvVar `json:"awsSecretAccessKey"`
+	S3Bucket               EnvVar `json:"s3Bucket"`
+	S3Key                  EnvVar `json:"s3Key"`
 }
 
 // LoadConfig reads a JSON configuration file and returns a Config struct.
