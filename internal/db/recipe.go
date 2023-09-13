@@ -12,6 +12,10 @@ type RecipeDB struct {
 	DB *gorm.DB
 }
 
+func NewRecipeDB(gormDB *gorm.DB) *RecipeDB {
+	return &RecipeDB{DB: gormDB}
+}
+
 func (db *RecipeDB) CreateRecipe(recipe *models.Recipe) error {
 	return db.DB.Create(recipe).Error
 }
@@ -26,6 +30,10 @@ func (db *RecipeDB) UpdateRecipeImageURL(recipe *models.Recipe, imageURL string)
 
 func (db *RecipeDB) UpdateRecipeGenerationStatus(recipe *models.Recipe, isComplete bool) error {
 	return db.DB.Model(recipe).Update("GenerationComplete", isComplete).Error
+}
+
+func (db *RecipeDB) UpdateFullRecipeJSON(recipe *models.Recipe) error {
+	return db.DB.Model(recipe).Update("FullRecipeJSON", recipe.FullRecipeJSON).Error
 }
 
 func (db *RecipeDB) FindTagByName(tagName string) (*models.Tag, error) {

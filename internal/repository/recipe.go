@@ -6,37 +6,41 @@ import (
 )
 
 type RecipeRepository struct {
-	recipeDB *db.RecipeDB
+	RecipeDB *db.RecipeDB
 }
 
 func NewRecipeRepository(recipeDB *db.RecipeDB) *RecipeRepository {
-	return &RecipeRepository{recipeDB: recipeDB}
+	return &RecipeRepository{RecipeDB: recipeDB}
 }
 
 func (r *RecipeRepository) CreateRecipe(recipe *models.Recipe) error {
-	return r.recipeDB.CreateRecipe(recipe)
+	return r.RecipeDB.CreateRecipe(recipe)
 }
 
 // func (r *RecipeRepository) UpdateRecipeFieldByID(id uint, field string, value interface{}) error {
-// 	return r.recipeDB.UpdateRecipeFieldByID(id, field, value)
+// 	return r.RecipeDB.UpdateRecipeFieldByID(id, field, value)
 // }
 
 func (r *RecipeRepository) UpdateRecipeImageURL(recipe *models.Recipe, imageURL string) error {
-	return r.recipeDB.UpdateRecipeImageURL(recipe, imageURL)
+	return r.RecipeDB.UpdateRecipeImageURL(recipe, imageURL)
 }
 
 func (r *RecipeRepository) UpdateRecipeGenerationStatus(recipe *models.Recipe, isComplete bool) error {
-	return r.recipeDB.UpdateRecipeGenerationStatus(recipe, isComplete)
+	return r.RecipeDB.UpdateRecipeGenerationStatus(recipe, isComplete)
+}
+
+func (r *RecipeRepository) UpdateFullRecipeJSON(recipe *models.Recipe) error {
+	return r.RecipeDB.UpdateFullRecipeJSON(recipe)
 }
 
 func (r *RecipeRepository) FindTagByName(tagName string) (*models.Tag, error) {
-	return r.recipeDB.FindTagByName(tagName)
+	return r.RecipeDB.FindTagByName(tagName)
 }
 
 func (r *RecipeRepository) CreateTag(tag *models.Tag) error {
-	return r.recipeDB.CreateTag(tag)
+	return r.RecipeDB.CreateTag(tag)
 }
 
 func (r *RecipeRepository) UpdateRecipeTagsAssociation(recipe *models.Recipe, tags []models.Tag) error {
-	return r.recipeDB.UpdateRecipeTagsAssociation(recipe, tags)
+	return r.RecipeDB.UpdateRecipeTagsAssociation(recipe, tags)
 }
