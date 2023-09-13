@@ -12,7 +12,7 @@ import (
 )
 
 // UploadRecipeImageToS3 uploads a given byte array to an S3 bucket and returns the location URL.
-func UploadRecipeImageToS3(cfg config.Config, imgBytes []byte) (string, error) {
+func UploadRecipeImageToS3(cfg *config.Config, imgBytes []byte) (string, error) {
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region:      aws.String(cfg.Env.AWSRegion.Value()),
 		Credentials: credentials.NewStaticCredentials(cfg.Env.AWSAccessKeyID.Value(), cfg.Env.AWSSecretAccessKey.Value(), ""),
