@@ -1,7 +1,6 @@
 package openai
 
 import (
-	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -9,9 +8,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	openai "github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
 	"github.com/windoze95/culinaryai/internal/models"
@@ -67,11 +63,6 @@ func handleAPIError(respErr error) (shouldRetry bool, waitTime time.Duration, er
 }
 
 func NewOpenaiClient(decryptedAPIKey string) (*OpenaiClient, error) {
-	// decryptedAPIKey, err := Decrypt(NewCipherConfig(), encryptedAPIKey)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to decrypt API key: %v", err)
-	// }
-
 	return &OpenaiClient{
 		Client: openai.NewClient(decryptedAPIKey),
 	}, nil
@@ -215,23 +206,59 @@ func (c *OpenaiClient) CreateImage(prompt string) ([]byte, error) {
 	return imgBytes, nil
 }
 
-// UploadToS3 uploads a given byte array to an S3 bucket and returns the location URL.
-func UploadRecipeImageToS3(imgBytes []byte) (string, error) {
-	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String("your-region"),
-	}))
-
-	uploader := s3manager.NewUploader(sess)
-
-	result, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String("your-bucket"),
-		Key:    aws.String("your-key"),
-		Body:   bytes.NewReader(imgBytes),
-	})
-
-	if err != nil {
-		return "", fmt.Errorf("failed to upload to S3: %v", err)
+func VerifyOpenAIKey(key string) (bool, error) {
+	// Set as invalid if no key exists yet
+	if key == "" {
+		return false, nil
 	}
 
-	return result.Location, nil
+	// Set up OpenAI client with the given key
+	client := openai.NewClient(key)
+	ctx := context.Background()
+
+	// Maximum number of retries
+	const maxRetries = 3
+
+	// Delay between retries
+	const retryDelay = 10 * time.Second
+
+	// Attempt the verification with retries
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		// Make a test API call using a minimal completion request
+		req := openai.CompletionRequest{
+			Model:     openai.GPT3Ada,
+			MaxTokens: 5,
+			Prompt:    "Test",
+		}
+		_, err := client.CreateCompletion(ctx, req)
+
+		// Check for specific API errors
+		e := &openai.APIError{}
+		if errors.As(err, &e) {
+			switch e.HTTPStatusCode {
+			case 401:
+				// Invalid auth or key (do not retry)
+				return false, nil
+			case 429:
+				// Rate limiting or engine overload (wait and retry)
+				time.Sleep(retryDelay)
+				continue
+			case 500:
+				// OpenAI server error (retry)
+				continue
+			default:
+				// Unhandled error (do not retry)
+				// return false, err
+				return true, err
+			}
+		}
+
+		// If the call was successful, the key is valid
+		if err == nil {
+			return true, nil
+		}
+	}
+
+	// If all attempts failed, return false
+	return false, errors.New("failed to verify OpenAI key after multiple attempts")
 }

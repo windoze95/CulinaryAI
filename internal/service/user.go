@@ -10,6 +10,7 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/windoze95/culinaryai/internal/config"
 	"github.com/windoze95/culinaryai/internal/models"
+	"github.com/windoze95/culinaryai/internal/openai"
 	"github.com/windoze95/culinaryai/internal/repository"
 	"github.com/windoze95/culinaryai/internal/util"
 	"golang.org/x/crypto/bcrypt"
@@ -65,6 +66,22 @@ func (s *UserService) Login(username, password string) (*models.User, error) {
 	}
 
 	return user, nil
+}
+
+func (s *UserService) VerifyOpenAIKeyInSettings(user *models.User) (bool, error) {
+	// Decrypt the OpenAI key
+	decryptedKey, err := util.DecryptOpenAIKey(s.Cfg.Env.OpenAIKeyEncryptionKey.Value(), user.Settings.EncryptedOpenAIKey)
+	if err != nil {
+		return false, fmt.Errorf("failed to decrypt OpenAI key: %v", err)
+	}
+
+	// Verify the OpenAI key
+	isValid, err := openai.VerifyOpenAIKey(decryptedKey)
+	if err != nil {
+		return false, fmt.Errorf("failed to verify OpenAI key: %v", err)
+	}
+
+	return isValid, nil
 }
 
 func (s *UserService) UpdateUserSettings(user *models.User, newOpenAIKey string) (bool, error) {
