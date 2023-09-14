@@ -61,6 +61,25 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User logged in successfully"})
 }
 
+func (h *UserHandler) GetSettings(c *gin.Context) {
+	// Retrieve the user from the context
+	user, err := getUserFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Use the service to get and verify the settings
+	isValid, err := h.Service.VerifyOpenAIKeyInSettings(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Render the settings modal template
+	c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": isValid, "user": user})
+}
+
 func (h *UserHandler) UpdateUserSettings(c *gin.Context) {
 	// Retrieve the user from the context
 	user, err := getUserFromContext(c)
