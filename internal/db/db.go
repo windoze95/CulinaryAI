@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -26,7 +27,7 @@ func connectToDatabaseWithRetry(dbURL string) (*gorm.DB, error) {
 			break
 		}
 		if time.Since(start) > 10*time.Minute {
-			log.Fatalf("Error connecting to the database: %v", err)
+			return nil, fmt.Errorf("could not connect to database after 10 minutes: %w", err)
 		}
 		log.Printf("Could not connect to database, retrying...")
 		time.Sleep(5 * time.Second)

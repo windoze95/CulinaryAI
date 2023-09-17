@@ -60,6 +60,10 @@ func (db *UserDB) UsernameExists(username string) (bool, error) {
 	return true, nil
 }
 
-func (db *UserDB) PreloadUserByID(userID uint, user *models.User) error {
-	return db.DB.Preload("Settings").Preload("GuidingContent").Where("id = ?", userID).First(user).Error
+func (db *UserDB) GetPreloadedUserByID(userID uint) (*models.User, error) {
+	var user models.User
+	if err := db.DB.Preload("Settings").Preload("GuidingContent").Where("id = ?", userID).First(user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

@@ -17,34 +17,6 @@ type OpenaiClient struct {
 	Client *openai.Client
 }
 
-// Common recipe definition
-var commonRecipeDef = jsonschema.Definition{
-	Type: jsonschema.Object,
-	Properties: map[string]jsonschema.Definition{
-		"ingredients": {
-			Type: jsonschema.Array,
-			Items: &jsonschema.Definition{
-				Type: jsonschema.Object,
-				Properties: map[string]jsonschema.Definition{
-					"name":   {Type: jsonschema.String},
-					"unit":   {Type: jsonschema.String, Enum: []string{"grams", "ml", "cups", "pieces", "teaspoons"}},
-					"amount": {Type: jsonschema.Number},
-				},
-			},
-		},
-		"instructions": {
-			Type:        jsonschema.Array,
-			Description: "Steps to prepare the recipe (no numbering)",
-			Items:       &jsonschema.Definition{Type: jsonschema.String},
-		},
-		"time_to_cook": {
-			Type:        jsonschema.Number,
-			Description: "Total time to prepare the recipe(s) in minutes",
-		},
-	},
-	// Required: []string{},
-}
-
 func handleAPIError(respErr error) (shouldRetry bool, waitTime time.Duration, err error) {
 	e := &openai.APIError{}
 	if errors.As(respErr, &e) {
@@ -81,8 +53,36 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(userRequirements string, userP
 		},
 	}
 
+	// Common recipe definition
+	var commonRecipeDef = jsonschema.Definition{
+		Type: jsonschema.Object,
+		Properties: map[string]jsonschema.Definition{
+			"ingredients": {
+				Type: jsonschema.Array,
+				Items: &jsonschema.Definition{
+					Type: jsonschema.Object,
+					Properties: map[string]jsonschema.Definition{
+						"name":   {Type: jsonschema.String},
+						"unit":   {Type: jsonschema.String, Enum: []string{"grams", "ml", "cups", "pieces", "teaspoons", "tablespoons", "ounces", "pounds", "pinch", "dash", "quarts", "gallons", "liters"}},
+						"amount": {Type: jsonschema.Number},
+					},
+				},
+			},
+			"instructions": {
+				Type:        jsonschema.Array,
+				Description: "Steps to prepare the recipe (no numbering)",
+				Items:       &jsonschema.Definition{Type: jsonschema.String},
+			},
+			"time_to_cook": {
+				Type:        jsonschema.Number,
+				Description: "Total time to prepare the recipe(s) in minutes",
+			},
+		},
+	}
+
 	// Define the function for use in the API call
 	var functionDef = openai.FunctionDefinition{
+		Name: "create_recipe",
 		Parameters: jsonschema.Definition{
 			Type: jsonschema.Object,
 			Properties: map[string]jsonschema.Definition{
@@ -125,6 +125,10 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(userRequirements string, userP
 				Model:     openai.GPT4,
 				Messages:  messages,
 				Functions: functions,
+				FunctionCall: &openai.FunctionCall{
+					Name:      functionDef.Name,
+					Arguments: "{\"unit_system\":\"metric\"}",
+				},
 			},
 		)
 

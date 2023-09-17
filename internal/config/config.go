@@ -23,7 +23,7 @@ type Env struct {
 	Port                   EnvVar `json:"port"`
 	DatabaseUrl            EnvVar `json:"databaseUrl"`
 	OpenAIKeyEncryptionKey EnvVar `json:"openAIKeyEncryptionKey"`
-	SessionKey             EnvVar `json:"sessionKey"`
+	JwtSecretKey           EnvVar `json:"jwtSecretKey"`
 	PublicOpenAIKey        EnvVar `json:"publicOpenAIKey"`
 	AWSRegion              EnvVar `json:"awsRegion"`
 	AWSAccessKeyID         EnvVar `json:"awsAccessKeyId"`

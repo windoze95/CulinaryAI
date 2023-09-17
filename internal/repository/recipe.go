@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/jinzhu/gorm"
 	"github.com/windoze95/culinaryai/internal/db"
 	"github.com/windoze95/culinaryai/internal/models"
 )
@@ -11,6 +12,17 @@ type RecipeRepository struct {
 
 func NewRecipeRepository(recipeDB *db.RecipeDB) *RecipeRepository {
 	return &RecipeRepository{RecipeDB: recipeDB}
+}
+
+func (r *RecipeRepository) GetRecipeByID(recipeID string) (*models.Recipe, error) {
+	recipe, err := r.RecipeDB.GetRecipeByID(recipeID)
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, NotFoundError{message: "Recipe not found"}
+		}
+		return nil, err
+	}
+	return recipe, nil
 }
 
 func (r *RecipeRepository) CreateRecipe(recipe *models.Recipe) error {

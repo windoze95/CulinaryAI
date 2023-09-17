@@ -37,6 +37,6 @@ func (r *UserRepository) UsernameExists(username string) (bool, error) {
 	return r.UserDB.UsernameExists(username)
 }
 
-func (r *UserRepository) PreloadUserByID(userID uint, user *models.User) error {
-	return r.UserDB.PreloadUserByID(userID, user)
+func (r *UserRepository) GetPreloadedUserByID(userID uint) (*models.User, error) {
+	return r.UserDB.GetPreloadedUserByID(userID)
 }

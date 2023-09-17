@@ -3,14 +3,12 @@ module github.com/windoze95/culinaryai
 go 1.20
 
 require (
-	github.com/gorilla/sessions v1.2.1
 	github.com/jinzhu/gorm v1.9.16
 	github.com/sashabaranov/go-openai v1.14.0
 	golang.org/x/crypto v0.11.0
 )
 
 require (
-	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
@@ -41,12 +39,11 @@ require (
 	github.com/TwiN/go-away v1.6.10
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/aws/aws-sdk-go v1.44.333
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.3.1
-	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/heroku/x v0.0.59
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/lib/pq v1.10.9
-	go.uber.org/ratelimit v0.3.0
 	golang.org/x/time v0.3.0
 )

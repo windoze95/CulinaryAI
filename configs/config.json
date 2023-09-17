@@ -4,7 +4,12 @@
         "port": "PORT",
         "databaseUrl": "DATABASE_URL",
         "openAIKeyEncryptionKey": "OPENAI_KEY_ENCRYPTION_KEY",
-        "sessionKey": "SESSION_KEY",
-        "publicOpenAIKey": "PUBLIC_OPENAI_KEY"
+        "jwtSecretKey": "JWT_SECRET_KEY",
+        "publicOpenAIKey": "PUBLIC_OPENAI_KEY",
+        "awsRegion": "AWS_REGION",
+        "awsAccessKeyID": "AWS_ACCESS_KEY_ID",
+        "awsSecretAccessKey": "AWS_SECRET_ACCESS_KEY",
+        "s3Bucket": "S3_BUCKET",
+        "s3Key": "S3_KEY"
     }
 }

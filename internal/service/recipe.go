@@ -29,6 +29,21 @@ func NewRecipeService(cfg *config.Config, repo *repository.RecipeRepository) *Re
 	}
 }
 
+func (s *RecipeService) GetRecipeByID(recipeID string) (*models.Recipe, error) {
+	// Fetch the recipe by its ID from the repository
+	recipe, err := s.Repo.GetRecipeByID(recipeID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Deserialize the FullRecipeJSON field back into the FullRecipe struct
+	if err := recipe.DeserializeFullRecipe(); err != nil {
+		return nil, fmt.Errorf("Failed to deserialize recipe: %w", err)
+	}
+
+	return recipe, nil
+}
+
 // GenerateRecipe handles the business logic for generating a recipe
 func (s *RecipeService) CreateRecipe(user *models.User, userPrompt string) (*models.Recipe, error) {
 	// Populate initial fields of the Recipe struct

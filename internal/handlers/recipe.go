@@ -4,7 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/windoze95/culinaryai/internal/repository"
 	"github.com/windoze95/culinaryai/internal/service"
+	"github.com/windoze95/culinaryai/internal/util"
 )
 
 type RecipeHandler struct {
@@ -15,9 +17,26 @@ func NewRecipeHandler(recipeService *service.RecipeService) *RecipeHandler {
 	return &RecipeHandler{Service: recipeService}
 }
 
+func (h *RecipeHandler) GetRecipe(c *gin.Context) {
+	recipeID := c.Param("recipe_id")
+
+	recipe, err := h.Service.GetRecipeByID(recipeID)
+	if err != nil {
+		switch e := err.(type) {
+		case repository.NotFoundError:
+			c.JSON(http.StatusNotFound, gin.H{"error": e.Error()})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"recipe": recipe})
+}
+
 func (h *RecipeHandler) CreateRecipe(c *gin.Context) {
 	// Retrieve the user from the context
-	user, err := getUserFromContext(c)
+	user, err := util.GetUserFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

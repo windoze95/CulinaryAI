@@ -3,9 +3,10 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/sessions"
 	"github.com/windoze95/culinaryai/internal/service"
+	"github.com/windoze95/culinaryai/internal/util"
 )
 
 type UserHandler struct {
@@ -48,41 +49,59 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Service.Login(userCredentials.Username, userCredentials.Password)
+	user, err := h.Service.LoginUser(userCredentials.Username, userCredentials.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
-	session := c.MustGet("session").(*sessions.Session)
-	session.Values["user_id"] = user.ID
-	session.Save(c.Request, c.Writer)
+	// // Create a new session
+	// session := c.MustGet("session").(*sessions.Session)
+	// session.Values["user_id"] = user.ID
+	// session.Values["ip"] = c.ClientIP()
+	// session.Values["user_agent"] = c.Request.UserAgent()
 
-	c.JSON(http.StatusOK, gin.H{"message": "User logged in successfully"})
+	// // Save the session
+	// session.Save(c.Request, c.Writer)
+
+	// c.JSON(http.StatusOK, gin.H{"message": "User logged in successfully"})
+
+	// Create JWT token
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["user_id"] = user.ID
+	// claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+
+	tokenString, err := token.SignedString(h.Service.Cfg.Env.JwtSecretKey.Value())
+	if err != nil {
+		c.JSON(500, gin.H{"message": "Could not log in"})
+		return
+	}
+
+	c.JSON(200, gin.H{"accessToken": tokenString, "message": "User logged in successfully", "user": user})
 }
 
-func (h *UserHandler) GetSettings(c *gin.Context) {
+func (h *UserHandler) GetUserSettings(c *gin.Context) {
 	// Retrieve the user from the context
-	user, err := getUserFromContext(c)
+	user, err := util.GetUserFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Use the service to get and verify the settings
-	isValid, err := h.Service.VerifyOpenAIKeyInSettings(user)
+	isValid, err := h.Service.VerifyOpenAIKeyInUserSettings(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Render the settings modal template
-	c.HTML(http.StatusOK, "settings.tmpl", gin.H{"isValid": isValid, "user": user})
+	c.JSON(http.StatusOK, gin.H{"isValid": isValid, "user": user})
 }
 
 func (h *UserHandler) UpdateUserSettings(c *gin.Context) {
 	// Retrieve the user from the context
-	user, err := getUserFromContext(c)
+	user, err := util.GetUserFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

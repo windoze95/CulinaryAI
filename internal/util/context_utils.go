@@ -1,4 +1,4 @@
-package handlers
+package util
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 	"github.com/windoze95/culinaryai/internal/models"
 )
 
-func getUserFromContext(c *gin.Context) (*models.User, error) {
+func GetUserFromContext(c *gin.Context) (*models.User, error) {
 	val, ok := c.Get("user")
 	if !ok {
 		return nil, errors.New("No user information")

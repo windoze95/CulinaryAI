@@ -55,7 +55,7 @@ func (s *UserService) CreateUser(username, password string) error {
 	return nil
 }
 
-func (s *UserService) Login(username, password string) (*models.User, error) {
+func (s *UserService) LoginUser(username, password string) (*models.User, error) {
 	user, err := s.Repo.GetUserByUsername(username)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,11 @@ func (s *UserService) Login(username, password string) (*models.User, error) {
 	return user, nil
 }
 
-func (s *UserService) VerifyOpenAIKeyInSettings(user *models.User) (bool, error) {
+func (s *UserService) GetPreloadedUserByID(sessionID uint) (*models.User, error) {
+	return s.Repo.GetPreloadedUserByID(sessionID)
+}
+
+func (s *UserService) VerifyOpenAIKeyInUserSettings(user *models.User) (bool, error) {
 	// Decrypt the OpenAI key
 	decryptedKey, err := util.DecryptOpenAIKey(s.Cfg.Env.OpenAIKeyEncryptionKey.Value(), user.Settings.EncryptedOpenAIKey)
 	if err != nil {

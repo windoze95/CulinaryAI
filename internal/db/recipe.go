@@ -16,6 +16,19 @@ func NewRecipeDB(gormDB *gorm.DB) *RecipeDB {
 	return &RecipeDB{DB: gormDB}
 }
 
+func (db *RecipeDB) GetRecipeByID(id string) (*models.Recipe, error) {
+	var recipe models.Recipe
+	err := db.DB.Preload("GuidingContent").
+		Preload("Tags").
+		Preload("GeneratedBy", func(db *gorm.DB) *gorm.DB {
+			return db.Select("Username")
+		}).
+		Where("id = ?", id).
+		First(recipe).Error
+
+	return &recipe, err
+}
+
 func (db *RecipeDB) CreateRecipe(recipe *models.Recipe) error {
 	return db.DB.Create(recipe).Error
 }

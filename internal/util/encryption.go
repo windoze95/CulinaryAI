@@ -15,20 +15,6 @@ type CipherConfig struct {
 	EncryptionKey []byte
 }
 
-// func GetOpenAIKeyCipherConfig(cfg config.Config) *CipherConfig {
-// 	encryptionKeyHex := cfg.Env.OpenAIKeyEncryptionKey.Value()
-// 	if encryptionKeyHex == "" {
-// 		log.Fatal("Openai key encryption key must be set")
-// 	}
-// 	encryptionKey, err := hex.DecodeString(encryptionKeyHex)
-// 	if err != nil {
-// 		log.Fatalf("Unable to decode openai key encryption key hex")
-// 	}
-// 	return &CipherConfig{
-// 		EncryptionKey: encryptionKey,
-// 	}
-// }
-
 func GetOpenAIKeyCipherConfig(encryptionKeyHex string) (*CipherConfig, error) {
 	if encryptionKeyHex == "" {
 		return nil, errors.New("Openai key encryption key must be set")
