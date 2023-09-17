@@ -9,7 +9,7 @@
 /coverage
 
 # production
-/build
+# /build # TODO: uncomment this line when I get a better solution for Heroku deployment
 
 # misc
 .DS_Store

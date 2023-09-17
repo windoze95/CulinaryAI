@@ -1,5 +1,0 @@
-{
-    "scripts": {
-        "heroku-postbuild": "cd web/culinaryai && yarn install && yarn build"
-    }
-}
