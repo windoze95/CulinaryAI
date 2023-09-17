@@ -36,8 +36,17 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 	// Apply rate limiting middleware to all routes
 	r.Use(middleware.RateLimitByIP(globalRps, globalCleanupInterval, globalExpiration))
 
-	// Serve static files
-	r.Static("/", "./web/culinaryai/build/")
+	// Individual static routes for specific files
+	r.StaticFile("/", "./web/culinaryai/build/index.html")
+	r.StaticFile("/asset-manifest.json", "./web/culinaryai/build/asset-manifest.json")
+	r.StaticFile("/favicon.ico", "./web/culinaryai/build/favicon.ico")
+	r.StaticFile("/logo192.png", "./web/culinaryai/build/logo192.png")
+	r.StaticFile("/logo512.png", "./web/culinaryai/build/logo512.png")
+	r.StaticFile("/manifest.json", "./web/culinaryai/build/manifest.json")
+	r.StaticFile("/robots.txt", "./web/culinaryai/build/robots.txt")
+
+	// Static route for files under "static" directory
+	r.Static("/static", "./web/culinaryai/build/static")
 
 	// User-related routes setup
 	userDB := db.NewUserDB(database)
