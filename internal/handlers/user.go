@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -25,11 +26,15 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		Recaptcha string `json:"recaptcha" binding:"required"`
 	}
 
+	log.Println("Creating user")
+
 	// Returns error if a required field is not included
 	if err := c.ShouldBindJSON(&newUser); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "All fields are required"})
 		return
 	}
+
+	log.Println("Validating reCAPTCHA")
 
 	// Verify reCAPTCHA
 	if err := h.Service.VerifyRecaptcha(newUser.Recaptcha); err != nil {
@@ -37,11 +42,15 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
+	log.Println("Validating username")
+
 	// Validate username
 	if err := h.Service.ValidateUsername(newUser.Username); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	log.Println("Validating password")
 
 	// Validate password
 	if err := h.Service.ValidatePassword(newUser.Password); err != nil {
@@ -49,12 +58,16 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
+	log.Println("Hashing password")
+
 	// Create user
 	err := h.Service.CreateUser(newUser.Username, newUser.Email, newUser.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	log.Println("User created successfully")
 
 	c.JSON(http.StatusOK, gin.H{"message": "User signed up successfully"})
 }
