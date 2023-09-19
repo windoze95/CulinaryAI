@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"bytes"
+	"io"
 	"log"
 	"net/http"
 
@@ -26,7 +28,19 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		Recaptcha string `json:"recaptcha" binding:"required"`
 	}
 
-	log.Println("Creating user")
+	// Read and log the request body
+	bodyBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Printf("Error reading body: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Can't read body"})
+		return
+	}
+
+	// Log the request body
+	log.Println(string(bodyBytes))
+
+	// Restore the io.ReadCloser to its original state
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 	// Returns error if a required field is not included
 	if err := c.ShouldBindJSON(&newUser); err != nil {
