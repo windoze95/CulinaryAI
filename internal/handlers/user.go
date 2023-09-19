@@ -50,7 +50,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	}
 
 	// Create user
-	err := h.Service.CreateUser(newUser.Username, newUser.Password)
+	err := h.Service.CreateUser(newUser.Username, newUser.Email, newUser.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
