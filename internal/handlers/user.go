@@ -96,7 +96,7 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 	claims["user_id"] = user.ID
 	// claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
-	tokenString, err := token.SignedString(h.Service.Cfg.Env.JwtSecretKey.Value())
+	tokenString, err := token.SignedString([]byte(h.Service.Cfg.Env.JwtSecretKey.Value()))
 	if err != nil {
 		log.Printf("error: LoginUser: %v", err)
 		c.JSON(500, gin.H{"message": "Could not log in"})
