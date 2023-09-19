@@ -29,9 +29,9 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	}
 
 	// Read and log the request body
-	bodyBytes, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		log.Printf("Error reading body: %v", err)
+	bodyBytes, e := io.ReadAll(c.Request.Body)
+	if e != nil {
+		log.Printf("Error reading body: %v", e)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Can't read body"})
 		return
 	}
