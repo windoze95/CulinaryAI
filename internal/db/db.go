@@ -10,6 +10,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/lib/pq"
 	"github.com/windoze95/culinaryai/internal/config"
+	"github.com/windoze95/culinaryai/internal/models"
 )
 
 func New(cfg *config.Config) (*gorm.DB, error) {
@@ -35,6 +36,8 @@ func connectToDatabaseWithRetry(dbURL string) (*gorm.DB, error) {
 
 	// Set a 5-second timeout for all queries in this session
 	// db.Exec("SET statement_timeout = 5000")
+
+	database.AutoMigrate(&models.User{}, &models.UserSettings{}, &models.Recipe{}, &models.GuidingContent{}, &models.Tag{})
 
 	return database, err
 }
