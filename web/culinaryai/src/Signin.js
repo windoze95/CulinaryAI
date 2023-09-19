@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -56,6 +56,8 @@ export default function Signin() {
   const [username, setUserName] = useState();
   const [password, setPassword] = useState();
 
+  const navigate = useNavigate();
+
   const handleSubmit = async e => {
     e.preventDefault();
     const response = await loginUser({
@@ -70,7 +72,7 @@ export default function Signin() {
       .then((value) => {
         localStorage.setItem('accessToken', response['accessToken']);
         localStorage.setItem('user', JSON.stringify(response['user']));
-        window.location.href = "/profile";
+        navigate("/");
       });
     } else {
       swal("Failed", response.message, "error");

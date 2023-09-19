@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import ReCAPTCHA from "react-google-recaptcha";
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -58,6 +58,8 @@ export default function Register() {
   const [isVerified, setIsVerified] = useState(false);
   const [recaptchaResponse, setRecaptchaResponse] = useState('');
 
+  const navigate = useNavigate();
+
   const handlePasswordChange = (e) => {
     const newPass = e.target.value;
     setPassword(newPass);
@@ -111,7 +113,7 @@ export default function Register() {
         })
         .then((value) => {
           // Redirect to the login page
-          window.location.href = "/signin";
+          navigate('/signin');
         });
       } else {
         // Handle case where API response is not as expected

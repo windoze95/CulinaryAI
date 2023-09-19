@@ -1,6 +1,6 @@
 import React from 'react';
-import { NavLink, Link, BrowserRouter, Route } from 'react-router-dom';
-import { Navbar, NavItem, Dropdown, Divider } from 'react-materialize';
+import { NavLink } from 'react-router-dom';
+import { Navbar, Divider } from 'react-materialize';
 import './Header.css';
 
 const Header = ({ token }) => {
@@ -27,7 +27,7 @@ const Header = ({ token }) => {
   return (
     <Navbar
       alignLinks="right"
-      brand={<a className="brand-logo" href="#">Logo</a>}
+      brand={<a className="brand-logo" href="/">Logo</a>}
       id="mobile-nav"
       // menuIcon={<a href="#" data-target="mobile-nav" className="sidenav-trigger right"><i className="material-icons">menu</i></a>}
       options={{
