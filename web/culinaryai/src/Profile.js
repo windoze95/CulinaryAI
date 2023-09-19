@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -32,6 +33,8 @@ export default function Profile() {
   const open = Boolean(anchorEl);
   const user = JSON.parse(localStorage.getItem('user'));
 
+  const navigate = useNavigate();
+
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -43,6 +46,7 @@ export default function Profile() {
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
+    navigate('/');
     // window.location.href = "/";
   };
 

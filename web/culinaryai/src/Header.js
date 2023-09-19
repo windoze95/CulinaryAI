@@ -1,10 +1,19 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { useNavigate, NavLink } from 'react-router-dom';
 import { Navbar, Divider } from 'react-materialize';
 import './Header.css';
 import LogoSvg from './logo.svg';
 
 const Header = ({ token }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
+    navigate('/');
+    // window.location.href = "/";
+  };
+
   const menuItems = !token ? [
     <NavLink to="/register" key="register" className="sidenav-close">
         <i className="material-icons left">person</i>Register
@@ -20,8 +29,8 @@ const Header = ({ token }) => {
       User Option 2
     </NavLink>,
     <Divider key="divider" />,
-    <NavLink to="#" key="o3" className="sidenav-close">
-      User Option 3
+    <NavLink onClick={handleLogout} key="logout" className="sidenav-close">
+      Logout
     </NavLink>
   ];
 
