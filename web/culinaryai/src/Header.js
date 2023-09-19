@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Navbar, Divider } from 'react-materialize';
 import './Header.css';
+import LogoSvg from './logo.svg';
 
 const Header = ({ token }) => {
   const menuItems = !token ? [
@@ -27,7 +28,7 @@ const Header = ({ token }) => {
   return (
     <Navbar
       alignLinks="right"
-      brand={<a className="brand-logo" href="/">Logo</a>}
+      brand={<a className="brand-logo" href="/"><img className="logo-img" src={LogoSvg} alt="Logo" /></a>}
       id="mobile-nav"
       // menuIcon={<a href="#" data-target="mobile-nav" className="sidenav-trigger right"><i className="material-icons">menu</i></a>}
       options={{
