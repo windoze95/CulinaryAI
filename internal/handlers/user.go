@@ -32,15 +32,11 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	log.Println("Validating reCAPTCHA")
-
 	// Verify reCAPTCHA
 	if err := h.Service.VerifyRecaptcha(newUser.Recaptcha); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	log.Println("Validating username")
 
 	// Validate username
 	if err := h.Service.ValidateUsername(newUser.Username); err != nil {
@@ -48,15 +44,11 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	log.Println("Validating password")
-
 	// Validate password
 	if err := h.Service.ValidatePassword(newUser.Password); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	log.Println("Hashing password")
 
 	// Create user
 	err := h.Service.CreateUser(newUser.Username, newUser.Email, newUser.Password)
@@ -64,8 +56,6 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	log.Println("User created successfully")
 
 	c.JSON(http.StatusOK, gin.H{"message": "User signed up successfully"})
 }
@@ -77,12 +67,14 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&userCredentials); err != nil {
+		log.Printf("error: LoginUser: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	user, err := h.Service.LoginUser(userCredentials.Username, userCredentials.Password)
 	if err != nil {
+		log.Printf("error: LoginUser: %v", err)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
@@ -106,6 +98,7 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 
 	tokenString, err := token.SignedString(h.Service.Cfg.Env.JwtSecretKey.Value())
 	if err != nil {
+		log.Printf("error: LoginUser: %v", err)
 		c.JSON(500, gin.H{"message": "Could not log in"})
 		return
 	}
