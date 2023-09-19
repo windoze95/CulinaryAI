@@ -90,7 +90,7 @@ export default function Register() {
     }
   
     try {
-      const response = await axios.post('/api/v1/users/register', {
+      const response = await axios.post('/api/v1/users', {
         username,
         email,
         password,
