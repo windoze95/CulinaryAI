@@ -10,7 +10,7 @@ const Header = ({ token }) => {
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
-    navigate('/');
+    navigate('/signin');
     // window.location.href = "/";
   };
 
