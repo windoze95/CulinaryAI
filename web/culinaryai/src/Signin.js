@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -39,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
 
   async function loginUser(credentials) {
     try {
-      const response = await axios.post('https://www.mecallapi.com/api/login', credentials, {
+      const response = await axios.post('/api/v1/users/login', credentials, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -93,9 +94,9 @@ export default function Signin() {
               margin="normal"
               required
               fullWidth
-              id="email"
-              name="email"
-              label="Email Address"
+              id="username"
+              name="username"
+              label="Username"
               onChange={e => setUserName(e.target.value)}
             />
             <TextField
@@ -118,6 +119,12 @@ export default function Signin() {
             >
               Sign In
             </Button>
+            <Typography variant="body2" align="center">Don't have an account?</Typography>
+            <Link to="/register" style={{ textDecoration: 'none' }}>
+              <Typography variant="body2" align="center">
+                Register
+              </Typography>
+            </Link>
           </form>
         </div>
       </Grid>

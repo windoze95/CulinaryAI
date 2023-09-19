@@ -1,8 +1,11 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -30,15 +33,20 @@ func NewUserService(cfg *config.Config, repo *repository.UserRepository) *UserSe
 }
 
 func (s *UserService) CreateUser(username, password string) error {
-	// Validate username
-	if err := s.ValidateUsername(username); err != nil {
-		return err
-	}
+	// // Validate username
+	// if err := s.ValidateUsername(username); err != nil {
+	// 	return err
+	// }
+
+	// // Validate password
+	// if err := s.ValidatePassword(password); err != nil {
+	// 	return err
+	// }
 
 	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return fmt.Errorf("Error hashing password: %v", err)
+		return fmt.Errorf("error hashing password: %v", err)
 	}
 
 	// Create User and UserSettings
@@ -49,7 +57,7 @@ func (s *UserService) CreateUser(username, password string) error {
 	settings := &models.UserSettings{}
 
 	if err := s.Repo.CreateUserAndSettings(user, settings); err != nil {
-		return fmt.Errorf("Error creating user and settings: %v", err)
+		return fmt.Errorf("error creating user and settings: %v", err)
 	}
 
 	return nil
@@ -62,7 +70,7 @@ func (s *UserService) LoginUser(username, password string) (*models.User, error)
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(password)); err != nil {
-		return nil, errors.New("Invalid username or password")
+		return nil, errors.New("invalid username or password")
 	}
 
 	return user, nil
@@ -105,13 +113,38 @@ func (s *UserService) UpdateUserSettings(user *models.User, newOpenAIKey string)
 	return openAIKeyChanged, nil
 }
 
+// VerifyRecaptcha verifies the provided reCAPTCHA response
+func (s *UserService) VerifyRecaptcha(recaptchaResponse string) error {
+	secretKey := s.Cfg.Env.RecaptchaSecretKey.Value()
+
+	// Google reCAPTCHA API endpoint for server-side verification
+	apiURL := "https://www.google.com/recaptcha/api/siteverify"
+
+	response, err := http.PostForm(apiURL, url.Values{"secret": {secretKey}, "response": {recaptchaResponse}})
+	if err != nil {
+		return errors.New("Failed to verify reCAPTCHA: " + err.Error())
+	}
+	defer response.Body.Close()
+
+	var result map[string]interface{}
+	if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+		return errors.New("Failed to read reCAPTCHA response: " + err.Error())
+	}
+
+	if success, ok := result["success"].(bool); !ok || !success {
+		return errors.New("reCAPTCHA verification failed")
+	}
+
+	return nil
+}
+
 func (s *UserService) ValidateUsername(username string) error {
 	exists, err := s.Repo.UsernameExists(username)
 	if err != nil {
-		return fmt.Errorf("Error checking username: %v", err)
+		return fmt.Errorf("error checking username: %v", err)
 	}
 	if exists {
-		return fmt.Errorf("Username is already taken")
+		return fmt.Errorf("username is already taken")
 	}
 
 	minLength := 3
@@ -181,7 +214,7 @@ func (s *UserService) ValidateUsername(username string) error {
 	return nil
 }
 
-func validatePassword(password string) error {
+func (s *UserService) ValidatePassword(password string) error {
 	if len(password) < 8 {
 		return errors.New("password must be at least 8 characters long")
 	}

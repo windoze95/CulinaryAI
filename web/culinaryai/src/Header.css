@@ -1,0 +1,10 @@
+.dropdown-content {
+    min-width: 200px !important;
+}
+
+/* Custom CSS to move sidenav trigger to the right */
+.nav-wrapper .sidenav-trigger {
+    position: absolute;
+    right: 0;
+  }
+  

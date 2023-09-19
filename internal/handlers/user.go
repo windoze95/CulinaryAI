@@ -19,8 +19,10 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var newUser struct {
-		Username string `json:"username" binding:"required"`
-		Password string `json:"password" binding:"required"`
+		Username  string `json:"username" binding:"required"`
+		Email     string `json:"email" binding:"required"`
+		Password  string `json:"password" binding:"required"`
+		Recaptcha string `json:"recaptcha" binding:"required"`
 	}
 
 	// Returns error if a required field is not included
@@ -29,6 +31,25 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
+	// Verify reCAPTCHA
+	if err := h.Service.VerifyRecaptcha(newUser.Recaptcha); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Validate username
+	if err := h.Service.ValidateUsername(newUser.Username); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Validate password
+	if err := h.Service.ValidatePassword(newUser.Password); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Create user
 	err := h.Service.CreateUser(newUser.Username, newUser.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

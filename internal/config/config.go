@@ -30,6 +30,7 @@ type Env struct {
 	AWSSecretAccessKey     EnvVar `json:"awsSecretAccessKey"`
 	S3Bucket               EnvVar `json:"s3Bucket"`
 	S3Key                  EnvVar `json:"s3Key"`
+	RecaptchaSecretKey     EnvVar `json:"recaptchaSecretKey"`
 }
 
 // LoadConfig reads a JSON configuration file and returns a Config struct.
