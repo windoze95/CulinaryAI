@@ -56,6 +56,7 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState(null);
   const [isVerified, setIsVerified] = useState(false);
+  const [recaptchaResponse, setRecaptchaResponse] = useState('');
 
   const handlePasswordChange = (e) => {
     const newPass = e.target.value;
@@ -66,6 +67,7 @@ export default function Register() {
   const handleCaptchaResponse = (value) => {
     if (value) {
       setIsVerified(true);
+      setRecaptchaResponse(value);
     }
   };
 
@@ -94,7 +96,7 @@ export default function Register() {
         username,
         email,
         password,
-        isVerified
+        recaptcha: recaptchaResponse
       }, {
         headers: {
           'Content-Type': 'application/json'
