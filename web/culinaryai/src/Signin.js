@@ -78,6 +78,7 @@ export default function Signin() {
         // navigate("/profile");
       });
     } else {
+      console.log(response);
       swal("Failed", response.message, "error");
     }
   }
