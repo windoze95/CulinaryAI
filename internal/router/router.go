@@ -3,6 +3,9 @@ package router
 import (
 	"time"
 
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"github.com/windoze95/culinaryai/internal/config"
 	"github.com/windoze95/culinaryai/internal/db"
 	"github.com/windoze95/culinaryai/internal/handlers"
@@ -10,10 +13,6 @@ import (
 	"github.com/windoze95/culinaryai/internal/repository"
 	"github.com/windoze95/culinaryai/internal/service"
 	"golang.org/x/time/rate"
-
-	"github.com/jinzhu/gorm"
-
-	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
@@ -22,6 +21,13 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 
 	// Create default Gin router
 	r := gin.Default()
+
+	config := cors.DefaultConfig()
+	config.AllowCredentials = true
+	config.AllowOrigins = []string{"https://culinaryai.com", "https://www.culinaryai.com"}
+	// Add other CORS config options if needed
+
+	r.Use(cors.New(config))
 
 	// Define constants and variables related to rate limiting
 	var publicOpenAIKeyRps int = 1               // 1 request per second
