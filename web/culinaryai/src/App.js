@@ -30,7 +30,7 @@ function App() {
       .finally(() => {
         setLoading(false);  // Set global loading state to false
       });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <AuthContext.Provider value={{ isAuthenticated }}>
@@ -39,7 +39,7 @@ function App() {
         <Header />
         <div className="wrapper">
           {isLoading ? (
-            <div className={`loading-div ${isLoading ? 'active' : ''}`}>
+            <div className="loading-div">
               Loading... <img src={LogoSvg} className="breathe-logo" alt="Logo" />
             </div>
           ) : (

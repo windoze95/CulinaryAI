@@ -2,13 +2,13 @@
   text-align: center;
 }
 
-.wrapper .loading-div {
-  opacity: 0;
-  transition: opacity 0.8s ease-in-out;
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
-.wrapper .loading-div.active {
-  opacity: 1;
+.loading-div {
+  animation: fadeIn 0.8s ease-in-out forwards;
 }
 
 @keyframes breathe {
@@ -19,8 +19,12 @@
   100% { transform: scale(1); }
 }
 
-.breathe-logo {
+/* .breathe-logo {
   animation: breathe 4s infinite ease-in-out;
+} */
+
+.breathe-logo {
+  animation: breathe 4s infinite ease-in-out, fadeIn 0.8s ease-in-out forwards;
 }
 
 /* .App-logo {
