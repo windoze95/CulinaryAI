@@ -62,7 +62,7 @@ func (db *UserDB) UsernameExists(username string) (bool, error) {
 
 func (db *UserDB) GetPreloadedUserByID(userID uint) (*models.User, error) {
 	var user models.User
-	if err := db.DB.Preload("Settings").Preload("GuidingContent").Where("id = ?", userID).First(user).Error; err != nil {
+	if err := db.DB.Preload("Settings").Preload("GuidingContent").Where("id = ?", userID).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
