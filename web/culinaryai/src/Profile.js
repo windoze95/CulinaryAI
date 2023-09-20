@@ -43,12 +43,12 @@ export default function Profile() {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-    navigate('/');
-    // window.location.href = "/";
-  };
+  // const handleLogout = () => {
+  //   localStorage.removeItem("accessToken");
+  //   localStorage.removeItem("user");
+  //   navigate('/');
+  //   // window.location.href = "/";
+  // };
 
   return (
     <div className={classes.root}>
@@ -61,13 +61,13 @@ export default function Profile() {
             <IconButton onClick={handleMenu} color="inherit">
               <Avatar src={user.avatar} />
             </IconButton>
-            <Menu id="menu-appbar" 
+            {/* <Menu id="menu-appbar" 
               anchorEl={anchorEl} 
               open={open}
               onClose={handleClose}
             >
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
-            </Menu>
+            </Menu> */}
           </div>
         </Toolbar>
       </AppBar>

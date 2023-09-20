@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 import Signin from './Signin';
 import Register from './Register'; // Make sure to import your Register component
 import Profile from './Profile';
@@ -11,7 +11,7 @@ function App() {
 
   // if (!token) {
     return (
-      <BrowserRouter>
+      <HashRouter>
         <Header token={token} />
         <div className="wrapper">
           { !token ? (
@@ -27,7 +27,7 @@ function App() {
             </Routes>
           )}
         </div>
-      </BrowserRouter>
+      </HashRouter>
   );
 }
 

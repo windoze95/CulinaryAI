@@ -1,11 +1,11 @@
 import React from 'react';
-import { useNavigate, NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { Navbar, Divider } from 'react-materialize';
 import './Header.css';
 import LogoSvg from './logo.svg';
 
 const Header = ({ token }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
