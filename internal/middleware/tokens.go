@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -12,6 +13,7 @@ func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		cookie, err := c.Cookie("auth_token") // Fetch auth_token cookie
 		if err != nil {
+			log.Println(err)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "No token provided"})
 			c.Abort()
 			return
@@ -22,8 +24,8 @@ func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return []byte(cfg.Env.JwtSecretKey.Value()), nil
 		})
-
 		if err != nil {
+			log.Println(err)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid or expired token"})
 			c.Abort()
 			return
@@ -33,6 +35,7 @@ func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 			c.Set("user_id", claims["user_id"])
 			c.Next()
 		} else {
+			log.Println(err)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
 			c.Abort()
 			return
