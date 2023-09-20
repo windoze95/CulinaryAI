@@ -25,7 +25,6 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 	config := cors.DefaultConfig()
 	config.AllowCredentials = true
 	config.AllowOrigins = []string{"https://culinaryai.com", "https://www.culinaryai.com"}
-	// Add other CORS config options if needed
 
 	r.Use(cors.New(config))
 
@@ -83,7 +82,7 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 		// User-related routes
 
 		// Verify a user's token
-		apiProtected.GET("/v1/users/verify", userHandler.VerifyToken)
+		apiProtected.GET("/v1/users/verify", middleware.AttachUserToContext(userService), userHandler.VerifyToken)
 		// Logout a user
 		apiProtected.POST("/v1/users/logout", userHandler.LogoutUser)
 		// Get a user's settings
