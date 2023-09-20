@@ -103,13 +103,23 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:     "auth_token",
-		Value:    tokenString,
-		HttpOnly: true,
-		Secure:   true,
-		Path:     "/",
-	})
+	c.SetCookie(
+		"auth_token",      // Cookie name
+		tokenString,       // Cookie value
+		60,                // Max age in seconds
+		"/",               // Path
+		".culinaryai.com", // Domain, set with leading dot for subdomain compatibility
+		true,              // Secure
+		true,              // HTTP only
+	)
+
+	// http.SetCookie(c.Writer, &http.Cookie{
+	// 	Name:     "auth_token",
+	// 	Value:    tokenString,
+	// 	HttpOnly: true,
+	// 	Secure:   true,
+	// 	Path:     "/",
+	// })
 
 	c.JSON(http.StatusOK, gin.H{"message": "User logged in successfully", "user": user})
 	// c.JSON(200, gin.H{"accessToken": tokenString, "message": "User logged in successfully", "user": user})
@@ -130,11 +140,11 @@ func (h *UserHandler) LogoutUser(c *gin.Context) {
 	c.SetCookie(
 		"auth_token",      // Cookie name
 		"",                // Empty value to clear the cookie
-		-1,                // MaxAge < 0 to expire the cookie immediately
+		-1,                // Max age < 0 to expire the cookie immediately
 		"/",               // Path
-		"your-domain.com", // Domain
-		false,             // Secure
-		true,              // HttpOnly
+		".culinaryai.com", // Domain, set with leading dot for subdomain compatibility
+		true,              // Secure
+		true,              // HTTP only
 	)
 
 	c.JSON(http.StatusOK, gin.H{"message": "User logged out successfully"})
