@@ -42,7 +42,7 @@ function App() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!isInitializationComplete) {
-    return <div className="loading-div">Loading... <img src={LogoSvg} className="breathe-logo" alt="Logo" /></div>
+    return <div className="loading-div"><img src={LogoSvg} className="breathe-logo" alt="Logo" /></div>
   }
 
   return (
