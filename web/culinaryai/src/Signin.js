@@ -45,9 +45,11 @@ const useStyles = makeStyles((theme) => ({
           'Content-Type': 'application/json'
         }
       });
-      return response.data;
+      return { data: response.data, status: response.status };
+      // return response.data;
     } catch (error) {
-      return { message: 'Login failed' };
+      return { message: 'Login failed', status: error.response ? error.response.status : 500 };
+      // return { message: 'Login failed' };
     }
   }
 
@@ -65,22 +67,19 @@ export default function Signin() {
       password
     });
     // if ('accessToken' in response) {
-    if (response.status === 200 && 'user' in response && 'Username' in response.user && response.user.Username === username) {
-      swal("Success", response.message, "success", {
+    if (response.status === 200 && 'user' in response.data && 'Username' in response.data.user && response.data.user.Username === username) {
+      swal("Success", response.data.message, "success", {
         buttons: false,
         timer: 2000,
       })
       .then((value) => {
         // localStorage.setItem('accessToken', response['accessToken']);
-        localStorage.setItem('user', JSON.stringify(response['user']));
+        localStorage.setItem('user', JSON.stringify(response.data['user']));
         // Reload the app
         window.location.href = "/";
         // navigate("/profile");
       });
     } else {
-      console.log(response);
-      console.log(response.status);
-      console.log(response.status === 200);
       swal("Failed", response.message, "error");
     }
   }
