@@ -65,7 +65,7 @@ export default function Signin() {
       password
     });
     // if ('accessToken' in response) {
-    if (response.status === 200 && 'user' in response && response.user.username === username) {
+    if (response.status === 200 && 'user' in response && 'Username' in response.user && response.user.Username === username) {
       swal("Success", response.message, "success", {
         buttons: false,
         timer: 2000,
@@ -78,9 +78,6 @@ export default function Signin() {
         // navigate("/profile");
       });
     } else {
-      console.log(response.user);
-      console.log('username' in response.user);
-      console.log(username);
       swal("Failed", response.message, "error");
     }
   }
