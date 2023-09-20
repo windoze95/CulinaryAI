@@ -80,8 +80,8 @@ func (s *UserService) LoginUser(username, password string) (*models.User, error)
 	return user, nil
 }
 
-func (s *UserService) GetPreloadedUserByID(sessionID uint) (*models.User, error) {
-	return s.Repo.GetPreloadedUserByID(sessionID)
+func (s *UserService) GetPreloadedUserByID(userID uint) (*models.User, error) {
+	return s.Repo.GetPreloadedUserByID(userID)
 }
 
 func (s *UserService) VerifyOpenAIKeyInUserSettings(user *models.User) (bool, error) {
