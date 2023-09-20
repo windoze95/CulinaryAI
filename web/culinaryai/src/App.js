@@ -26,6 +26,7 @@ axios.interceptors.response.use(
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
 
   useEffect(() => {
     // Verify the JWT token in the HTTP-only cookie
@@ -37,6 +38,9 @@ function App() {
       })
       .catch(error => {
         setIsAuthenticated(false);
+      })
+      .finally(() => {
+        setIsVerifying(false); // Set to false once verification is done
       });
   }, []); // Empty dependency array means this useEffect runs once when the component mounts
 
