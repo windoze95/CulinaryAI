@@ -78,7 +78,8 @@ export default function Signin() {
         // navigate("/profile");
       });
     } else {
-      console.log(response.user.username);
+      console.log(response.user);
+      console.log('username' in response.user);
       console.log(username);
       swal("Failed", response.message, "error");
     }
