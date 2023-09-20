@@ -64,14 +64,16 @@ export default function Signin() {
       username,
       password
     });
-    if ('accessToken' in response) {
+    // if ('accessToken' in response) {
+    if (response.status === 200 && 'user' in response && response.user.username === username) {
       swal("Success", response.message, "success", {
         buttons: false,
         timer: 2000,
       })
       .then((value) => {
-        localStorage.setItem('accessToken', response['accessToken']);
+        // localStorage.setItem('accessToken', response['accessToken']);
         localStorage.setItem('user', JSON.stringify(response['user']));
+        // Reload the app
         window.location.href = "/";
         // navigate("/profile");
       });

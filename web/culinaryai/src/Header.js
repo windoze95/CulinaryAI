@@ -3,18 +3,30 @@ import { NavLink } from 'react-router-dom';
 import { Navbar, Divider } from 'react-materialize';
 import './Header.css';
 import LogoSvg from './logo.svg';
+import { useAuth } from './App';
+import axios from 'axios';
 
-const Header = ({ token }) => {
+const Header = () => {
+  const { isAuthenticated } = useAuth();
   // const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-    // navigate('/signin');
-    window.location.href = "/";
+    axios.post('/api/v1/users/logout')
+    .then(response => {
+      if (response.status === 200) {
+        // Perform client-side cleanup
+        localStorage.removeItem("user");
+        // Reload the app
+        window.location.href = "/";
+      }
+    })
+    .catch(error => {
+      // Handle any errors here, like showing a message to the user
+      console.error("Logout failed:", error);
+    });
   };
 
-  const menuItems = !token ? [
+  const menuItems = !isAuthenticated ? [
     <NavLink to="/register" key="register" className="sidenav-close">
         <i className="material-icons left">person</i>Register
     </NavLink>,

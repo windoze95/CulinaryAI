@@ -103,7 +103,41 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, gin.H{"accessToken": tokenString, "message": "User logged in successfully", "user": user})
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "auth_token",
+		Value:    tokenString,
+		HttpOnly: true,
+		Secure:   true,
+		Path:     "/",
+	})
+
+	c.JSON(200, gin.H{"message": "User logged in successfully", "user": user})
+	// c.JSON(200, gin.H{"accessToken": tokenString, "message": "User logged in successfully", "user": user})
+}
+
+func (h *UserHandler) VerifyToken(c *gin.Context) {
+	// Retrieve the user from the context
+	user, _ := util.GetUserFromContext(c)
+	if user == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"isAuthenticated": false})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"isAuthenticated": true})
+}
+
+func (h *UserHandler) LogoutUser(c *gin.Context) {
+	// Clear the cookie
+	c.SetCookie(
+		"auth_token",      // Cookie name
+		"",                // Empty value to clear the cookie
+		-1,                // MaxAge < 0 to expire the cookie immediately
+		"/",               // Path
+		"your-domain.com", // Domain
+		false,             // Secure
+		true,              // HttpOnly
+	)
+
+	c.JSON(http.StatusOK, gin.H{"message": "User logged out successfully"})
 }
 
 func (h *UserHandler) GetUserSettings(c *gin.Context) {
