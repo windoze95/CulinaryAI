@@ -106,7 +106,7 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 	c.SetCookie(
 		"auth_token",      // Cookie name
 		tokenString,       // Cookie value
-		2592000,           // Max age in seconds (30 days)
+		31536000,          // Max age in seconds (365 days)
 		"/",               // Path
 		".culinaryai.com", // Domain, set with leading dot for subdomain compatibility
 		true,              // Secure
