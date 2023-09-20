@@ -54,37 +54,49 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 	userService := service.NewUserService(cfg, userRepo)
 	userHandler := handlers.NewUserHandler(userService)
 
-	// Create a new user
-	r.POST("/api/v1/users", userHandler.CreateUser)
-
-	// Login a user
-	r.POST("/api/v1/users/login", userHandler.LoginUser)
-
-	r.Use(middleware.VerifyTokenMiddleware(cfg))
-
-	// Verify a user's token
-	r.GET("/api/v1/users/verify", userHandler.VerifyToken)
-
-	// Logout a user
-	r.POST("/api/v1/users/logout", userHandler.LogoutUser)
-
-	// Get a user's settings
-	r.GET("/api/v1/users/settings", middleware.AttachUserToContext(userService), userHandler.GetUserSettings)
-
-	// Update a user's settings
-	r.PUT("/api/v1/users/settings", middleware.AttachUserToContext(userService), userHandler.UpdateUserSettings)
-
 	// Recipe-related routes setup
 	recipeDB := db.NewRecipeDB(database)
 	recipeRepo := repository.NewRecipeRepository(recipeDB)
 	recipeService := service.NewRecipeService(cfg, recipeRepo)
 	recipeHandler := handlers.NewRecipeHandler(recipeService)
 
-	// Get a single recipe by it's ID
-	r.GET("/api/v1/recipes/:recipe_id", recipeHandler.GetRecipe)
+	// Group for API routes that don't require token verification
+	apiPublic := r.Group("/api")
+	{
+		// Create a new user
+		apiPublic.POST("/v1/users", userHandler.CreateUser)
+		// Login a user
+		apiPublic.POST("/v1/users/login", userHandler.LoginUser)
+	}
 
-	// Create a new recipe
-	r.POST("/api/v1/recipes", middleware.RateLimitPublicOpenAIKey(publicOpenAIKeyRateLimiter), middleware.AttachUserToContext(userService), recipeHandler.CreateRecipe)
+	// Group for API routes that require token verification
+	apiProtected := r.Group("/api")
+	{
+		r.Use(middleware.VerifyTokenMiddleware(cfg))
+
+		// User-related routes
+
+		// Verify a user's token
+		apiProtected.GET("/v1/users/verify", userHandler.VerifyToken)
+		// Logout a user
+		apiProtected.POST("/v1/users/logout", userHandler.LogoutUser)
+		// Get a user's settings
+		apiProtected.GET("/v1/users/settings", middleware.AttachUserToContext(userService), userHandler.GetUserSettings)
+		// Update a user's settings
+		apiProtected.PUT("/v1/users/settings", middleware.AttachUserToContext(userService), userHandler.UpdateUserSettings)
+
+		// Recipe-related routes
+
+		// Get a single recipe by it's ID
+		apiProtected.GET("/v1/recipes/:recipe_id", recipeHandler.GetRecipe)
+		// Create a new recipe
+		apiProtected.POST("/v1/recipes", middleware.RateLimitPublicOpenAIKey(publicOpenAIKeyRateLimiter), middleware.AttachUserToContext(userService), recipeHandler.CreateRecipe)
+	}
+
+	// Catch-all route for serving back the React app
+	r.NoRoute(func(c *gin.Context) {
+		c.File("./web/culinaryai/build/index.html")
+	})
 
 	return r
 }
