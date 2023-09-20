@@ -77,7 +77,7 @@ export default function Signin() {
         localStorage.setItem('user', JSON.stringify(response.data['user']));
         // Reload the app
         window.location.href = "/";
-        // navigate("/profile");
+        // navigate("/home");
       });
     } else {
       swal("Failed", response.message, "error");

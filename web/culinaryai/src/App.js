@@ -4,7 +4,7 @@ import LogoSvg from './logo.svg';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Signin from './Signin';
 import Register from './Register';
-import Profile from './Profile';
+import Home from './Home';
 import Header from './Header';
 import axios from 'axios';
 import InterceptorComponent from './InterceptorComponent';
@@ -33,6 +33,12 @@ function App() {
         setLoading(false);  // Set global loading state to false
         setInitializationComplete(true); // Mark initialization as complete
       });
+
+    // Remove the loading div
+    const loadingDiv = document.getElementById('loading-div-init');
+    if (loadingDiv) {
+      loadingDiv.remove();
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!isInitializationComplete) {
@@ -59,8 +65,8 @@ function App() {
               </>
             ) : (
               <>
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/*" element={<Profile />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/*" element={<Home />} />
               </>
             )}
           </Routes>
@@ -83,7 +89,7 @@ export default App;
 // import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 // import Signin from './Signin';
 // import Register from './Register';
-// import Profile from './Profile';
+// import Home from './Home';
 // import Header from './Header';
 // import axios from 'axios';
 // import InterceptorComponent from './InterceptorComponent';
@@ -170,8 +176,8 @@ export default App;
 //                 </>
 //               ) : (
 //                 <>
-//                   <Route path="/profile" element={<Profile />} />
-//                   <Route path="/*" element={<Profile />} />
+//                   <Route path="/home" element={<Home />} />
+//                   <Route path="/*" element={<Home />} />
 //                 </>
 //               )}
 //             </Routes>
@@ -207,8 +213,8 @@ export default App;
 //               </>
 //             ) : (
 //               <>
-//                 <Route path="/profile" element={<Profile />} />
-//                 <Route path="/*" element={<Profile />} />
+//                 <Route path="/home" element={<Home />} />
+//                 <Route path="/*" element={<Home />} />
 //               </>
 //             )}
 //           </Routes>
@@ -229,7 +235,7 @@ export default App;
 // import { HashRouter, Route, Routes } from 'react-router-dom';
 // import Signin from './Signin';
 // import Register from './Register'; // Make sure to import your Register component
-// import Profile from './Profile';
+// import Home from './Home';
 // import Header from './Header';
 
 // function App() {
@@ -248,8 +254,8 @@ export default App;
 //             </Routes>
 //           ) : (
 //             <Routes>
-//               <Route path="/profile" element={<Profile />} />
-//               <Route path="/*" element={<Profile />} />
+//               <Route path="/home" element={<Home />} />
+//               <Route path="/*" element={<Home />} />
 //             </Routes>
 //           )}
 //         </div>
@@ -264,7 +270,7 @@ export default App;
 // import './App.css';
 // import { BrowserRouter, Route, Routes } from 'react-router-dom';
 // import Signin from './Signin';
-// import Profile from './Profile';
+// import Home from './Home';
 
 // function App() {
 //   const token = localStorage.getItem('accessToken');
@@ -277,11 +283,11 @@ export default App;
 //     <div className="wrapper">
 //       <BrowserRouter>
 //         <Routes>
-//           <Route path="/profile">
-//             <Profile />
+//           <Route path="/home">
+//             <Home />
 //           </Route>
 //           <Route path="/">
-//             <Profile />
+//             <Home />
 //           </Route>
 //         </Routes>
 //       </BrowserRouter>
