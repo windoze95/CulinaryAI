@@ -99,7 +99,7 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 	tokenString, err := token.SignedString([]byte(h.Service.Cfg.Env.JwtSecretKey.Value()))
 	if err != nil {
 		log.Printf("error: LoginUser: %v", err)
-		c.JSON(500, gin.H{"message": "Could not log in"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Could not log in"})
 		return
 	}
 
