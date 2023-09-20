@@ -11,6 +11,10 @@ import (
 
 func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		log.Println("VerifyTokenMiddleware", c.Request.Cookies())
+		log.Println("VerifyTokenMiddleware", c.Request.Header.Get("Cookie"))
+		log.Println("VerifyTokenMiddleware", c.Request.Header.Get("Authorization"))
+		log.Println("VerifyTokenMiddleware", c.Request.Header.Get("auth_token"))
 		cookie, err := c.Cookie("auth_token") // Fetch auth_token cookie
 		if err != nil {
 			log.Println("VerifyTokenMiddleware error", err)
