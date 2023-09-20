@@ -111,7 +111,7 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 		Path:     "/",
 	})
 
-	c.JSON(200, gin.H{"message": "User logged in successfully", "user": user})
+	c.JSON(http.StatusOK, gin.H{"message": "User logged in successfully", "user": user})
 	// c.JSON(200, gin.H{"accessToken": tokenString, "message": "User logged in successfully", "user": user})
 }
 
