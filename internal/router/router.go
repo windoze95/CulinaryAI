@@ -77,7 +77,7 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 	// Group for API routes that require token verification
 	apiProtected := r.Group("/api")
 	{
-		r.Use(middleware.VerifyTokenMiddleware(cfg))
+		apiProtected.Use(middleware.VerifyTokenMiddleware(cfg))
 
 		// User-related routes
 
