@@ -14,7 +14,7 @@ function App() {
 
   useEffect(() => {
     // Verify the JWT token in the HTTP-only cookie
-    axios.get('/api/v1/users/verify')
+    axios.get('/api/v1/users/verify', { withCredentials: true })
       .then(response => {
         if (response.data.isAuthenticated) {
           setIsAuthenticated(true);
