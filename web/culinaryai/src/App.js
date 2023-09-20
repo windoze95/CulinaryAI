@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import './App.css';
+import LogoSvg from './logo.svg';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import Signin from './Signin';
 import Register from './Register';
@@ -78,20 +79,24 @@ function App() {
         {/* <InterceptorComponent setIsAuthenticated={setIsAuthenticated} /> */}
         <Header />
         <div className="wrapper">
-          <Routes>
-            {!isAuthenticated ? (
-              <>
-                <Route path="/signin" element={<Signin />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/*" element={<Signin />} />
-              </>
-            ) : (
-              <>
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/*" element={<Profile />} />
-              </>
-            )}
-          </Routes>
+          {isVerifying ? (
+            <div>Loading... <img src={LogoSvg} className="breathe-logo" alt="Logo" /></div>
+          ) : (
+            <Routes>
+              {!isAuthenticated ? (
+                <>
+                  <Route path="/signin" element={<Signin />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/*" element={<Signin />} />
+                </>
+              ) : (
+                <>
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/*" element={<Profile />} />
+                </>
+              )}
+            </Routes>
+          )}
         </div>
       </BrowserRouter>
     </AuthContext.Provider>
