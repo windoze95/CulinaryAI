@@ -9,6 +9,21 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
+axios.interceptors.response.use(
+  response => {
+    return response;
+  },
+  error => {
+    if (error.response && error.response.data.forceLogout) {
+      // Perform client-side cleanup
+      localStorage.removeItem("user");
+      // Redirect to the sign-in route
+      window.location.href = "/signin";
+    }
+    return Promise.reject(error);
+  }
+);
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 

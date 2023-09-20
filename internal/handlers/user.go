@@ -137,15 +137,7 @@ func (h *UserHandler) VerifyToken(c *gin.Context) {
 
 func (h *UserHandler) LogoutUser(c *gin.Context) {
 	// Clear the cookie
-	c.SetCookie(
-		"auth_token",      // Cookie name
-		"",                // Empty value to clear the cookie
-		-1,                // Max age < 0 to expire the cookie immediately
-		"/",               // Path
-		".culinaryai.com", // Domain, set with leading dot for subdomain compatibility
-		true,              // Secure
-		true,              // HTTP only
-	)
+	util.ClearAuthTokenCookie(c)
 
 	c.JSON(http.StatusOK, gin.H{"message": "User logged out successfully"})
 }

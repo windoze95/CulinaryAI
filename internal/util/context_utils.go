@@ -20,3 +20,17 @@ func GetUserFromContext(c *gin.Context) (*models.User, error) {
 
 	return user, nil
 }
+
+// ClearAuthTokenCookie clears the authentication token cookie from the client's browser.
+func ClearAuthTokenCookie(c *gin.Context) {
+	// Clear the auth_token cookie
+	c.SetCookie(
+		"auth_token",      // Cookie name
+		"",                // Empty value to clear the cookie
+		-1,                // Max age < 0 to expire the cookie immediately
+		"/",               // Path
+		".culinaryai.com", // Domain, set with leading dot for subdomain compatibility
+		true,              // Secure
+		true,              // HTTP only
+	)
+}
