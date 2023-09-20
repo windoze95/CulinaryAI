@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -11,19 +10,12 @@ import (
 
 func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log.Println("VerifyTokenMiddleware", c.Request.Cookies())
-		log.Println("VerifyTokenMiddleware", c.Request.Header.Get("Cookie"))
-		log.Println("VerifyTokenMiddleware", c.Request.Header.Get("Authorization"))
-		log.Println("VerifyTokenMiddleware", c.Request.Header.Get("auth_token"))
 		cookie, err := c.Cookie("auth_token") // Fetch auth_token cookie
 		if err != nil {
-			log.Println("VerifyTokenMiddleware error", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "No token provided"})
 			c.Abort()
 			return
 		}
-
-		log.Println("cookie", cookie)
 
 		tokenString := cookie // Token is fetched from the cookie
 
@@ -31,21 +23,15 @@ func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 			return []byte(cfg.Env.JwtSecretKey.Value()), nil
 		})
 		if err != nil {
-			log.Println("VerifyTokenMiddleware error", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid or expired token"})
 			c.Abort()
 			return
 		}
 
-		log.Println("token", token)
-
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			log.Println("claims", claims)
-			log.Println("claims[user_id]", claims["user_id"])
 			c.Set("user_id", claims["user_id"])
 			c.Next()
 		} else {
-			log.Println("VerifyTokenMiddleware error", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
 			c.Abort()
 			return
