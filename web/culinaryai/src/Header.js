@@ -17,7 +17,7 @@ const Header = () => {
         // Perform client-side cleanup
         localStorage.removeItem("user");
         // Reload the app
-        window.location.href = "/";
+        window.location.href = "/login";
       }
     })
     .catch(error => {
