@@ -83,6 +83,8 @@ export default function Signin() {
       console.log(response.user.Username);
       console.log('user' in response);
       console.log('Username' in response.user);
+      console.log(response.status);
+      console.log(response.status === 200);
       swal("Failed", response.message, "error");
     }
   }
