@@ -74,6 +74,9 @@ func (s *UserService) LoginUser(username, password string) (*models.User, error)
 		return nil, errors.New("invalid username or password")
 	}
 
+	// Clear the hashed password before returning the user
+	user.HashedPassword = ""
+
 	return user, nil
 }
 
