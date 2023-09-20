@@ -14,10 +14,12 @@ const AuthContext = createContext();
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isInitializationComplete, setInitializationComplete] = useState(false);
   const { isLoading, setLoading } = useLoading(); // Use global loading state
 
   useEffect(() => {
     setLoading(true);  // Set global loading state to true
+
     axios.get('/api/v1/users/verify', { withCredentials: true })
       .then(response => {
         if (response.data.isAuthenticated) {
@@ -29,8 +31,13 @@ function App() {
       })
       .finally(() => {
         setLoading(false);  // Set global loading state to false
+        setInitializationComplete(true); // Mark initialization as complete
       });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!isInitializationComplete) {
+    return <div className="loading-div">Loading... <img src={LogoSvg} className="breathe-logo" alt="Logo" /></div>
+  }
 
   return (
     <AuthContext.Provider value={{ isAuthenticated }}>
@@ -38,26 +45,26 @@ function App() {
         <InterceptorComponent setIsAuthenticated={setIsAuthenticated} isAuthenticated={isAuthenticated} />
         <Header />
         <div className="wrapper">
-          {isLoading ? (
+          {/* {isLoading ? (
             <div className="loading-div">
               Loading... <img src={LogoSvg} className="breathe-logo" alt="Logo" />
             </div>
-          ) : (
-            <Routes>
-              {!isAuthenticated ? (
-                <>
-                  <Route path="/signin" element={<Signin />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/*" element={<Signin />} />
-                </>
-              ) : (
-                <>
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/*" element={<Profile />} />
-                </>
-              )}
-            </Routes>
-          )}
+          ) : ( */}
+          <Routes>
+            {!isAuthenticated ? (
+              <>
+                <Route path="/signin" element={<Signin />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/*" element={<Signin />} />
+              </>
+            ) : (
+              <>
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/*" element={<Profile />} />
+              </>
+            )}
+          </Routes>
+          {/* )} */}
         </div>
       </BrowserRouter>
     </AuthContext.Provider>
