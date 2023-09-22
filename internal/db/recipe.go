@@ -51,7 +51,7 @@ func (db *RecipeDB) UpdateFullRecipeJSON(recipe *models.Recipe) error {
 
 func (db *RecipeDB) FindTagByName(tagName string) (*models.Tag, error) {
 	var tag models.Tag
-	err := db.DB.Where("name = ?", tagName).First(&tag).Error
+	err := db.DB.Where("Hashtag = ?", tagName).First(&tag).Error
 	if err != nil {
 		return nil, err
 	}
