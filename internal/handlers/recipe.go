@@ -39,6 +39,7 @@ func (h *RecipeHandler) CreateRecipe(c *gin.Context) {
 	user, err := util.GetUserFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.Abort()
 		return
 	}
 
