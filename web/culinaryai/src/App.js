@@ -6,6 +6,8 @@ import Signin from './Signin';
 import Register from './Register';
 import Home from './Home';
 import Header from './Header';
+import GenerateRecipe from './GenerateRecipe';
+import Recipe from './Recipe';
 import axios from 'axios';
 import InterceptorComponent from './InterceptorComponent';
 import { useLoading } from './LoadingContext';
@@ -14,16 +16,18 @@ const AuthContext = createContext();
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   const [isInitializationComplete, setInitializationComplete] = useState(false);
   const { isLoading, setLoading } = useLoading(); // Use global loading state
 
   useEffect(() => {
-    setLoading(true);  // Set global loading state to true
+    setLoading(true); // Set global loading state to true
 
     axios.get('/api/v1/users/verify', { withCredentials: true })
       .then(response => {
         if (response.data.isAuthenticated) {
           setIsAuthenticated(true);
+          setUser(response.data.user);
         }
       })
       .catch(error => {
@@ -46,7 +50,7 @@ function App() {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated }}>
+    <AuthContext.Provider value={{ isAuthenticated, user }}>
       <BrowserRouter>
         <InterceptorComponent setIsAuthenticated={setIsAuthenticated} isAuthenticated={isAuthenticated} />
         <Header />
@@ -57,6 +61,7 @@ function App() {
             </div>
           ) : ( */}
           <Routes>
+            <Route path="/recipe/:id" element={<Recipe />} />
             {!isAuthenticated ? (
               <>
                 <Route path="/signin" element={<Signin />} />
@@ -66,6 +71,7 @@ function App() {
             ) : (
               <>
                 <Route path="/home" element={<Home />} />
+                <Route path="/generate" element={<GenerateRecipe />} />
                 <Route path="/*" element={<Home />} />
               </>
             )}
