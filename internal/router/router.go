@@ -95,7 +95,7 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 		// Get a single recipe by it's ID
 		apiProtected.GET("/v1/recipes/:recipe_id", recipeHandler.GetRecipe)
 		// Create a new recipe
-		apiProtected.POST("/v1/recipes", middleware.RateLimitPublicOpenAIKey(publicOpenAIKeyRateLimiter), middleware.AttachUserToContext(userService), recipeHandler.CreateRecipe)
+		apiProtected.POST("/v1/recipes", middleware.AttachUserToContext(userService), middleware.RateLimitPublicOpenAIKey(publicOpenAIKeyRateLimiter), recipeHandler.CreateRecipe)
 	}
 
 	// Catch-all route for serving back the React app
