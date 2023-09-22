@@ -132,7 +132,7 @@ func (h *UserHandler) VerifyToken(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"isAuthenticated": false})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"isAuthenticated": true})
+	c.JSON(http.StatusOK, gin.H{"isAuthenticated": true, "user": user})
 }
 
 func (h *UserHandler) LogoutUser(c *gin.Context) {
