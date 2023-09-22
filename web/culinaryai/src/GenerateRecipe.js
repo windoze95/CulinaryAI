@@ -11,7 +11,10 @@ const GenerateRecipe = () => {
   const generateRecipe = async () => {
     setLoading(true);  // Set global loading state to true
     try {
-      const response = await axios.post('/api/v1/recipes', { userPrompt: prompt });
+      const response = await axios.post('/api/v1/recipes',
+        { userPrompt: prompt },
+        { withCredentials: true }
+      );
       if (response.data && response.data.recipe.ID) {
         navigate(`/recipe/${response.data.recipe.ID}`);
       }
