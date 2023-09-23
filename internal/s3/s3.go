@@ -36,3 +36,29 @@ func UploadRecipeImageToS3(cfg *config.Config, imgBytes []byte, s3Key string) (s
 func GenerateS3Key(recipeID uint) string {
 	return fmt.Sprintf("recipes/%d/images/recipe_image_%d.jpg", recipeID, recipeID)
 }
+
+// func GeneratePresignedURL(cfg *config.Config, s3Key string) (string, error) {
+// 	sess, err := session.NewSession(&aws.Config{
+// 		Region:      aws.String(cfg.Env.AWSRegion.Value()),
+// 		Credentials: credentials.NewStaticCredentials(cfg.Env.AWSAccessKeyID.Value(), cfg.Env.AWSSecretAccessKey.Value(), ""),
+// 	})
+// 	if err != nil {
+// 		return "", err
+// 	}
+
+// 	// Create S3 service client
+// 	svc := s3.New(sess)
+
+// 	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
+// 		Bucket: aws.String(cfg.Env.S3Bucket.Value()),
+// 		Key:    aws.String(s3Key),
+// 	})
+
+// 	urlStr, err := req.Presign(15 * time.Minute)
+
+// 	if err != nil {
+// 		return "", err
+// 	}
+
+// 	return urlStr, nil
+// }
