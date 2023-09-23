@@ -72,6 +72,8 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 		apiPublic.POST("/v1/users", userHandler.CreateUser)
 		// Login a user
 		apiPublic.POST("/v1/users/login", userHandler.LoginUser)
+		// Get a single recipe by it's ID
+		apiPublic.GET("/v1/recipes/:recipe_id", recipeHandler.GetRecipe)
 	}
 
 	// Group for API routes that require token verification
@@ -92,8 +94,8 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 
 		// Recipe-related routes
 
-		// Get a single recipe by it's ID
-		apiProtected.GET("/v1/recipes/:recipe_id", recipeHandler.GetRecipe)
+		// // Get a single recipe by it's ID
+		// apiProtected.GET("/v1/recipes/:recipe_id", recipeHandler.GetRecipe)
 		// Create a new recipe
 		apiProtected.POST("/v1/recipes", middleware.AttachUserToContext(userService), middleware.RateLimitPublicOpenAIKey(publicOpenAIKeyRateLimiter), recipeHandler.CreateRecipe)
 	}
