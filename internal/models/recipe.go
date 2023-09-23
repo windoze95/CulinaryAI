@@ -37,12 +37,14 @@ type Ingredient struct {
 }
 
 type MainRecipe struct {
+	RecipeName   string       `json:"recipe_name"`
 	Ingredients  []Ingredient `json:"ingredients"`
 	Instructions []string     `json:"instructions"`
 	TimeToCook   int          `json:"time_to_cook"`
 }
 
 type FullRecipe struct {
+	Title       string       `json:"title"`
 	MainRecipe  MainRecipe   `json:"main_recipe"`
 	SubRecipes  []MainRecipe `json:"sub_recipes"`
 	DallEPrompt string       `json:"dall_e_prompt"`
