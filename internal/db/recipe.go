@@ -24,7 +24,7 @@ func (db *RecipeDB) GetRecipeByID(id string) (*models.Recipe, error) {
 			return db.Select("Username")
 		}).
 		Where("id = ?", id).
-		First(recipe).Error
+		First(&recipe).Error
 
 	return &recipe, err
 }
