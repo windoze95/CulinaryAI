@@ -29,7 +29,6 @@ type Env struct {
 	AWSAccessKeyID         EnvVar `json:"awsAccessKeyId"`
 	AWSSecretAccessKey     EnvVar `json:"awsSecretAccessKey"`
 	S3Bucket               EnvVar `json:"s3Bucket"`
-	S3Key                  EnvVar `json:"s3Key"`
 	RecaptchaSecretKey     EnvVar `json:"recaptchaSecretKey"`
 }
 

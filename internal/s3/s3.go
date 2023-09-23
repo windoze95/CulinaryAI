@@ -12,7 +12,7 @@ import (
 )
 
 // UploadRecipeImageToS3 uploads a given byte array to an S3 bucket and returns the location URL.
-func UploadRecipeImageToS3(cfg *config.Config, imgBytes []byte) (string, error) {
+func UploadRecipeImageToS3(cfg *config.Config, imgBytes []byte, s3Key string) (string, error) {
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region:      aws.String(cfg.Env.AWSRegion.Value()),
 		Credentials: credentials.NewStaticCredentials(cfg.Env.AWSAccessKeyID.Value(), cfg.Env.AWSSecretAccessKey.Value(), ""),
@@ -22,7 +22,7 @@ func UploadRecipeImageToS3(cfg *config.Config, imgBytes []byte) (string, error) 
 
 	result, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(cfg.Env.S3Bucket.Value()),
-		Key:    aws.String(cfg.Env.S3Key.Value()),
+		Key:    aws.String(s3Key),
 		Body:   bytes.NewReader(imgBytes),
 	})
 
@@ -31,4 +31,8 @@ func UploadRecipeImageToS3(cfg *config.Config, imgBytes []byte) (string, error) 
 	}
 
 	return result.Location, nil
+}
+
+func GenerateS3Key(recipeID uint) string {
+	return fmt.Sprintf("recipes/%d/images/recipe_image_%d.jpg", recipeID, recipeID)
 }

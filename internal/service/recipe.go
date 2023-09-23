@@ -135,7 +135,9 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 			return
 		}
 
-		imageURL, err := s3.UploadRecipeImageToS3(s.Cfg, imageBytes)
+		s3Key := s3.GenerateS3Key(recipe.ID)
+
+		imageURL, err := s3.UploadRecipeImageToS3(s.Cfg, imageBytes, s3Key)
 		if err != nil {
 			log.Printf("error: failed to upload image to S3: %v", err)
 			// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload image to S3: " + err.Error()})
@@ -228,9 +230,7 @@ func cleanHashtag(hashtag string) string {
 	hashtag = strings.ReplaceAll(hashtag, " ", "")
 
 	// Remove '#' if present
-	if strings.HasPrefix(hashtag, "#") {
-		hashtag = hashtag[1:]
-	}
+	hashtag = strings.TrimPrefix(hashtag, "#")
 
 	return hashtag
 }
