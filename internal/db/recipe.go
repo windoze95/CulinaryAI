@@ -1,6 +1,8 @@
 package db
 
 import (
+	"log"
+
 	_ "github.com/heroku/x/hmetrics/onload"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -17,6 +19,7 @@ func NewRecipeDB(gormDB *gorm.DB) *RecipeDB {
 }
 
 func (db *RecipeDB) GetRecipeByID(id string) (*models.Recipe, error) {
+	log.Printf("About to query database for recipe with ID: %s", id)
 	var recipe models.Recipe
 	err := db.DB.Preload("GuidingContent").
 		Preload("Tags").
@@ -25,7 +28,7 @@ func (db *RecipeDB) GetRecipeByID(id string) (*models.Recipe, error) {
 		}).
 		Where("id = ?", id).
 		First(&recipe).Error
-
+	log.Printf("Query complete. Recipe retrieved: %+v, Error: %v", recipe, err)
 	return &recipe, err
 }
 

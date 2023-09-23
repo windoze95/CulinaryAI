@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,10 +19,12 @@ func NewRecipeHandler(recipeService *service.RecipeService) *RecipeHandler {
 }
 
 func (h *RecipeHandler) GetRecipe(c *gin.Context) {
+	log.Printf("Handling GET request for recipe, ID: %s", c.Param("recipe_id"))
 	recipeID := c.Param("recipe_id")
 
 	recipe, err := h.Service.GetRecipeByID(recipeID)
 	if err != nil {
+		log.Printf("Error getting recipe: %v", err)
 		switch e := err.(type) {
 		case repository.NotFoundError:
 			c.JSON(http.StatusNotFound, gin.H{"error": e.Error()})
@@ -30,6 +33,7 @@ func (h *RecipeHandler) GetRecipe(c *gin.Context) {
 		}
 		return
 	}
+	log.Printf("Sending response: %d, Recipe: %+v", http.StatusOK, recipe)
 
 	c.JSON(http.StatusOK, gin.H{"recipe": recipe})
 }

@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"log"
+
 	"github.com/jinzhu/gorm"
 	"github.com/windoze95/culinaryai/internal/db"
 	"github.com/windoze95/culinaryai/internal/models"
@@ -17,6 +19,7 @@ func NewRecipeRepository(recipeDB *db.RecipeDB) *RecipeRepository {
 func (r *RecipeRepository) GetRecipeByID(recipeID string) (*models.Recipe, error) {
 	recipe, err := r.RecipeDB.GetRecipeByID(recipeID)
 	if err != nil {
+		log.Printf("Repository error: %v", err)
 		if gorm.IsRecordNotFoundError(err) {
 			return nil, NotFoundError{message: "Recipe not found"}
 		}
