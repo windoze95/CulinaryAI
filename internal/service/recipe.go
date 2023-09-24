@@ -94,7 +94,7 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 		}
 
 		// Create the chat completion with the user's prompt
-		recipeContent, err := chatService.CreateRecipeChatCompletion(user.GuidingContent.Requirements, recipe.UserPrompt)
+		recipeContent, err := chatService.CreateRecipeChatCompletion(user.GuidingContent, recipe.UserPrompt)
 		if err != nil {
 			log.Printf("error: failed to create recipe chat completion: %v", err)
 			// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create recipe: " + err.Error()})

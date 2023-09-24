@@ -13,8 +13,8 @@ func NewUserRepository(userDB *db.UserDB) *UserRepository {
 	return &UserRepository{UserDB: userDB}
 }
 
-func (r *UserRepository) CreateUserAndSettings(user *models.User, settings *models.UserSettings) error {
-	return r.UserDB.CreateUserAndSettings(user, settings)
+func (r *UserRepository) CreateUser(user *models.User, settings *models.UserSettings, gc *models.GuidingContent) error {
+	return r.UserDB.CreateUser(user, settings, gc)
 }
 
 func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
@@ -31,6 +31,10 @@ func (r *UserRepository) GetUserByUsername(username string) (*models.User, error
 
 func (r *UserRepository) UpdateUserSettingsOpenAIKey(userID uint, encryptedOpenAIKey string) error {
 	return r.UserDB.UpdateUserSettingsOpenAIKey(userID, encryptedOpenAIKey)
+}
+
+func (r *UserRepository) UpdateGuidingContent(userID uint, updatedGC *models.GuidingContent) error {
+	return r.UserDB.UpdateGuidingContent(userID, updatedGC)
 }
 
 func (r *UserRepository) UsernameExists(username string) (bool, error) {

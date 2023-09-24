@@ -190,3 +190,14 @@ func (h *UserHandler) UpdateUserSettings(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "No changes made"})
 	}
 }
+
+// func (h *UserHandler) UpdatePreferences(c *gin.Context) {
+// 	// Parse request to get 'preferences' data
+
+// 	// Call the service layer function to perform the actual update
+// 	if err := h.Service.UpdateGuidingContent(userID, updatedGC); err != nil {
+// 		// Handle error
+// 	}
+
+// 	// Respond back to client
+// }

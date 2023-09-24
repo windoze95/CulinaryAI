@@ -56,8 +56,10 @@ func (s *UserService) CreateUser(username, email, password string) error {
 		HashedPassword: string(hashedPassword),
 	}
 	settings := &models.UserSettings{}
+	gc := &models.GuidingContent{}
+	gc.UnitSystem = 1 // Default value
 
-	if err := s.Repo.CreateUserAndSettings(user, settings); err != nil {
+	if err := s.Repo.CreateUser(user, settings, gc); err != nil {
 		return fmt.Errorf("error creating user and settings: %v", err)
 	}
 
@@ -115,6 +117,10 @@ func (s *UserService) UpdateUserSettings(user *models.User, newOpenAIKey string)
 		}
 	}
 	return openAIKeyChanged, nil
+}
+
+func (s *UserService) UpdateGuidingContent(user *models.User, updatedGC *models.GuidingContent) error {
+	return s.Repo.UpdateGuidingContent(user.ID, updatedGC)
 }
 
 // VerifyRecaptcha verifies the provided reCAPTCHA response

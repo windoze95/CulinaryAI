@@ -15,7 +15,7 @@ func NewUserDB(gormDB *gorm.DB) *UserDB {
 	return &UserDB{DB: gormDB}
 }
 
-func (db *UserDB) CreateUserAndSettings(user *models.User, settings *models.UserSettings) error {
+func (db *UserDB) CreateUser(user *models.User, settings *models.UserSettings, gc *models.GuidingContent) error {
 	tx := db.DB.Begin()
 
 	if err := tx.Create(user).Error; err != nil {
@@ -25,6 +25,13 @@ func (db *UserDB) CreateUserAndSettings(user *models.User, settings *models.User
 
 	settings.UserID = user.ID
 	if err := tx.Create(settings).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	gc.UserID = user.ID
+	gc.UnitSystem = 1 // Default value
+	if err := tx.Create(gc).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -46,6 +53,27 @@ func (db *UserDB) GetUserByUsername(username string) (*models.User, error) {
 
 func (db *UserDB) UpdateUserSettingsOpenAIKey(userID uint, encryptedOpenAIKey string) error {
 	return db.DB.Model(&models.UserSettings{}).Where("user_id = ?", userID).Update("EncryptedOpenAIKey", encryptedOpenAIKey).Error
+}
+
+// UpdateGuidingContent updates an existing GuidingContent record.
+func (db *UserDB) UpdateGuidingContent(userID uint, updatedGC *models.GuidingContent) error {
+	var existingGC models.GuidingContent
+
+	// First, find the existing record
+	if err := db.DB.Where("user_id = ?", userID).First(&existingGC).Error; err != nil {
+		return err
+	}
+
+	// Update fields
+	existingGC.UnitSystem = updatedGC.UnitSystem
+	existingGC.Requirements = updatedGC.Requirements
+
+	// Perform the update
+	if err := db.DB.Save(&existingGC).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (db *UserDB) UsernameExists(username string) (bool, error) {
