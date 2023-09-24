@@ -11,6 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import swal from 'sweetalert';
 import axios from 'axios';
+import GithubLinkButton from './GithubLinkButton';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -133,6 +134,7 @@ export default function Signin() {
               </Typography>
             </Link>
           </form>
+          <GithubLinkButton />
         </div>
       </Grid>
     </Grid>

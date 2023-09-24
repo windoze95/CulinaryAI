@@ -72,7 +72,7 @@ const Recipe = ({ match }) => {
         }, 5000); // Poll every 5 seconds
 
         return () => clearInterval(interval);
-    }, [isGenerating]);
+    }, [isGenerating]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <div>
