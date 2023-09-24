@@ -1,6 +1,8 @@
 package models
 
 import (
+	"log"
+
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
@@ -29,6 +31,18 @@ type GuidingContent struct {
 	Requirements string // Additional instructions or guidelines
 	// DietaryRestrictions string // Specific dietary restrictions
 	// SupportingResearch string // Supporting research to help convey the user's expectations
+}
+
+func (gc *GuidingContent) GetUnitSystemName() string {
+	switch gc.UnitSystem {
+	case 1:
+		return "US Customary"
+	case 2:
+		return "Metric"
+	default:
+		log.Println("Invalid Unit System used, defaulting to US Customary")
+		return "US Customary"
+	}
 }
 
 func (gc *GuidingContent) BeforeCreate(tx *gorm.DB) (err error) {
