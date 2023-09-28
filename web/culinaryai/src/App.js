@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import './App.css';
 import LogoSvg from './logo.svg';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Landing from './Landing';
 import Signin from './Signin';
 import Register from './Register';
 import Home from './Home';
@@ -64,9 +65,10 @@ function App() {
             <Route path="/recipe/:id" element={<Recipe />} />
             {!isAuthenticated ? (
               <>
+                {/* <Route path="/landing" element={<Landing />} /> */}
                 <Route path="/signin" element={<Signin />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/*" element={<Signin />} />
+                <Route path="/*" element={<Landing />} />
               </>
             ) : (
               <>
