@@ -64,9 +64,9 @@ func (s *UserService) CreateUser(username, email, password string) error {
 	if err := s.Repo.CreateUser(user, settings, gc); err != nil {
 		if pgErr, ok := err.(*pq.Error); ok {
 			if pgErr.Code == "23505" { // Unique constraint violation
-				if strings.Contains(pgErr.Error(), "Username") {
+				if strings.Contains(pgErr.Error(), "users_username_key") {
 					return fmt.Errorf("username already in use")
-				} else if strings.Contains(pgErr.Error(), "Email") {
+				} else if strings.Contains(pgErr.Error(), "users_email_key") {
 					return fmt.Errorf("email already in use")
 				}
 			}
