@@ -4,6 +4,7 @@ import { useAuth } from './App';
 import { useParams } from 'react-router-dom';
 import Footer from './Footer';
 import { makeStyles } from '@material-ui/core/styles';
+import { useLoading } from './LoadingContext';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import { Helmet } from 'react-helmet';
@@ -65,6 +66,7 @@ const IngredientList = ({ ingredients }) => (
   
   const Recipe = () => {
     const classes = useStyles();
+    const { setLoading } = useLoading();
     const { isAuthenticated, user } = useAuth();
     const [recipe, setRecipe] = useState(null);
     const [isGenerating, setIsGenerating] = useState(true);
@@ -96,6 +98,8 @@ const IngredientList = ({ ingredients }) => (
             fetchRecipe();
         }
         }, 5000); // Poll every 5 seconds
+
+        setLoading(isGenerating); // Set global loading state
 
         return () => clearInterval(interval);
     }, [isGenerating]); // eslint-disable-line react-hooks/exhaustive-deps
