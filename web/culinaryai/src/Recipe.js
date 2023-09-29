@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     <ul>
       {ingredients.map((ingredient, index) => (
         <li key={index}>
-          {ingredient.unit === "pieces"
+          {(ingredient.unit.toLowerCase() === "pieces" || ingredient.unit.toLowerCase() === "piece")
             ? `${ingredient.amount} ${ingredient.name}`
             : `${ingredient.amount} ${ingredient.unit} of ${ingredient.name}`}
         </li>
