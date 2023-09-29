@@ -40,6 +40,10 @@ func (db *RecipeDB) CreateRecipe(recipe *models.Recipe) error {
 // 	return db.DB.Model(&models.Recipe{}).Where("id = ?", id).Update(field, value).Error
 // }
 
+func (db *RecipeDB) UpdateRecipeTitle(recipe *models.Recipe, title string) error {
+	return db.DB.Model(recipe).Update("Title", title).Error
+}
+
 func (db *RecipeDB) UpdateRecipeImageURL(recipe *models.Recipe, imageURL string) error {
 	return db.DB.Model(recipe).Update("ImageURL", imageURL).Error
 }

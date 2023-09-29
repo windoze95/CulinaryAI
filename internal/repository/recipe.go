@@ -36,6 +36,10 @@ func (r *RecipeRepository) CreateRecipe(recipe *models.Recipe) error {
 // 	return r.RecipeDB.UpdateRecipeFieldByID(id, field, value)
 // }
 
+func (r *RecipeRepository) UpdateRecipeTitle(recipe *models.Recipe, title string) error {
+	return r.RecipeDB.UpdateRecipeTitle(recipe, title)
+}
+
 func (r *RecipeRepository) UpdateRecipeImageURL(recipe *models.Recipe, imageURL string) error {
 	return r.RecipeDB.UpdateRecipeImageURL(recipe, imageURL)
 }

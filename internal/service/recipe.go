@@ -110,6 +110,11 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 			return
 		}
 
+		if err := s.Repo.UpdateRecipeTitle(recipe, recipe.FullRecipe.Title); err != nil {
+			log.Printf("error: failed to update recipe title: %v", err)
+			return
+		}
+
 		// Update the existing recipe's FullRecipeJSON field in the database using the repository
 		if err := s.Repo.UpdateFullRecipeJSON(recipe); err != nil {
 			log.Printf("error: failed to update recipe with FullRecipeJSON: %v", err)
