@@ -26,15 +26,27 @@ const useStyles = makeStyles((theme) => ({
     },
   }));
 
-const IngredientList = ({ ingredients }) => (
+  const IngredientList = ({ ingredients }) => (
     <ul>
       {ingredients.map((ingredient, index) => (
         <li key={index}>
-          {ingredient.amount} {ingredient.unit} of {ingredient.name}
+          {ingredient.unit === "pieces"
+            ? `${ingredient.amount} ${ingredient.name}`
+            : `${ingredient.amount} ${ingredient.unit} of ${ingredient.name}`}
         </li>
       ))}
     </ul>
-  );
+  );  
+
+// const IngredientList = ({ ingredients }) => (
+//     <ul>
+//       {ingredients.map((ingredient, index) => (
+//         <li key={index}>
+//           {ingredient.amount} {ingredient.unit} of {ingredient.name}
+//         </li>
+//       ))}
+//     </ul>
+//   );
   
   const InstructionsList = ({ instructions }) => (
     <ol>
