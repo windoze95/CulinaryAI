@@ -34,12 +34,12 @@ const Header = () => {
       <i className="material-icons left">login</i>Sign in
     </NavLink>
   ] : [
-    <NavLink to="#" key="o1" className="sidenav-close">
-      User Option 1
+    <NavLink to="/generate" key="generate" className="sidenav-close">
+      Generate
     </NavLink>,
-    <NavLink to="#" key="o2" className="sidenav-close">
-      User Option 2
-    </NavLink>,
+    // <NavLink to="#" key="o2" className="sidenav-close">
+    //   User Option 2
+    // </NavLink>,
     <Divider key="divider" />,
     <NavLink onClick={handleLogout} key="logout" className="sidenav-close">
       Logout
