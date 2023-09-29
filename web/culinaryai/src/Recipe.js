@@ -3,6 +3,24 @@ import axios from 'axios';
 import { useAuth } from './App';
 import { useParams } from 'react-router-dom';
 import Footer from './Footer';
+import { makeStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+      height: '100vh',
+    },
+    image: {
+      // Removed background image
+    },
+    paper: {
+      margin: theme.spacing(4, 2),  // Reduced margin
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+    },
+  }));
 
 const IngredientList = ({ ingredients }) => (
     <ul>
@@ -43,6 +61,7 @@ const IngredientList = ({ ingredients }) => (
   );
   
   const Recipe = () => {
+    const classes = useStyles();
     const { isAuthenticated, user } = useAuth();
     const [recipe, setRecipe] = useState(null);
     const [isGenerating, setIsGenerating] = useState(true);
@@ -79,20 +98,25 @@ const IngredientList = ({ ingredients }) => (
     }, [isGenerating]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <div>
-        {isGenerating ? (
-          <p>Generating your recipe...<br />This may take a few minutes to complete</p>
-        ) : (
-          <div>
-            <h1>{recipe.Title}</h1>
-            {recipe && <RecipeDetail mainRecipe={recipe.FullRecipe.main_recipe} subRecipes={recipe.FullRecipe.sub_recipes} />}
-            {isAuthenticated && recipe.GeneratedByUserID === user.ID && (
-              <button onClick={regenerateRecipe}>Regenerate</button>
+      <Grid container className={classes.root} justifyContent="center">
+        <Grid item xs={12} md={7} component={Paper} elevation={6} square>
+          <div className={classes.paper}>
+            {isGenerating ? (
+            <p>Generating your recipe...<br />This may take a few minutes to complete</p>
+            ) : (
+            <div>
+                <h1>{recipe.Title}</h1>
+                <img src={recipe.ImageURL} alt={recipe.Title} />
+                {recipe && <RecipeDetail mainRecipe={recipe.FullRecipe.main_recipe} subRecipes={recipe.FullRecipe.sub_recipes} />}
+                {isAuthenticated && recipe.GeneratedByUserID === user.ID && (
+                <button onClick={regenerateRecipe}>Regenerate</button>
+                )}
+            </div>
             )}
           </div>
-        )}
-        <Footer />
-      </div>
+          <Footer />
+        </Grid>
+      </Grid>
     );
 };
 
