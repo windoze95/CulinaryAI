@@ -145,7 +145,7 @@ const useStyles = makeStyles((theme) => ({
                 <h1>{recipe ? recipe.Title : 'Loading...'}</h1>
                 <img src={recipe ? recipe.ImageURL : 'default-image-url'} alt={recipe ? recipe.Title : 'Loading...'} className={classes.recipeImage} />
                 {recipe && <RecipeDetail mainRecipe={recipe.FullRecipe.main_recipe} subRecipes={recipe.FullRecipe.sub_recipes} />}
-                {isAuthenticated && recipe.GeneratedByUserID === user.ID && (
+                {isAuthenticated && recipe && recipe.GeneratedByUserID === user.ID && (
                 <button onClick={regenerateRecipe}>Regenerate</button>
                 )}
             </div>
