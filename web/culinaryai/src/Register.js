@@ -151,6 +151,7 @@ export default function Register() {
               name="username"
               label="Username"
               type="text"
+              autoCapitalize="none"
               onChange={e => setUsername(e.target.value)}
             />
             <TextField
