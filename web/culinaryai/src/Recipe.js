@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from './App';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import Footer from './Footer';
 import { makeStyles } from '@material-ui/core/styles';
 import LogoSvg from './logo.svg';
@@ -80,7 +80,15 @@ const useStyles = makeStyles((theme) => ({
     const classes = useStyles();
     const { isAuthenticated, user } = useAuth();
     const [recipe, setRecipe] = useState(null);
+    const location = useLocation();
     const [isGenerating, setIsGenerating] = useState(false);
+
+    useEffect(() => {
+        // Check if the user came from the "/generate" route
+        if (location.state && location.state.from === '/generate') {
+          setIsGenerating(true);
+        }
+    }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
   
     const { id } = useParams();
   
