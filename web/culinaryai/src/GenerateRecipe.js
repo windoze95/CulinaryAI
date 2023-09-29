@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useLoading } from './LoadingContext';  // Import the useLoading context
+import { useLoading } from './LoadingContext';
+import Footer from './Footer';
 
 const GenerateRecipe = () => {
   const [prompt, setPrompt] = useState('');
@@ -34,6 +35,7 @@ const GenerateRecipe = () => {
         onChange={(e) => setPrompt(e.target.value)}
       />
       <button onClick={generateRecipe}>Generate</button>
+      <Footer />
     </div>
   );
 };

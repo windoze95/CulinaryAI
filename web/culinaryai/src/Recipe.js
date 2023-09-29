@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from './App';
 import { useParams } from 'react-router-dom';
+import Footer from './Footer';
 
 const IngredientList = ({ ingredients }) => (
     <ul>
@@ -50,6 +51,7 @@ const Recipe = ({ match }) => {
         try {
             const response = await axios.get(`/api/v1/recipes/${id}`);
             if (response.data) {
+                console.log('Recipe:', response.data);
                 setRecipe(response.data);
                 setIsGenerating(!response.data.recipe.GenerationComplete);
             }
@@ -88,6 +90,7 @@ const Recipe = ({ match }) => {
                 )}
             </div>
         )}
+        <Footer />
       </div>
     );
 };

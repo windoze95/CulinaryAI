@@ -10,6 +10,7 @@ import Menu from '@material-ui/core/Menu';
 import Avatar from '@material-ui/core/Avatar';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import Footer from './Footer';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -79,6 +80,7 @@ export default function Home() {
           </Typography>
         </CardContent>
       </Card>
+      <Footer />
     </div>
   );
 }
