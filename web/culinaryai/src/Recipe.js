@@ -12,52 +12,51 @@ const IngredientList = ({ ingredients }) => (
         </li>
       ))}
     </ul>
-);
-
-const InstructionsList = ({ instructions }) => (
+  );
+  
+  const InstructionsList = ({ instructions }) => (
     <ol>
-        {instructions.map((instruction, index) => (
+      {instructions.map((instruction, index) => (
         <li key={index}>{instruction}</li>
-        ))}
+      ))}
     </ol>
-);
-
-const RecipeDetail = ({ mainRecipe, subRecipes }) => (
+  );
+  
+  const RecipeDetail = ({ mainRecipe, subRecipes }) => (
     <div>
-        <h2>Main Recipe</h2>
-        <IngredientList ingredients={mainRecipe.ingredients} />
-        <InstructionsList instructions={mainRecipe.instructions} />
-        <p>Time to cook: {mainRecipe.timeToCook} minutes</p>
-        
-        {subRecipes.map((subRecipe, index) => (
+      <h2>{mainRecipe.recipe_name}</h2>
+      <IngredientList ingredients={mainRecipe.ingredients} />
+      <InstructionsList instructions={mainRecipe.instructions} />
+      <p>Time to cook: {mainRecipe.time_to_cook} minutes</p>
+      
+      {subRecipes.map((subRecipe, index) => (
         <div key={index}>
-            <h3>Sub Recipe {index + 1}</h3>
-            <IngredientList ingredients={subRecipe.ingredients} />
-            <InstructionsList instructions={subRecipe.instructions} />
-            <p>Time to cook: {subRecipe.timeToCook} minutes</p>
+          <h3>{subRecipe.recipe_name}</h3>
+          <IngredientList ingredients={subRecipe.ingredients} />
+          <InstructionsList instructions={subRecipe.instructions} />
+          <p>Time to cook: {subRecipe.time_to_cook} minutes</p>
         </div>
-        ))}
+      ))}
     </div>
-);
-
-const Recipe = ({ match }) => {
+  );
+  
+  const Recipe = () => {
     const { isAuthenticated, user } = useAuth();
     const [recipe, setRecipe] = useState(null);
     const [isGenerating, setIsGenerating] = useState(true);
-
+  
     const { id } = useParams();
-
+  
     const fetchRecipe = async () => {
-        try {
-            const response = await axios.get(`/api/v1/recipes/${id}`);
-            if (response.data) {
-                console.log('Recipe:', response.data);
-                setRecipe(response.data);
-                setIsGenerating(!response.data.recipe.GenerationComplete);
-            }
-        } catch (error) {
-            console.error('Error fetching recipe:', error);
+      try {
+        const response = await axios.get(`/api/v1/recipes/${id}`);
+        if (response.data) {
+          setRecipe(response.data.recipe);
+          setIsGenerating(!response.data.recipe.GenerationComplete);
         }
+      } catch (error) {
+        console.error('Error fetching recipe:', error);
+      }
     };
 
     const regenerateRecipe = async () => {
@@ -79,16 +78,15 @@ const Recipe = ({ match }) => {
     return (
         <div>
         {isGenerating ? (
-            <p>Generating your recipe...</p>
+          <p>Generating your recipe...<br />This may take a few minutes to complete</p>
         ) : (
-            <div>
-                <h1>{recipe.Title}</h1>
-                {/* Display your recipe here */}
-                {recipe && <RecipeDetail mainRecipe={recipe.FullRecipe.MainRecipe} subRecipes={recipe.FullRecipe.SubRecipes} />}
-                {isAuthenticated && recipe.GeneratedByUserID === user.ID && (
-                    <button onClick={regenerateRecipe}>Regenerate</button>
-                )}
-            </div>
+          <div>
+            <h1>{recipe.Title}</h1>
+            {recipe && <RecipeDetail mainRecipe={recipe.FullRecipe.main_recipe} subRecipes={recipe.FullRecipe.sub_recipes} />}
+            {isAuthenticated && recipe.GeneratedByUserID === user.ID && (
+              <button onClick={regenerateRecipe}>Regenerate</button>
+            )}
+          </div>
         )}
         <Footer />
       </div>
