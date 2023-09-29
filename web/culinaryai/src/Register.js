@@ -119,12 +119,13 @@ export default function Register() {
         });
       } else {
         // Handle case where API response is not as expected
-        swal("Failed", response.data.error, "error");
+        swal("Failed", "An unknown error occurred", "error");
       }
   
     } catch (error) {
       // Handle API call errors
-      swal("Failed", "Registration failed due to an unknown error", "error");
+      const errorMessage = error.response?.data?.error || 'An unknown error occurred';
+      swal("Failed", errorMessage, "error");
     }
   };
   
