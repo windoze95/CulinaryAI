@@ -53,6 +53,7 @@ const IngredientList = ({ ingredients }) => (
       try {
         const response = await axios.get(`/api/v1/recipes/${id}`);
         if (response.data) {
+          console.log('Recipe:', response.data.recipe);
           setRecipe(response.data.recipe);
           setIsGenerating(!response.data.recipe.GenerationComplete);
         }
