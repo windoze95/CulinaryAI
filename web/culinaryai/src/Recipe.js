@@ -24,7 +24,7 @@ const IngredientList = ({ ingredients }) => (
   
   const RecipeDetail = ({ mainRecipe, subRecipes }) => (
     <div>
-      <h2>{mainRecipe.recipe_name}</h2>
+      {subRecipes && subRecipes.length > 0 && <h2>{mainRecipe.recipe_name}</h2>}
       <IngredientList ingredients={mainRecipe.ingredients} />
       <InstructionsList instructions={mainRecipe.instructions} />
       <p>Time to cook: {mainRecipe.time_to_cook} minutes</p>
