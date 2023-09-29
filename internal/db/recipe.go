@@ -45,9 +45,7 @@ func (db *RecipeDB) GetRecipeByID(id string) (*models.Recipe, error) {
 	var recipe models.Recipe
 	err := db.DB.Preload("GuidingContent").
 		Preload("Tags").
-		Preload("GeneratedBy", func(db *gorm.DB) *gorm.DB {
-			return db.Select("ID", "Username") // Select only ID and Username
-		}).
+		Preload("GeneratedBy").
 		Where("id = ?", id).
 		First(&recipe).Error
 	// log.Printf("Query complete. username retrieved: %+v, Error: %v", recipe.GeneratedBy, err)
