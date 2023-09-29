@@ -44,6 +44,12 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
+	// Validate email
+	if err := h.Service.ValidateEmail(newUser.Email); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Validate password
 	if err := h.Service.ValidatePassword(newUser.Password); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

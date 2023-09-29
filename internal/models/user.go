@@ -9,8 +9,8 @@ import (
 
 type User struct {
 	gorm.Model
-	Username         string
-	Email            string
+	Username         string `gorm:"unique"`
+	Email            string `gorm:"unique"`
 	HashedPassword   string
 	Settings         UserSettings `gorm:"foreignKey:UserID"`
 	CollectedRecipes []Recipe     `gorm:"many2many:user_collected_recipes;"`

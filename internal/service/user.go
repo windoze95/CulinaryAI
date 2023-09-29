@@ -12,6 +12,7 @@ import (
 
 	goaway "github.com/TwiN/go-away"
 	"github.com/asaskevich/govalidator"
+	"github.com/lib/pq"
 	"github.com/windoze95/culinaryai/internal/config"
 	"github.com/windoze95/culinaryai/internal/models"
 	"github.com/windoze95/culinaryai/internal/openai"
@@ -61,7 +62,16 @@ func (s *UserService) CreateUser(username, email, password string) error {
 	gc.UnitSystem = 1 // Default value
 
 	if err := s.Repo.CreateUser(user, settings, gc); err != nil {
-		return fmt.Errorf("error creating user and settings: %v", err)
+		if pgErr, ok := err.(*pq.Error); ok {
+			if pgErr.Code == "23505" { // Unique constraint violation
+				if strings.Contains(pgErr.Error(), "Email") {
+					return fmt.Errorf("email already in use")
+				} else if strings.Contains(pgErr.Error(), "Username") {
+					return fmt.Errorf("username already in use")
+				}
+			}
+		}
+		return fmt.Errorf("error creating user: %v", err)
 	}
 
 	return nil
@@ -153,13 +163,13 @@ func (s *UserService) VerifyRecaptcha(recaptchaResponse string) error {
 }
 
 func (s *UserService) ValidateUsername(username string) error {
-	exists, err := s.Repo.UsernameExists(username)
-	if err != nil {
-		return fmt.Errorf("error checking username: %v", err)
-	}
-	if exists {
-		return fmt.Errorf("username is already taken")
-	}
+	// exists, err := s.Repo.UsernameExists(username)
+	// if err != nil {
+	// 	return fmt.Errorf("error checking username: %v", err)
+	// }
+	// if exists {
+	// 	return fmt.Errorf("username is already taken")
+	// }
 
 	minLength := 3
 	if len(username) < minLength {
@@ -225,6 +235,13 @@ func (s *UserService) ValidateUsername(username string) error {
 	}
 
 	// If we've passed all checks, the username is valid.
+	return nil
+}
+
+func (s *UserService) ValidateEmail(email string) error {
+	if !govalidator.IsEmail(email) {
+		return fmt.Errorf("invalid email format")
+	}
 	return nil
 }
 
