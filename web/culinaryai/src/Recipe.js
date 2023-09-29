@@ -80,18 +80,28 @@ const useStyles = makeStyles((theme) => ({
     const classes = useStyles();
     const { isAuthenticated, user } = useAuth();
     const [recipe, setRecipe] = useState(null);
-    const [isGenerating, setIsGenerating] = useState(true);
+    const [isGenerating, setIsGenerating] = useState(false);
   
     const { id } = useParams();
   
     const fetchRecipe = async () => {
       try {
         const response = await axios.get(`/api/v1/recipes/${id}`);
-        if (response.data) {
-          console.log('Recipe:', response.data.recipe);
-          setRecipe(response.data.recipe);
-          setIsGenerating(!response.data.recipe.GenerationComplete);
+        if (response.data && response.data.recipe) {
+            setRecipe(response.data.recipe);
+        
+            // Set isGenerating based on GenerationComplete property
+            if (response.data.recipe.GenerationComplete === undefined || 
+                response.data.recipe.GenerationComplete === false) {
+                setIsGenerating(true);
+            } else {
+                setIsGenerating(false);
+            }
         }
+        // if (response.data) {
+        //   setRecipe(response.data.recipe);
+        //   setIsGenerating(!response.data.recipe.GenerationComplete);
+        // }
       } catch (error) {
         console.error('Error fetching recipe:', error);
       }
@@ -132,8 +142,8 @@ const useStyles = makeStyles((theme) => ({
             This may take a few minutes to complete</p>
             ) : (
             <div>
-                <h1>{recipe.Title}</h1>
-                <img src={recipe.ImageURL} alt={recipe.Title} className={classes.recipeImage} />
+                <h1>{recipe ? recipe.Title : 'Loading...'}</h1>
+                <img src={recipe ? recipe.ImageURL : 'default-image-url'} alt={recipe ? recipe.Title : 'Loading...'} className={classes.recipeImage} />
                 {recipe && <RecipeDetail mainRecipe={recipe.FullRecipe.main_recipe} subRecipes={recipe.FullRecipe.sub_recipes} />}
                 {isAuthenticated && recipe.GeneratedByUserID === user.ID && (
                 <button onClick={regenerateRecipe}>Regenerate</button>
