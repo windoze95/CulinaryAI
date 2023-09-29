@@ -74,7 +74,7 @@ function App() {
               <>
                 <Route path="/home" element={<Home />} />
                 <Route path="/generate" element={<GenerateRecipe />} />
-                <Route path="/*" element={<Home />} />
+                <Route path="/*" element={<GenerateRecipe />} />
               </>
             )}
           </Routes>

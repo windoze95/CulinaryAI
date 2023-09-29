@@ -29,14 +29,16 @@ const IngredientList = ({ ingredients }) => (
       <InstructionsList instructions={mainRecipe.instructions} />
       <p>Time to cook: {mainRecipe.time_to_cook} minutes</p>
       
-      {subRecipes.map((subRecipe, index) => (
-        <div key={index}>
-          <h3>{subRecipe.recipe_name}</h3>
-          <IngredientList ingredients={subRecipe.ingredients} />
-          <InstructionsList instructions={subRecipe.instructions} />
-          <p>Time to cook: {subRecipe.time_to_cook} minutes</p>
-        </div>
-      ))}
+      {subRecipes && subRecipes.length > 0 && (
+        subRecipes.map((subRecipe, index) => (
+            <div key={index}>
+            <h3>{subRecipe.recipe_name}</h3>
+            <IngredientList ingredients={subRecipe.ingredients} />
+            <InstructionsList instructions={subRecipe.instructions} />
+            <p>Time to cook: {subRecipe.time_to_cook} minutes</p>
+            </div>
+        ))
+      )}
     </div>
   );
   

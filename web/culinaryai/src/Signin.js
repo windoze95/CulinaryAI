@@ -78,7 +78,7 @@ export default function Signin() {
         // localStorage.setItem('accessToken', response['accessToken']);
         localStorage.setItem('user', JSON.stringify(response.data['user']));
         // Reload the app
-        window.location.href = "/";
+        window.location.href = "/generate";
         // navigate("/home");
       });
     } else {
