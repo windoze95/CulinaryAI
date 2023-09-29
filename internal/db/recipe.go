@@ -33,7 +33,7 @@ func (db *RecipeDB) GetRecipeByID(id string) (*models.Recipe, error) {
 }
 
 func (db *RecipeDB) CreateRecipe(recipe *models.Recipe) error {
-	return db.DB.Create(recipe).Error
+	return db.DB.Omit("GeneratedBy").Create(recipe).Error
 }
 
 // func (db *RecipeDB) UpdateRecipeFieldByID(id uint, field string, value interface{}) error {
