@@ -53,10 +53,10 @@ func (s *RecipeService) CreateRecipe(user *models.User, userPrompt string) (*mod
 	// Populate initial fields of the Recipe struct
 	recipe := &models.Recipe{
 		// GeneratedBy:       *user,
-		GeneratedBy: user,
-		UserPrompt:  userPrompt,
+		// GeneratedBy: user,
+		UserPrompt: userPrompt,
 		// GuidingContent:    user.GuidingContent, // Set from user's existing GuidingContent
-		GuidingContent:    &user.GuidingContent,    // Set from user's existing GuidingContent
+		// GuidingContent:    &user.GuidingContent,    // Set from user's existing GuidingContent
 		GuidingContentUID: user.GuidingContent.UID, // Set from user's existing GuidingContent
 	}
 
