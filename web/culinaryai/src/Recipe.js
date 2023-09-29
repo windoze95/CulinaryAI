@@ -6,6 +6,7 @@ import Footer from './Footer';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
+import { Helmet } from 'react-helmet';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -103,6 +104,13 @@ const IngredientList = ({ ingredients }) => (
       <Grid container className={classes.root} justifyContent="center">
         <Grid item xs={12} md={7} component={Paper} elevation={6} square>
           <div className={classes.paper}>
+            <Helmet>
+                <title>{recipe ? recipe.Title : 'Loading...'}</title>
+                <meta property="og:title" content={recipe ? recipe.Title : 'Loading...'} />
+                <meta property="og:image" content={recipe ? recipe.ImageURL : 'default-image-url'} />
+                {/* <meta property="og:description" content="Your description here" /> */}
+                <meta property="og:url" content={window.location.href} />
+            </Helmet>
             {isGenerating ? (
             <p>Generating your recipe...<br />This may take a few minutes to complete</p>
             ) : (
