@@ -11,8 +11,10 @@ const useStyles = makeStyles((theme) => ({
     root: {
       height: '100vh',
     },
-    image: {
-      // Removed background image
+    recipeImage: {
+        width: '100%',  // or you can set a specific width
+        aspectRatio: 1, // maintain aspect ratio
+        resizeMode: 'contain', // or 'cover'
     },
     paper: {
       margin: theme.spacing(4, 2),  // Reduced margin
@@ -106,7 +108,7 @@ const IngredientList = ({ ingredients }) => (
             ) : (
             <div>
                 <h1>{recipe.Title}</h1>
-                <img src={recipe.ImageURL} alt={recipe.Title} />
+                <img src={recipe.ImageURL} alt={recipe.Title} className={classes.recipeImage} />
                 {recipe && <RecipeDetail mainRecipe={recipe.FullRecipe.main_recipe} subRecipes={recipe.FullRecipe.sub_recipes} />}
                 {isAuthenticated && recipe.GeneratedByUserID === user.ID && (
                 <button onClick={regenerateRecipe}>Regenerate</button>
