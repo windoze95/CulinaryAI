@@ -8,6 +8,7 @@ import LogoSvg from './logo.svg';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import { Helmet } from 'react-helmet';
+import swal from 'sweetalert';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -111,7 +112,8 @@ const useStyles = makeStyles((theme) => ({
         //   setIsGenerating(!response.data.recipe.GenerationComplete);
         // }
       } catch (error) {
-        console.error('Error fetching recipe:', error);
+        const errorMessage = error.response?.data?.error || 'An unknown error occurred';
+        swal("Failed", errorMessage, "error");
       }
     };
 
