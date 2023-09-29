@@ -17,7 +17,7 @@ const GenerateRecipe = () => {
         { withCredentials: true }
       );
       if (response.data && response.data.recipe.ID) {
-        navigate(`/recipe/${response.data.recipe.ID}`);
+        navigate(`/recipe/${response.data.recipe.ID}`, { state: { from: '/generate' } });
       }
     } catch (error) {
       console.error('Error generating recipe:', error);
