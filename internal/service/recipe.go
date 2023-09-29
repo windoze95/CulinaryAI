@@ -54,7 +54,9 @@ func (s *RecipeService) CreateRecipe(user *models.User, userPrompt string) (*mod
 	recipe := &models.Recipe{
 		// GeneratedBy:       *user,
 		// GeneratedBy: user,
-		UserPrompt: userPrompt,
+		GeneratedByUserID: user.ID, // Set from user's ID
+		UserPrompt:        userPrompt,
+		GuidingContentID:  user.GuidingContent.ID, // Set from user's existing GuidingContent ID
 		// GuidingContent:    user.GuidingContent, // Set from user's existing GuidingContent
 		// GuidingContent:    &user.GuidingContent,    // Set from user's existing GuidingContent
 		GuidingContentUID: user.GuidingContent.UID, // Set from user's existing GuidingContent

@@ -32,14 +32,27 @@ func NewRecipeDB(gormDB *gorm.DB) *RecipeDB {
 // 	return &recipe, err
 // }
 
+// func (db *RecipeDB) GetRecipeByID(id string) (*models.Recipe, error) {
+// 	var recipe models.Recipe
+// 	err := db.DB.Preload("GuidingContent").
+// 		Preload("Tags").
+// 		// Preload("GeneratedBy").
+// 		Where("id = ?", id).
+// 		First(&recipe).Error
+// 	log.Printf("Query complete. Recipe retrieved: %+v, Error: %v", recipe, err)
+// 	return &recipe, err
+// }
+
 func (db *RecipeDB) GetRecipeByID(id string) (*models.Recipe, error) {
 	var recipe models.Recipe
 	err := db.DB.Preload("GuidingContent").
 		Preload("Tags").
-		Preload("GeneratedBy").
+		Preload("GeneratedBy", func(db *gorm.DB) *gorm.DB {
+			return db.Select("ID", "Username") // Select only ID and Username
+		}).
 		Where("id = ?", id).
 		First(&recipe).Error
-	log.Printf("Query complete. Recipe retrieved: %+v, Error: %v", recipe, err)
+	log.Printf("Query complete. username retrieved: %+v, Error: %v", recipe.GeneratedBy.Username, err)
 	return &recipe, err
 }
 
