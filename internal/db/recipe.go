@@ -1,8 +1,6 @@
 package db
 
 import (
-	"log"
-
 	_ "github.com/heroku/x/hmetrics/onload"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -52,7 +50,7 @@ func (db *RecipeDB) GetRecipeByID(id string) (*models.Recipe, error) {
 		}).
 		Where("id = ?", id).
 		First(&recipe).Error
-	log.Printf("Query complete. username retrieved: %+v, Error: %v", recipe.GeneratedBy, err)
+	// log.Printf("Query complete. username retrieved: %+v, Error: %v", recipe.GeneratedBy, err)
 	return &recipe, err
 }
 
