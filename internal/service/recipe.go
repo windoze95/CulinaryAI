@@ -36,10 +36,13 @@ func (s *RecipeService) GetRecipeByID(recipeID string) (*models.Recipe, error) {
 		return nil, err
 	}
 
-	// Deserialize the FullRecipeJSON field back into the FullRecipe struct
-	if err := recipe.DeserializeFullRecipe(); err != nil {
-		log.Printf("Failed to deserialize recipe: %v", err)
-		return nil, fmt.Errorf("failed to deserialize recipe: %w", err)
+	if recipe.GenerationComplete {
+
+		// Deserialize the FullRecipeJSON field back into the FullRecipe struct
+		if err := recipe.DeserializeFullRecipe(); err != nil {
+			log.Printf("Failed to deserialize recipe: %v", err)
+			return nil, fmt.Errorf("failed to deserialize recipe: %w", err)
+		}
 	}
 
 	return recipe, nil
