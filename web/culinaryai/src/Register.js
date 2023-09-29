@@ -119,12 +119,12 @@ export default function Register() {
         });
       } else {
         // Handle case where API response is not as expected
-        swal("Failed", "Registration failed", "error");
+        swal("Failed", response.data.error, "error");
       }
   
     } catch (error) {
       // Handle API call errors
-      swal("Failed", "Registration failed", "error");
+      swal("Failed", "Registration failed due to an unknown error", "error");
     }
   };
   
@@ -149,6 +149,7 @@ export default function Register() {
               id="username"
               name="username"
               label="Username"
+              type="text"
               onChange={e => setUsername(e.target.value)}
             />
             <TextField
@@ -159,6 +160,7 @@ export default function Register() {
               id="email"
               name="email"
               label="Email Address"
+              type="email"
               onChange={e => setEmail(e.target.value)}
             />
             <TextField
