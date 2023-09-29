@@ -80,7 +80,6 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 
 	user, err := h.Service.LoginUser(userCredentials.Username, userCredentials.Password)
 	if err != nil {
-		log.Printf("error: LoginUser: %v", err)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}

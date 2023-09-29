@@ -19,7 +19,6 @@ func NewRecipeHandler(recipeService *service.RecipeService) *RecipeHandler {
 }
 
 func (h *RecipeHandler) GetRecipe(c *gin.Context) {
-	log.Printf("Handling GET request for recipe, ID: %s", c.Param("recipe_id"))
 	recipeID := c.Param("recipe_id")
 
 	recipe, err := h.Service.GetRecipeByID(recipeID)
@@ -33,7 +32,6 @@ func (h *RecipeHandler) GetRecipe(c *gin.Context) {
 		}
 		return
 	}
-	log.Printf("Sending response: %d, Recipe: %+v", http.StatusOK, recipe)
 
 	c.JSON(http.StatusOK, gin.H{"recipe": recipe})
 }

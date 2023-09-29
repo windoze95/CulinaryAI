@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -82,9 +81,6 @@ func (s *UserService) LoginUser(username, password string) (*models.User, error)
 	if err != nil {
 		return nil, err
 	}
-
-	log.Printf("User: %+v", user)
-	log.Printf("HashedPassword: %s", user.HashedPassword)
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(password)); err != nil {
 		return nil, errors.New("invalid username or password")
