@@ -52,7 +52,7 @@ func (db *RecipeDB) GetRecipeByID(id string) (*models.Recipe, error) {
 		}).
 		Where("id = ?", id).
 		First(&recipe).Error
-	log.Printf("Query complete. username retrieved: %+v, Error: %v", recipe.GeneratedBy.Username, err)
+	log.Printf("Query complete. username retrieved: %+v, Error: %v", recipe.GeneratedBy, err)
 	return &recipe, err
 }
 
