@@ -41,9 +41,9 @@ export default function Landing() {
           <GithubLinkButton />
           <Typography variant="body1" align="center">
             <br />
-            ** Rights to the trademark-pending name: <strong>CulinaryAI™</strong> in the Apple AppStore is currently in despute.<br />
+            ** The name: <strong>CulinaryAI™</strong> in the Apple App Store is currently subject to a naming despute.<br />
             <br />
-            Note to Apple: This domain is owned and operated by Juliano DiCesare, registered Apple Developer.<br />
+            Note to Apple: This domain is owned and operated by Juliano DiCesare, registered Apple Developer. I assert common law rights to the use of the wordmark 'CulinaryAI™' in commerce. The trademark is also submitted and currently under review for official registration.<br />
           </Typography>
         </div>
         <Footer />
