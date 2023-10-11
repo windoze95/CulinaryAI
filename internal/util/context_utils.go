@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
-	"github.com/windoze95/culinaryai/internal/models"
+	"github.com/windoze95/saltybytes-api/internal/models"
 )
 
 func GetUserFromContext(c *gin.Context) (*models.User, error) {
@@ -25,12 +25,12 @@ func GetUserFromContext(c *gin.Context) (*models.User, error) {
 func ClearAuthTokenCookie(c *gin.Context) {
 	// Clear the auth_token cookie
 	c.SetCookie(
-		"auth_token",      // Cookie name
-		"",                // Empty value to clear the cookie
-		-1,                // Max age < 0 to expire the cookie immediately
-		"/",               // Path
-		".culinaryai.com", // Domain, set with leading dot for subdomain compatibility
-		true,              // Secure
-		true,              // HTTP only
+		"auth_token",         // Cookie name
+		"",                   // Empty value to clear the cookie
+		-1,                   // Max age < 0 to expire the cookie immediately
+		"/",                  // Path
+		".api.saltybytes.ai", // Domain, set with leading dot for subdomain compatibility
+		true,                 // Secure
+		true,                 // HTTP only
 	)
 }

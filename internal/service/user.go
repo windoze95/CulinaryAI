@@ -1,23 +1,24 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
-	"net/url"
 	"regexp"
 	"strings"
 
 	goaway "github.com/TwiN/go-away"
 	"github.com/asaskevich/govalidator"
 	"github.com/lib/pq"
-	"github.com/windoze95/culinaryai/internal/config"
-	"github.com/windoze95/culinaryai/internal/models"
-	"github.com/windoze95/culinaryai/internal/openai"
-	"github.com/windoze95/culinaryai/internal/repository"
-	"github.com/windoze95/culinaryai/internal/util"
+	"github.com/windoze95/saltybytes-api/internal/config"
+	"github.com/windoze95/saltybytes-api/internal/models"
+	"github.com/windoze95/saltybytes-api/internal/openai"
+	"github.com/windoze95/saltybytes-api/internal/repository"
+	"github.com/windoze95/saltybytes-api/internal/util"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/facebook"
 )
 
 type UserService struct {
@@ -50,11 +51,16 @@ func (s *UserService) CreateUser(username, email, password string) error {
 		return fmt.Errorf("error hashing password: %v", err)
 	}
 
+	hashedPasswordStr := string(hashedPassword)
+
 	// Create User and UserSettings
 	user := &models.User{
-		Username:       username,
-		Email:          email,
-		HashedPassword: string(hashedPassword),
+		Username: username,
+		Email:    &email,
+		Auth: models.UserAuth{
+			HashedPassword: &hashedPasswordStr,
+			AuthType:       "standard",
+		},
 	}
 	settings := &models.UserSettings{}
 	gc := &models.GuidingContent{}
@@ -82,14 +88,150 @@ func (s *UserService) LoginUser(username, password string) (*models.User, error)
 		return nil, err
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(*user.Auth.HashedPassword), []byte(password)); err != nil {
 		return nil, errors.New("invalid username or password")
 	}
 
 	// Clear the hashed password before returning the user
-	user.HashedPassword = ""
+	// user.HashedPassword = ""
 
 	return user, nil
+}
+
+func (s *UserService) CreateFacebookUser(username, code string) (*models.User, error) {
+	// Construct OAuth2 config
+	fbOauthConfig := &oauth2.Config{
+		RedirectURL:  s.Cfg.Env.FacebookRedirectURL.Value(),
+		ClientID:     s.Cfg.Env.FacebookClientID.Value(),
+		ClientSecret: s.Cfg.Env.FacebookClientSecret.Value(),
+		Scopes:       []string{"email"},
+		Endpoint:     facebook.Endpoint,
+	}
+
+	// Exchange the received code for a token
+	token, err := fbOauthConfig.Exchange(context.Background(), code)
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch user info
+	// Use the token to make an HTTP request to Facebook API to get user's info
+	client := fbOauthConfig.Client(context.Background(), token)
+	resp, err := client.Get("https://graph.facebook.com/me?fields=id,name,email")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Decode the response into a struct
+	var facebookUser struct {
+		ID    string `json:"id"`
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&facebookUser); err != nil {
+		return nil, err
+	}
+
+	if facebookUser.Email == "" {
+		facebookUser.Email = facebookUser.ID + "@facebook.com"
+	}
+
+	// Check if the user already exists in the database; if not, create a new user
+	user, err := s.Repo.GetUserByFacebookID(facebookUser.ID)
+	if err != nil {
+		// Create User and UserSettings
+		user = &models.User{
+			Username:   username,
+			Email:      &facebookUser.Email,
+			FacebookID: &facebookUser.ID,
+			Auth: models.UserAuth{
+				AuthType: "facebook",
+			},
+		}
+		settings := &models.UserSettings{}
+		gc := &models.GuidingContent{}
+		gc.UnitSystem = 1 // Default value
+
+		if err := s.Repo.CreateUser(user, settings, gc); err != nil {
+			if pgErr, ok := err.(*pq.Error); ok {
+				if pgErr.Code == "23505" { // Unique constraint violation
+					if strings.Contains(pgErr.Error(), "username") {
+						return nil, fmt.Errorf("username already in use")
+					} else if strings.Contains(pgErr.Error(), "email") {
+						return nil, fmt.Errorf("email already in use")
+					}
+				}
+			}
+			return nil, fmt.Errorf("error creating user: %v", err)
+		}
+	} else {
+		// Update the user's email if it has changed
+		if user.Email != &facebookUser.Email {
+			user.Email = &facebookUser.Email
+			if err := s.Repo.UpdateUserEmail(user.ID, facebookUser.Email); err != nil {
+				return nil, fmt.Errorf("error updating user email: %v", err)
+			}
+		}
+	}
+
+	return user, nil
+}
+
+func (s *UserService) TryFacebookLogin(code string) (*models.User, error) {
+	// Construct OAuth2 config
+	fbOauthConfig := &oauth2.Config{
+		RedirectURL:  s.Cfg.Env.FacebookRedirectURL.Value(),
+		ClientID:     s.Cfg.Env.FacebookClientID.Value(),
+		ClientSecret: s.Cfg.Env.FacebookClientSecret.Value(),
+		Scopes:       []string{"email"},
+		Endpoint:     facebook.Endpoint,
+	}
+
+	// Exchange the received code for a token
+	token, err := fbOauthConfig.Exchange(context.Background(), code)
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch user info
+	client := fbOauthConfig.Client(context.Background(), token)
+	resp, err := client.Get("https://graph.facebook.com/me?fields=id,name,email")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Decode the response into a struct
+	var facebookUser struct {
+		ID    string `json:"id"`
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&facebookUser); err != nil {
+		return nil, err
+	}
+
+	// Check if the user already exists in the database by their Facebook ID
+	user, err := s.Repo.GetUserByFacebookID(facebookUser.ID)
+	if err != nil {
+		// User does not exist; return an error to signify that signup is needed
+		return nil, fmt.Errorf("user does not exist")
+	}
+
+	if facebookUser.Email == "" {
+		facebookUser.Email = facebookUser.ID + "@facebook.com"
+	}
+
+	// Update the user's email if it has changed
+	if user.Email != &facebookUser.Email {
+		user.Email = &facebookUser.Email
+		if err := s.Repo.UpdateUserEmail(user.ID, facebookUser.Email); err != nil {
+			return nil, fmt.Errorf("error updating user email: %v", err)
+		}
+	}
+
+	return user, nil // User exists, return the user
 }
 
 func (s *UserService) GetPreloadedUserByID(userID uint) (*models.User, error) {
@@ -133,30 +275,30 @@ func (s *UserService) UpdateGuidingContent(user *models.User, updatedGC *models.
 	return s.Repo.UpdateGuidingContent(user.ID, updatedGC)
 }
 
-// VerifyRecaptcha verifies the provided reCAPTCHA response
-func (s *UserService) VerifyRecaptcha(recaptchaResponse string) error {
-	secretKey := s.Cfg.Env.RecaptchaSecretKey.Value()
+// // VerifyRecaptcha verifies the provided reCAPTCHA response
+// func (s *UserService) VerifyRecaptcha(recaptchaResponse string) error {
+// 	secretKey := s.Cfg.Env.RecaptchaSecretKey.Value()
 
-	// Google reCAPTCHA API endpoint for server-side verification
-	apiURL := "https://www.google.com/recaptcha/api/siteverify"
+// 	// Google reCAPTCHA API endpoint for server-side verification
+// 	apiURL := "https://www.google.com/recaptcha/api/siteverify"
 
-	response, err := http.PostForm(apiURL, url.Values{"secret": {secretKey}, "response": {recaptchaResponse}})
-	if err != nil {
-		return errors.New("Failed to verify reCAPTCHA: " + err.Error())
-	}
-	defer response.Body.Close()
+// 	response, err := http.PostForm(apiURL, url.Values{"secret": {secretKey}, "response": {recaptchaResponse}})
+// 	if err != nil {
+// 		return errors.New("Failed to verify reCAPTCHA: " + err.Error())
+// 	}
+// 	defer response.Body.Close()
 
-	var result map[string]interface{}
-	if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
-		return errors.New("Failed to read reCAPTCHA response: " + err.Error())
-	}
+// 	var result map[string]interface{}
+// 	if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+// 		return errors.New("Failed to read reCAPTCHA response: " + err.Error())
+// 	}
 
-	if success, ok := result["success"].(bool); !ok || !success {
-		return errors.New("reCAPTCHA verification failed")
-	}
+// 	if success, ok := result["success"].(bool); !ok || !success {
+// 		return errors.New("reCAPTCHA verification failed")
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func (s *UserService) ValidateUsername(username string) error {
 	// exists, err := s.Repo.UsernameExists(username)
@@ -206,15 +348,15 @@ func (s *UserService) ValidateUsername(username string) error {
 		"support",
 		"help",
 		"faq",
-		"culinaryai",
-		"culinary_ai",
-		"culinary-ai",
-		"culinaryaiadmin",
-		"culinaryai_admin",
-		"culinaryai-admin",
-		"culinaryairoot",
-		"culinaryai_root",
-		"culinaryai-root",
+		"saltybytes",
+		"saltybytes_ai",
+		"saltybytes-ai",
+		"saltybytesadmin",
+		"saltybytes_admin",
+		"saltybytes-admin",
+		"saltybytesroot",
+		"saltybytes_root",
+		"saltybytes-root",
 	}
 
 	lowercaseUsername := strings.ToLower(username)

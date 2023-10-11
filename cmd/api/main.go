@@ -7,9 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
-	"github.com/windoze95/culinaryai/internal/config"
-	"github.com/windoze95/culinaryai/internal/db"
-	"github.com/windoze95/culinaryai/internal/router"
+	"github.com/windoze95/saltybytes-api/internal/config"
+	"github.com/windoze95/saltybytes-api/internal/db"
+	"github.com/windoze95/saltybytes-api/internal/router"
 )
 
 func init() {

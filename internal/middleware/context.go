@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/windoze95/culinaryai/internal/service"
+	"github.com/windoze95/saltybytes-api/internal/service"
 )
 
 func AttachUserToContext(userService *service.UserService) gin.HandlerFunc {
@@ -25,7 +25,7 @@ func AttachUserToContext(userService *service.UserService) gin.HandlerFunc {
 		if err != nil {
 			c.Set("user", nil)
 		} else {
-			user.HashedPassword = "" // Remove password from user object
+			// user.Auth.HashedPassword = "" // Remove password from user object
 			c.Set("user", user)
 		}
 		c.Next()

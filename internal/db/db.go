@@ -9,8 +9,8 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/lib/pq"
-	"github.com/windoze95/culinaryai/internal/config"
-	"github.com/windoze95/culinaryai/internal/models"
+	"github.com/windoze95/saltybytes-api/internal/config"
+	"github.com/windoze95/saltybytes-api/internal/models"
 )
 
 func New(cfg *config.Config) (*gorm.DB, error) {

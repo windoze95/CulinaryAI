@@ -8,12 +8,12 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
-	"github.com/windoze95/culinaryai/internal/config"
-	"github.com/windoze95/culinaryai/internal/models"
-	"github.com/windoze95/culinaryai/internal/openai"
-	"github.com/windoze95/culinaryai/internal/repository"
-	"github.com/windoze95/culinaryai/internal/s3"
-	"github.com/windoze95/culinaryai/internal/util"
+	"github.com/windoze95/saltybytes-api/internal/config"
+	"github.com/windoze95/saltybytes-api/internal/models"
+	"github.com/windoze95/saltybytes-api/internal/openai"
+	"github.com/windoze95/saltybytes-api/internal/repository"
+	"github.com/windoze95/saltybytes-api/internal/s3"
+	"github.com/windoze95/saltybytes-api/internal/util"
 )
 
 type RecipeService struct {

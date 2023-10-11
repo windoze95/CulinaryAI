@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/jinzhu/gorm"
-	"github.com/windoze95/culinaryai/internal/models"
+	"github.com/windoze95/saltybytes-api/internal/models"
 )
 
 type UserDB struct {
@@ -45,6 +45,18 @@ func (db *UserDB) GetUserByUsername(username string) (*models.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (db *UserDB) GetUserByFacebookID(facebookID string) (*models.User, error) {
+	var user models.User
+	if err := db.DB.Where("facebook_id = ?", facebookID).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (db *UserDB) UpdateUserEmail(userID uint, email string) error {
+	return db.DB.Model(&models.User{}).Where("id = ?", userID).Update("Email", email).Error
 }
 
 // func (db *UserDB) GetUserByID(userID uint, user *models.User) error {

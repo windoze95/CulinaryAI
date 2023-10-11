@@ -30,6 +30,9 @@ type Env struct {
 	AWSSecretAccessKey     EnvVar `json:"awsSecretAccessKey"`
 	S3Bucket               EnvVar `json:"s3Bucket"`
 	RecaptchaSecretKey     EnvVar `json:"recaptchaSecretKey"`
+	FacebookClientID       EnvVar `json:"facebookClientId"`
+	FacebookClientSecret   EnvVar `json:"facebookClientSecret"`
+	FacebookRedirectURL    EnvVar `json:"facebookRedirectUrl"`
 }
 
 // LoadConfig reads a JSON configuration file and returns a Config struct.

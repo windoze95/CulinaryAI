@@ -6,8 +6,10 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/windoze95/culinaryai/internal/service"
-	"github.com/windoze95/culinaryai/internal/util"
+	"github.com/windoze95/saltybytes-api/internal/service"
+	"github.com/windoze95/saltybytes-api/internal/util"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/facebook"
 )
 
 type UserHandler struct {
@@ -32,11 +34,11 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	// Verify reCAPTCHA
-	if err := h.Service.VerifyRecaptcha(newUser.Recaptcha); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	// // Verify reCAPTCHA
+	// if err := h.Service.VerifyRecaptcha(newUser.Recaptcha); err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 	return
+	// }
 
 	// Validate username
 	if err := h.Service.ValidateUsername(newUser.Username); err != nil {
@@ -108,15 +110,15 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie(
-		"auth_token",      // Cookie name
-		tokenString,       // Cookie value
-		31536000,          // Max age in seconds (365 days)
-		"/",               // Path
-		".culinaryai.com", // Domain, set with leading dot for subdomain compatibility
-		true,              // Secure
-		true,              // HTTP only
-	)
+	// c.SetCookie(
+	// 	"auth_token",      // Cookie name
+	// 	tokenString,       // Cookie value
+	// 	31536000,          // Max age in seconds (365 days)
+	// 	"/",               // Path
+	// 	".api.saltybytes.ai", // Domain, set with leading dot for subdomain compatibility
+	// 	true,              // Secure
+	// 	true,              // HTTP only
+	// )
 
 	// http.SetCookie(c.Writer, &http.Cookie{
 	// 	Name:     "auth_token",
@@ -126,8 +128,84 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 	// 	Path:     "/",
 	// })
 
-	c.JSON(http.StatusOK, gin.H{"message": "User logged in successfully", "user": user})
-	// c.JSON(200, gin.H{"accessToken": tokenString, "message": "User logged in successfully", "user": user})
+	// c.JSON(http.StatusOK, gin.H{"message": "User logged in successfully", "user": user})
+	c.JSON(http.StatusOK, gin.H{"accessToken": tokenString, "message": "User logged in successfully", "user": user})
+}
+
+func (h *UserHandler) FacebookAuth(c *gin.Context) {
+	// Construct OAuth2 config here
+	fbOauthConfig := &oauth2.Config{
+		RedirectURL:  h.Service.Cfg.Env.FacebookRedirectURL.Value(),
+		ClientID:     h.Service.Cfg.Env.FacebookClientID.Value(),
+		ClientSecret: h.Service.Cfg.Env.FacebookClientSecret.Value(),
+		Scopes:       []string{"email"},
+		Endpoint:     facebook.Endpoint,
+	}
+
+	// Generate OAuth2 URL and redirect user to Facebook for authentication
+	authURL := fbOauthConfig.AuthCodeURL("", oauth2.AccessTypeOffline)
+	c.Redirect(http.StatusFound, authURL)
+}
+
+func (h *UserHandler) FacebookCallback(c *gin.Context) {
+	// Extract 'code' from query parameters
+	code := c.DefaultQuery("code", "")
+	if code == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing code"})
+		return
+	}
+
+	// Try to fetch the user information first; if the user doesn't exist, then ask for a username.
+	user, err := h.Service.TryFacebookLogin(code)
+	if err == nil {
+		// Log the user in
+		token := jwt.New(jwt.SigningMethodHS256)
+		claims := token.Claims.(jwt.MapClaims)
+		claims["user_id"] = user.ID
+		// claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+
+		tokenString, err := token.SignedString([]byte(h.Service.Cfg.Env.JwtSecretKey.Value()))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Could not log in"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"accessToken": tokenString, "message": "User logged in successfully", "user": user})
+		return
+	}
+
+	// If user doesn't exist, ask for a username to complete the signup.
+	c.JSON(http.StatusOK, gin.H{"message": "Please provide a username", "code": code})
+}
+
+func (h *UserHandler) CompleteFacebookSignup(c *gin.Context) {
+	var details struct {
+		Code     string `json:"code" binding:"required"`
+		Username string `json:"username" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&details); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	user, err := h.Service.CreateFacebookUser(details.Username, details.Code)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Log the user in
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["user_id"] = user.ID
+	// claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+
+	tokenString, err := token.SignedString([]byte(h.Service.Cfg.Env.JwtSecretKey.Value()))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Could not log in"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"accessToken": tokenString, "message": "User logged in successfully", "user": user})
 }
 
 func (h *UserHandler) VerifyToken(c *gin.Context) {

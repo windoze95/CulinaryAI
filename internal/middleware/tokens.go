@@ -5,8 +5,8 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/windoze95/culinaryai/internal/config"
-	"github.com/windoze95/culinaryai/internal/util"
+	"github.com/windoze95/saltybytes-api/internal/config"
+	"github.com/windoze95/saltybytes-api/internal/util"
 )
 
 func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {

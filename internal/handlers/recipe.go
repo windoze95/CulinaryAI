@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/windoze95/culinaryai/internal/repository"
-	"github.com/windoze95/culinaryai/internal/service"
-	"github.com/windoze95/culinaryai/internal/util"
+	"github.com/windoze95/saltybytes-api/internal/repository"
+	"github.com/windoze95/saltybytes-api/internal/service"
+	"github.com/windoze95/saltybytes-api/internal/util"
 )
 
 type RecipeHandler struct {

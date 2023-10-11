@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/windoze95/culinaryai/internal/config"
+	"github.com/windoze95/saltybytes-api/internal/config"
 )
 
 // UploadRecipeImageToS3 uploads a given byte array to an S3 bucket and returns the location URL.

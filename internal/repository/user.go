@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/windoze95/culinaryai/internal/db"
-	"github.com/windoze95/culinaryai/internal/models"
+	"github.com/windoze95/saltybytes-api/internal/db"
+	"github.com/windoze95/saltybytes-api/internal/models"
 )
 
 type UserRepository struct {
@@ -19,6 +19,14 @@ func (r *UserRepository) CreateUser(user *models.User, settings *models.UserSett
 
 func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
 	return r.UserDB.GetUserByUsername(username)
+}
+
+func (r *UserRepository) GetUserByFacebookID(facebookID string) (*models.User, error) {
+	return r.UserDB.GetUserByFacebookID(facebookID)
+}
+
+func (r *UserRepository) UpdateUserEmail(userID uint, email string) error {
+	return r.UserDB.UpdateUserEmail(userID, email)
 }
 
 // func (r *UserRepository) GetUserByID(userID uint) (*models.User, error) {

@@ -2,8 +2,8 @@ package repository
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/windoze95/culinaryai/internal/db"
-	"github.com/windoze95/culinaryai/internal/models"
+	"github.com/windoze95/saltybytes-api/internal/db"
+	"github.com/windoze95/saltybytes-api/internal/models"
 )
 
 type RecipeRepository struct {
