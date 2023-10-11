@@ -29,7 +29,6 @@ type Env struct {
 	AWSAccessKeyID         EnvVar `json:"awsAccessKeyId"`
 	AWSSecretAccessKey     EnvVar `json:"awsSecretAccessKey"`
 	S3Bucket               EnvVar `json:"s3Bucket"`
-	RecaptchaSecretKey     EnvVar `json:"recaptchaSecretKey"`
 	FacebookClientID       EnvVar `json:"facebookClientId"`
 	FacebookClientSecret   EnvVar `json:"facebookClientSecret"`
 	FacebookRedirectURL    EnvVar `json:"facebookRedirectUrl"`
