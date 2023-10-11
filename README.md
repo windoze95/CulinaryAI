@@ -1,9 +1,5 @@
-# CulinaryAI™
+# SaltyBytes API
 
 An AI-powered recipe generator that aligns with predefined dietary restrictions.
 
-[CulinaryAI™](https://culinaryai.com)
-
-## TODO:
-
-- User controls (history, collect, delete, realign)
+[SaltyBytes API](https://api.saltybytes.ai)
