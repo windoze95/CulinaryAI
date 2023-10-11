@@ -30,6 +30,7 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 		"https://saltybytes.ai",
 		"https://www.saltybytes.ai",
 	}
+	config.AllowHeaders = append(config.AllowHeaders, "X-SaltyBytes-Identifier")
 
 	r.Use(cors.New(config))
 
