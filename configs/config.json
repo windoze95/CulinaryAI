@@ -10,7 +10,7 @@
         "awsAccessKeyID": "AWS_ACCESS_KEY_ID",
         "awsSecretAccessKey": "AWS_SECRET_ACCESS_KEY",
         "s3Bucket": "S3_BUCKET",
-        "facebookClientId": "FACEBOOK_CLIENT_ID",
+        "facebookClientID": "FACEBOOK_CLIENT_ID",
         "facebookClientSecret": "FACEBOOK_CLIENT_SECRET",
         "facebookRedirectUrl": "FACEBOOK_REDIRECT_URL"
     }

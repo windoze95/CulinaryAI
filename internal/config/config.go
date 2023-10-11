@@ -26,10 +26,10 @@ type Env struct {
 	JwtSecretKey           EnvVar `json:"jwtSecretKey"`
 	PublicOpenAIKey        EnvVar `json:"publicOpenAIKey"`
 	AWSRegion              EnvVar `json:"awsRegion"`
-	AWSAccessKeyID         EnvVar `json:"awsAccessKeyId"`
+	AWSAccessKeyID         EnvVar `json:"awsAccessKeyID"`
 	AWSSecretAccessKey     EnvVar `json:"awsSecretAccessKey"`
 	S3Bucket               EnvVar `json:"s3Bucket"`
-	FacebookClientID       EnvVar `json:"facebookClientId"`
+	FacebookClientID       EnvVar `json:"facebookClientID"`
 	FacebookClientSecret   EnvVar `json:"facebookClientSecret"`
 	FacebookRedirectURL    EnvVar `json:"facebookRedirectUrl"`
 }
