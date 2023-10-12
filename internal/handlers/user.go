@@ -22,10 +22,10 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var newUser struct {
-		Username  string `json:"username" binding:"required"`
-		Email     string `json:"email" binding:"required"`
-		Password  string `json:"password" binding:"required"`
-		Recaptcha string `json:"recaptcha" binding:"required"`
+		Username string `json:"username" binding:"required"`
+		Email    string `json:"email" binding:"required"`
+		Password string `json:"password" binding:"required"`
+		// Recaptcha string `json:"recaptcha" binding:"required"`
 	}
 
 	// Returns error if a required field is not included
