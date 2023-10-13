@@ -13,8 +13,8 @@ func NewUserRepository(userDB *db.UserDB) *UserRepository {
 	return &UserRepository{UserDB: userDB}
 }
 
-func (r *UserRepository) CreateUser(user *models.User, settings *models.UserSettings, gc *models.GuidingContent) error {
-	return r.UserDB.CreateUser(user, settings, gc)
+func (r *UserRepository) CreateUser(user *models.User) error {
+	return r.UserDB.CreateUser(user)
 }
 
 func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {

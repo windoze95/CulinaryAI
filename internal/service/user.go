@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	goaway "github.com/TwiN/go-away"
 	"github.com/asaskevich/govalidator"
@@ -24,6 +25,12 @@ import (
 type UserService struct {
 	Cfg  *config.Config
 	Repo *repository.UserRepository
+}
+
+type UserResponse struct {
+	ID       uint   `json:"id"`
+	Username string `json:"username"`
+	FirsName string `json:"first_name"`
 }
 
 // Constructor function for initializing a new UserService
@@ -61,12 +68,18 @@ func (s *UserService) CreateUser(username, email, password string) error {
 			HashedPassword: &hashedPasswordStr,
 			AuthType:       "standard",
 		},
+		Subscription: models.Subscription{
+			SubscriptionTier: models.Free,
+			ExpiresAt:        time.Now().AddDate(0, 1, 0), // One month from now
+		},
+		Settings:       models.UserSettings{},
+		GuidingContent: models.GuidingContent{},
 	}
-	settings := &models.UserSettings{}
-	gc := &models.GuidingContent{}
-	gc.UnitSystem = 1 // Default value
+	// settings := &models.UserSettings{}
+	// gc := &models.GuidingContent{}
+	// gc.UnitSystem = 1 // Default value
 
-	if err := s.Repo.CreateUser(user, settings, gc); err != nil {
+	if err := s.Repo.CreateUser(user); err != nil {
 		if pgErr, ok := err.(*pq.Error); ok {
 			if pgErr.Code == "23505" { // Unique constraint violation
 				if strings.Contains(pgErr.Error(), "username") {
@@ -117,7 +130,7 @@ func (s *UserService) CreateFacebookUser(username, code string) (*models.User, e
 	// Fetch user info
 	// Use the token to make an HTTP request to Facebook API to get user's info
 	client := fbOauthConfig.Client(context.Background(), token)
-	resp, err := client.Get("https://graph.facebook.com/me?fields=id,name,email")
+	resp, err := client.Get("https://graph.facebook.com/me?fields=id,first_name,email")
 	if err != nil {
 		return nil, err
 	}
@@ -125,9 +138,9 @@ func (s *UserService) CreateFacebookUser(username, code string) (*models.User, e
 
 	// Decode the response into a struct
 	var facebookUser struct {
-		ID    string `json:"id"`
-		Name  string `json:"name"`
-		Email string `json:"email"`
+		ID        string `json:"id"`
+		FirstName string `json:"first_name"`
+		Email     string `json:"email"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&facebookUser); err != nil {
 		return nil, err
@@ -148,12 +161,19 @@ func (s *UserService) CreateFacebookUser(username, code string) (*models.User, e
 			Auth: models.UserAuth{
 				AuthType: "facebook",
 			},
+			Subscription: models.Subscription{
+				SubscriptionTier: models.Free,
+				ExpiresAt:        time.Now().AddDate(0, 1, 0), // One month from now
+			},
+			Settings:       models.UserSettings{},
+			GuidingContent: models.GuidingContent{},
 		}
-		settings := &models.UserSettings{}
-		gc := &models.GuidingContent{}
-		gc.UnitSystem = 1 // Default value
 
-		if err := s.Repo.CreateUser(user, settings, gc); err != nil {
+		// settings := &models.UserSettings{}
+		// gc := &models.GuidingContent{}
+		// gc.UnitSystem = 1 // Default value
+
+		if err := s.Repo.CreateUser(user); err != nil {
 			if pgErr, ok := err.(*pq.Error); ok {
 				if pgErr.Code == "23505" { // Unique constraint violation
 					if strings.Contains(pgErr.Error(), "username") {
@@ -196,7 +216,7 @@ func (s *UserService) TryFacebookLogin(code string) (*models.User, error) {
 
 	// Fetch user info
 	client := fbOauthConfig.Client(context.Background(), token)
-	resp, err := client.Get("https://graph.facebook.com/me?fields=id,name,email")
+	resp, err := client.Get("https://graph.facebook.com/me?fields=id,first_name,email")
 	if err != nil {
 		return nil, err
 	}
@@ -204,9 +224,9 @@ func (s *UserService) TryFacebookLogin(code string) (*models.User, error) {
 
 	// Decode the response into a struct
 	var facebookUser struct {
-		ID    string `json:"id"`
-		Name  string `json:"name"`
-		Email string `json:"email"`
+		ID        string `json:"id"`
+		FirstName string `json:"first_name"`
+		Email     string `json:"email"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&facebookUser); err != nil {
 		return nil, err

@@ -15,27 +15,36 @@ func NewUserDB(gormDB *gorm.DB) *UserDB {
 	return &UserDB{DB: gormDB}
 }
 
-func (db *UserDB) CreateUser(user *models.User, settings *models.UserSettings, gc *models.GuidingContent) error {
+// func (db *UserDB) CreateUser(user *models.User, settings *models.UserSettings, gc *models.GuidingContent) error {
+// 	tx := db.DB.Begin()
+
+// 	if err := tx.Create(user).Error; err != nil {
+// 		tx.Rollback()
+// 		return err
+// 	}
+
+// 	settings.UserID = user.ID
+// 	if err := tx.Create(settings).Error; err != nil {
+// 		tx.Rollback()
+// 		return err
+// 	}
+
+// 	gc.UserID = user.ID
+// 	gc.UnitSystem = 1 // Default value
+// 	if err := tx.Create(gc).Error; err != nil {
+// 		tx.Rollback()
+// 		return err
+// 	}
+
+// 	return tx.Commit().Error
+// }
+
+func (db *UserDB) CreateUser(user *models.User) error {
 	tx := db.DB.Begin()
-
-	if err := tx.Create(user).Error; err != nil {
+	if err := tx.Create(&user).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
-
-	settings.UserID = user.ID
-	if err := tx.Create(settings).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	gc.UserID = user.ID
-	gc.UnitSystem = 1 // Default value
-	if err := tx.Create(gc).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
 	return tx.Commit().Error
 }
 

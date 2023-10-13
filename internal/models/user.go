@@ -21,6 +21,7 @@ import (
 type User struct {
 	gorm.Model
 	Username         string         `gorm:"unique;index"`
+	FirstName        *string        `gorm:"default:null"`
 	Email            *string        `gorm:"unique;default:null"`
 	FacebookID       *string        `gorm:"unique;default:null;index"`
 	Settings         UserSettings   `gorm:"foreignKey:UserID"`
@@ -47,10 +48,10 @@ const (
 
 type Subscription struct {
 	gorm.Model
-	UserID           uint `gorm:"unique;index"`
+	UserID           uint             `gorm:"unique;index"`
+	SubscriptionTier SubscriptionTier `gorm:"type:enum('Free','30-Uses','90-Uses');default:'Free';index"`
 	ExpiresAt        time.Time
-	SubscriptionTier SubscriptionTier `gorm:"type:enum('Free','30-Uses','90-Uses');index"`
-	RemainingUses    int
+	RemainingUses    int `gorm:"default:5"`
 }
 
 type UserSettings struct {
