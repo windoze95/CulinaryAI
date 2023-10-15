@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -75,8 +77,7 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&userCredentials); err != nil {
-		log.Printf("error: LoginUser: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "All fields are required"})
 		return
 	}
 
@@ -97,16 +98,11 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 
 	// c.JSON(http.StatusOK, gin.H{"message": "User logged in successfully"})
 
-	// Create JWT token
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["user_id"] = user.ID
-	// claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
-
-	tokenString, err := token.SignedString([]byte(h.Service.Cfg.Env.JwtSecretKey.Value()))
+	// Log the user in
+	tokenString, err := generateAuthToken(user.ID, h.Service.Cfg.Env.JwtSecretKey.Value())
 	if err != nil {
-		log.Printf("error: LoginUser: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Could not log in"})
+		log.Printf("error: handlers.LoginUser: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -151,22 +147,19 @@ func (h *UserHandler) FacebookCallback(c *gin.Context) {
 	// Extract 'code' from query parameters
 	code := c.DefaultQuery("code", "")
 	if code == "" {
+		log.Printf("error: handlers.FacebookCallback: %v", errors.New("missing code"))
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing code"})
 		return
 	}
 
-	// Try to fetch the user information first; if the user doesn't exist, then ask for a username.
+	// Try to fetch the user information
 	user, err := h.Service.TryFacebookLogin(code)
 	if err == nil {
 		// Log the user in
-		token := jwt.New(jwt.SigningMethodHS256)
-		claims := token.Claims.(jwt.MapClaims)
-		claims["user_id"] = user.ID
-		// claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
-
-		tokenString, err := token.SignedString([]byte(h.Service.Cfg.Env.JwtSecretKey.Value()))
+		tokenString, err := generateAuthToken(user.ID, h.Service.Cfg.Env.JwtSecretKey.Value())
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "Could not log in"})
+			log.Printf("error: handlers.FacebookCallback: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -184,7 +177,7 @@ func (h *UserHandler) CompleteFacebookSignup(c *gin.Context) {
 		Username string `json:"username" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&details); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "All fields are required"})
 		return
 	}
 	user, err := h.Service.CreateFacebookUser(details.Username, details.Code)
@@ -194,18 +187,31 @@ func (h *UserHandler) CompleteFacebookSignup(c *gin.Context) {
 	}
 
 	// Log the user in
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["user_id"] = user.ID
-	// claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
-
-	tokenString, err := token.SignedString([]byte(h.Service.Cfg.Env.JwtSecretKey.Value()))
+	tokenString, err := generateAuthToken(user.ID, h.Service.Cfg.Env.JwtSecretKey.Value())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Could not log in"})
+		log.Printf("error: handlers.CompleteFacebookSignup: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"accessToken": tokenString, "message": "User logged in successfully", "user": user})
+}
+
+func generateAuthToken(userID uint, secretKey string) (string, error) {
+	// Create a new token object, specifying signing method and the claims you would like it to contain.
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	// Set claims
+	claims := token.Claims.(jwt.MapClaims)
+	claims["user_id"] = userID
+
+	// Sign and get the complete encoded token as a string using the secret
+	tokenString, err := token.SignedString([]byte(secretKey))
+	if err != nil {
+		return "", fmt.Errorf("generateAuthToken: %v ", err)
+	}
+
+	return tokenString, nil
 }
 
 func (h *UserHandler) VerifyToken(c *gin.Context) {

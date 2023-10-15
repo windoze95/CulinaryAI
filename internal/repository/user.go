@@ -1,6 +1,10 @@
 package repository
 
 import (
+	"errors"
+	"strings"
+
+	"github.com/lib/pq"
 	"github.com/windoze95/saltybytes-api/internal/db"
 	"github.com/windoze95/saltybytes-api/internal/models"
 )
@@ -14,7 +18,18 @@ func NewUserRepository(userDB *db.UserDB) *UserRepository {
 }
 
 func (r *UserRepository) CreateUser(user *models.User) error {
-	return r.UserDB.CreateUser(user)
+	if err := r.UserDB.CreateUser(user); err != nil {
+		// Check for unique constraints
+		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
+			if strings.Contains(pgErr.Error(), "username") {
+				return errors.New("username already in use")
+			} else if strings.Contains(pgErr.Error(), "email") {
+				return errors.New("email already in use")
+			}
+		}
+		return err
+	}
+	return nil
 }
 
 func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
