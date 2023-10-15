@@ -2,7 +2,7 @@
     "title": "SaltyBytes",
     "env": {
         "port": "PORT",
-        "databaseUrl": "DATABASE_URL",
+        "databaseUrl": "HEROKU_POSTGRESQL_BRONZE_URL",
         "openAIKeyEncryptionKey": "OPENAI_KEY_ENCRYPTION_KEY",
         "jwtSecretKey": "JWT_SECRET_KEY",
         "publicOpenAIKey": "PUBLIC_OPENAI_KEY",
