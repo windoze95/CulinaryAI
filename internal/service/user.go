@@ -40,7 +40,7 @@ func NewUserService(cfg *config.Config, repo *repository.UserRepository) *UserSe
 	}
 }
 
-func (s *UserService) CreateUser(username, firstName, email, password string) error {
+func (s *UserService) CreateUser(username, firstName, email, password string) (*models.User, error) {
 	// // Validate username
 	// if err := s.ValidateUsername(username); err != nil {
 	// 	return err
@@ -54,7 +54,7 @@ func (s *UserService) CreateUser(username, firstName, email, password string) er
 	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 	if err != nil {
-		return fmt.Errorf("error hashing password: %v", err)
+		return nil, fmt.Errorf("error hashing password: %v", err)
 	}
 
 	hashedPasswordStr := string(hashedPassword)
@@ -93,10 +93,10 @@ func (s *UserService) CreateUser(username, firstName, email, password string) er
 	// }
 
 	if err := s.Repo.CreateUser(user); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return user, nil
 }
 
 func (s *UserService) LoginUser(username, password string) (*models.User, error) {

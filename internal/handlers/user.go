@@ -62,13 +62,21 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	}
 
 	// Create user
-	err := h.Service.CreateUser(newUser.Username, newUser.FirstName, newUser.Email, newUser.Password)
+	user, err := h.Service.CreateUser(newUser.Username, newUser.FirstName, newUser.Email, newUser.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User signed up successfully"})
+	// Log the user in
+	tokenString, err := generateAuthToken(user.ID, h.Service.Cfg.Env.JwtSecretKey.Value())
+	if err != nil {
+		log.Printf("error: handlers.LoginUser: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"access_token": tokenString, "message": "User signed up successfully", "user": user})
 }
 
 func (h *UserHandler) LoginUser(c *gin.Context) {
@@ -126,7 +134,7 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 	// })
 
 	// c.JSON(http.StatusOK, gin.H{"message": "User logged in successfully", "user": user})
-	c.JSON(http.StatusOK, gin.H{"accessToken": tokenString, "message": "User logged in successfully", "user": user})
+	c.JSON(http.StatusOK, gin.H{"access_token": tokenString, "message": "User logged in successfully", "user": user})
 }
 
 func (h *UserHandler) FacebookAuth(c *gin.Context) {
@@ -164,7 +172,7 @@ func (h *UserHandler) FacebookCallback(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"accessToken": tokenString, "message": "User logged in successfully", "user": user})
+		c.JSON(http.StatusOK, gin.H{"access_token": tokenString, "message": "User logged in successfully", "user": user})
 		return
 	}
 
@@ -195,7 +203,7 @@ func (h *UserHandler) CompleteFacebookSignup(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"accessToken": tokenString, "message": "User logged in successfully", "user": user})
+	c.JSON(http.StatusOK, gin.H{"access_token": tokenString, "message": "User logged in successfully", "user": user})
 }
 
 func generateAuthToken(userID uint, secretKey string) (string, error) {
