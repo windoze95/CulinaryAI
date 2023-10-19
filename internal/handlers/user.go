@@ -24,15 +24,16 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var newUser struct {
-		Username string `json:"username" binding:"required"`
-		Email    string `json:"email" binding:"required"`
-		Password string `json:"password" binding:"required"`
+		Username  string `json:"username" binding:"required"`
+		FirstName string `json:"firstName"`
+		Email     string `json:"email" binding:"required"`
+		Password  string `json:"password" binding:"required"`
 		// Recaptcha string `json:"recaptcha" binding:"required"`
 	}
 
 	// Returns error if a required field is not included
 	if err := c.ShouldBindJSON(&newUser); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "All fields are required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Username, email, and password fields are required"})
 		return
 	}
 
@@ -61,7 +62,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	}
 
 	// Create user
-	err := h.Service.CreateUser(newUser.Username, newUser.Email, newUser.Password)
+	err := h.Service.CreateUser(newUser.Username, newUser.FirstName, newUser.Email, newUser.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

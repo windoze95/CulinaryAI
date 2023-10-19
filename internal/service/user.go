@@ -40,7 +40,7 @@ func NewUserService(cfg *config.Config, repo *repository.UserRepository) *UserSe
 	}
 }
 
-func (s *UserService) CreateUser(username, email, password string) error {
+func (s *UserService) CreateUser(username, firstName, email, password string) error {
 	// // Validate username
 	// if err := s.ValidateUsername(username); err != nil {
 	// 	return err
@@ -61,8 +61,9 @@ func (s *UserService) CreateUser(username, email, password string) error {
 
 	// Create User and UserSettings
 	user := &models.User{
-		Username: username,
-		Email:    &email,
+		Username:  username,
+		FirstName: &firstName,
+		Email:     &email,
 		Auth: models.UserAuth{
 			HashedPassword: &hashedPasswordStr,
 			AuthType:       "standard",
