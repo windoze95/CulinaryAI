@@ -87,8 +87,8 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 		// Login a user
 		apiPublic.POST("/auth/login", userHandler.LoginUser)
 		// Facebook OAuth routes
-		apiPublic.GET("/auth/facebook", userHandler.FacebookAuth)
-		apiPublic.GET("/auth/facebook/callback", userHandler.FacebookCallback)
+		apiPublic.POST("/auth/facebook", userHandler.FacebookAuth)
+		apiPublic.POST("/auth/facebook/callback", userHandler.FacebookCallback)
 		apiPublic.POST("/auth/facebook/complete", userHandler.CompleteFacebookSignup)
 		// Get a single recipe by it's ID
 		apiPublic.GET("/recipes/:recipe_id", recipeHandler.GetRecipe)
