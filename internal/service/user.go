@@ -87,7 +87,8 @@ func (s *UserService) CreateUser(username, firstName, email, password string) (*
 	// 	return fmt.Errorf("error creating user: %v", err)
 	// }
 
-	if err := s.Repo.CreateUser(user); err != nil {
+	user, err = s.Repo.CreateUser(user)
+	if err != nil {
 		return nil, err
 	}
 
@@ -95,7 +96,7 @@ func (s *UserService) CreateUser(username, firstName, email, password string) (*
 }
 
 func (s *UserService) LoginUser(username, password string) (*models.User, error) {
-	user, err := s.Repo.GetUserByUsername(username)
+	user, err := s.Repo.GetUserAuthByUsername(username)
 	if err != nil {
 		return nil, err
 	}
@@ -106,6 +107,8 @@ func (s *UserService) LoginUser(username, password string) (*models.User, error)
 
 	// Clear the hashed password before returning the user
 	// user.HashedPassword = ""
+
+	user = util.StripSensitiveUserData(user)
 
 	return user, nil
 }
@@ -178,7 +181,8 @@ func (s *UserService) CreateFacebookUser(username, code string) (*models.User, e
 		// 	}
 		// 	return nil, fmt.Errorf("error creating user: %v", err)
 		// }
-		if err := s.Repo.CreateUser(user); err != nil {
+		user, err = s.Repo.CreateUser(user)
+		if err != nil {
 			return nil, err
 		}
 	} else {

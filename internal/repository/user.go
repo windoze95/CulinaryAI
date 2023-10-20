@@ -7,6 +7,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/windoze95/saltybytes-api/internal/db"
 	"github.com/windoze95/saltybytes-api/internal/models"
+	"github.com/windoze95/saltybytes-api/internal/util"
 )
 
 type UserRepository struct {
@@ -17,27 +18,48 @@ func NewUserRepository(userDB *db.UserDB) *UserRepository {
 	return &UserRepository{UserDB: userDB}
 }
 
-func (r *UserRepository) CreateUser(user *models.User) error {
+func (r *UserRepository) CreateUser(user *models.User) (*models.User, error) {
 	if err := r.UserDB.CreateUser(user); err != nil {
 		// Check for unique constraints
 		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
 			if strings.Contains(pgErr.Error(), "username") {
-				return errors.New("username already in use")
+				return nil, errors.New("username already in use")
 			} else if strings.Contains(pgErr.Error(), "email") {
-				return errors.New("email already in use")
+				return nil, errors.New("email already in use")
 			}
 		}
-		return err
+		return nil, err
 	}
-	return nil
+
+	user = util.StripSensitiveUserData(user)
+
+	return user, nil
 }
 
-func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
+func (r *UserRepository) GetUserAuthByUsername(username string) (*models.User, error) {
 	return r.UserDB.GetUserByUsername(username)
 }
 
+func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
+	user, err := r.UserDB.GetUserByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+
+	user = util.StripSensitiveUserData(user)
+
+	return user, nil
+}
+
 func (r *UserRepository) GetUserByFacebookID(facebookID string) (*models.User, error) {
-	return r.UserDB.GetUserByFacebookID(facebookID)
+	user, err := r.UserDB.GetUserByFacebookID(facebookID)
+	if err != nil {
+		return nil, err
+	}
+
+	user = util.StripSensitiveUserData(user)
+
+	return user, nil
 }
 
 func (r *UserRepository) UpdateUserEmail(userID uint, email string) error {
@@ -65,5 +87,12 @@ func (r *UserRepository) UsernameExists(username string) (bool, error) {
 }
 
 func (r *UserRepository) GetPreloadedUserByID(userID uint) (*models.User, error) {
-	return r.UserDB.GetPreloadedUserByID(userID)
+	user, err := r.UserDB.GetPreloadedUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	user = util.StripSensitiveUserData(user)
+
+	return user, nil
 }

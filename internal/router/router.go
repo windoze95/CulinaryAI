@@ -47,7 +47,6 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 	// Apply rate limiting middleware to all routes
 	r.Use(middleware.RateLimitByIP(globalRps, globalCleanupInterval, globalExpiration))
 	r.Use(middleware.CheckIDHeader())
-	r.Use(middleware.StripSensitiveUserData())
 
 	// // Individual static routes for specific files
 	// r.StaticFile("/", "./web/saltybytes/build/index.html")
