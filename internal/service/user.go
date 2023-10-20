@@ -70,6 +70,9 @@ func (s *UserService) CreateUser(username, firstName, email, password string) (*
 		GuidingContent:   models.GuidingContent{},
 		CollectedRecipes: []models.Recipe{},
 	}
+	user.Settings.UserID = user.ID
+	user.GuidingContent.UserID = user.ID
+
 	// settings := &models.UserSettings{}
 	// gc := &models.GuidingContent{}
 	// gc.UnitSystem = 1 // Default value
@@ -164,6 +167,8 @@ func (s *UserService) CreateFacebookUser(username, code string) (*models.User, e
 			GuidingContent:   models.GuidingContent{},
 			CollectedRecipes: []models.Recipe{},
 		}
+		user.Settings.UserID = user.ID
+		user.GuidingContent.UserID = user.ID
 
 		// settings := &models.UserSettings{}
 		// gc := &models.GuidingContent{}
