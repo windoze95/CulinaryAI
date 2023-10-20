@@ -24,11 +24,11 @@ type User struct {
 	FirstName        *string        `gorm:"default:null"`
 	Email            *string        `gorm:"unique;default:null"`
 	FacebookID       *string        `gorm:"unique;default:null;index"`
-	Settings         UserSettings   `gorm:"foreignKey:UserID"`
-	CollectedRecipes []Recipe       `gorm:"many2many:user_collected_recipes;"`
-	GuidingContent   GuidingContent `gorm:"foreignKey:UserID"`
 	Auth             UserAuth       `gorm:"foreignKey:UserID"`
 	Subscription     Subscription   `gorm:"foreignKey:UserID"`
+	Settings         UserSettings   `gorm:"foreignKey:UserID"`
+	GuidingContent   GuidingContent `gorm:"foreignKey:UserID"`
+	CollectedRecipes []Recipe       `gorm:"many2many:user_collected_recipes;"`
 }
 
 type UserAuth struct {

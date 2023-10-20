@@ -26,12 +26,6 @@ type UserService struct {
 	Repo *repository.UserRepository
 }
 
-type UserResponse struct {
-	ID       uint   `json:"id"`
-	Username string `json:"username"`
-	FirsName string `json:"first_name"`
-}
-
 // Constructor function for initializing a new UserService
 func NewUserService(cfg *config.Config, repo *repository.UserRepository) *UserService {
 	return &UserService{
@@ -72,8 +66,9 @@ func (s *UserService) CreateUser(username, firstName, email, password string) (*
 			SubscriptionTier: models.Free,
 			ExpiresAt:        time.Now().AddDate(0, 1, 0), // One month from now
 		},
-		Settings:       models.UserSettings{},
-		GuidingContent: models.GuidingContent{},
+		Settings:         models.UserSettings{},
+		GuidingContent:   models.GuidingContent{},
+		CollectedRecipes: []models.Recipe{},
 	}
 	// settings := &models.UserSettings{}
 	// gc := &models.GuidingContent{}
@@ -162,8 +157,9 @@ func (s *UserService) CreateFacebookUser(username, code string) (*models.User, e
 				SubscriptionTier: models.Free,
 				ExpiresAt:        time.Now().AddDate(0, 1, 0), // One month from now
 			},
-			Settings:       models.UserSettings{},
-			GuidingContent: models.GuidingContent{},
+			Settings:         models.UserSettings{},
+			GuidingContent:   models.GuidingContent{},
+			CollectedRecipes: []models.Recipe{},
 		}
 
 		// settings := &models.UserSettings{}

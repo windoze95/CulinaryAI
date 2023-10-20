@@ -41,7 +41,7 @@ func NewUserDB(gormDB *gorm.DB) *UserDB {
 
 func (db *UserDB) CreateUser(user *models.User) error {
 	tx := db.DB.Begin()
-	if err := tx.Create(&user).Error; err != nil {
+	if err := tx.Create(user).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
