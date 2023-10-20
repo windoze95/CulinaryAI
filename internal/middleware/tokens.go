@@ -6,6 +6,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/windoze95/saltybytes-api/internal/config"
+	"github.com/windoze95/saltybytes-api/internal/models"
 	"github.com/windoze95/saltybytes-api/internal/util"
 )
 
@@ -40,6 +41,26 @@ func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+	}
+}
+
+func StripSensitiveUserData() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Allow the handler to execute
+		c.Next()
+
+		// Retrieve the user from the context
+		user, err := util.GetUserFromContext(c)
+		if err != nil {
+			return
+		}
+
+		// Remove sensitive data from the user object
+		user.Auth = models.UserAuth{}
+		user.Settings.EncryptedOpenAIKey = ""
+
+		// Set the user in the context
+		c.Set("user", user)
 	}
 }
 
