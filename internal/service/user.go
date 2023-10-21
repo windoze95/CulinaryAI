@@ -66,12 +66,12 @@ func (s *UserService) CreateUser(username, firstName, email, password string) (*
 			SubscriptionTier: models.Free,
 			ExpiresAt:        time.Now().AddDate(0, 1, 0), // One month from now
 		},
-		Settings:         models.UserSettings{},
+		Settings: models.UserSettings{},
+		// EncryptedOpenAIKey: "",
+		// },
 		GuidingContent:   models.GuidingContent{},
 		CollectedRecipes: []models.Recipe{},
 	}
-	user.Settings.UserID = user.ID
-	user.GuidingContent.UserID = user.ID
 
 	// settings := &models.UserSettings{}
 	// gc := &models.GuidingContent{}
@@ -167,8 +167,6 @@ func (s *UserService) CreateFacebookUser(username, code string) (*models.User, e
 			GuidingContent:   models.GuidingContent{},
 			CollectedRecipes: []models.Recipe{},
 		}
-		user.Settings.UserID = user.ID
-		user.GuidingContent.UserID = user.ID
 
 		// settings := &models.UserSettings{}
 		// gc := &models.GuidingContent{}

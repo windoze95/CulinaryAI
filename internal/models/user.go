@@ -113,8 +113,8 @@ func (s *Subscription) BeforeUpdate(tx *gorm.DB) (err error) {
 
 type UserSettings struct {
 	gorm.Model
-	UserID             uint `gorm:"unique;index"`
-	EncryptedOpenAIKey string
+	UserID             uint   `gorm:"unique;index"`
+	EncryptedOpenAIKey string `gorm:"default:''"`
 }
 
 type GuidingContent struct {
