@@ -67,7 +67,7 @@ func (s *UserService) CreateUser(username, firstName, email, password string) (*
 			ExpiresAt:        time.Now().AddDate(0, 1, 0), // One month from now
 		},
 		Settings: models.UserSettings{
-			UsePersonalAPIKey:  false,
+			UsePersonalAPIKey:  true,
 			EncryptedOpenAIKey: "",
 		},
 		GuidingContent:   models.GuidingContent{},
