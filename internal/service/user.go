@@ -66,7 +66,10 @@ func (s *UserService) CreateUser(username, firstName, email, password string) (*
 			SubscriptionTier: models.Free,
 			ExpiresAt:        time.Now().AddDate(0, 1, 0), // One month from now
 		},
-		Settings:         models.UserSettings{},
+		Settings: models.UserSettings{
+			UsePersonalAPIKey:  false,
+			EncryptedOpenAIKey: "",
+		},
 		GuidingContent:   models.GuidingContent{},
 		CollectedRecipes: []models.Recipe{},
 	}
