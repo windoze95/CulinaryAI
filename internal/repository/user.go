@@ -31,7 +31,7 @@ func (r *UserRepository) CreateUser(user *models.User) (*models.User, error) {
 		return nil, err
 	}
 
-	user = util.StripSensitiveUserData(user)
+	// user = util.StripSensitiveUserData(user)
 
 	return user, nil
 }
@@ -46,7 +46,7 @@ func (r *UserRepository) GetUserByUsername(username string) (*models.User, error
 		return nil, err
 	}
 
-	user = util.StripSensitiveUserData(user)
+	// user = util.StripSensitiveUserData(user)
 
 	return user, nil
 }
