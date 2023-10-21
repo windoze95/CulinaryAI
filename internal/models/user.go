@@ -114,6 +114,7 @@ func (s *Subscription) BeforeUpdate(tx *gorm.DB) (err error) {
 type UserSettings struct {
 	gorm.Model
 	UserID             uint   `gorm:"unique;index"`
+	UsePersonalAPIKey  bool   `gorm:"default:false"`
 	EncryptedOpenAIKey string `gorm:"default:''"`
 }
 
