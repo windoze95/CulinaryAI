@@ -114,6 +114,7 @@ func (s *Subscription) BeforeUpdate(tx *gorm.DB) (err error) {
 type UserSettings struct {
 	gorm.Model
 	UserID             uint   `gorm:"unique;index"`
+	KeepScreenAwake    bool   `gorm:"default:true"`
 	UsePersonalAPIKey  bool   `gorm:"default:false"`
 	EncryptedOpenAIKey string `gorm:"default:''"`
 }
@@ -122,17 +123,17 @@ type GuidingContent struct {
 	gorm.Model
 	UserID       uint `gorm:"unique;index"`
 	UID          uuid.UUID
-	UnitSystem   GuidingContentUnitSystem `gorm:"type:text"`
+	UnitSystem   GuidingContentUnitSystem `gorm:"type:int;default:0"`
 	Requirements string                   // Additional instructions or guidelines
 	// DietaryRestrictions string // Specific dietary restrictions
 	// SupportingResearch string // Supporting research to help convey the user's expectations
 }
 
-type GuidingContentUnitSystem string
+type GuidingContentUnitSystem int
 
 const (
-	USCustomary GuidingContentUnitSystem = "US Customary"
-	Metric      GuidingContentUnitSystem = "Metric"
+	USCustomary GuidingContentUnitSystem = iota // 0
+	Metric                                      // 1
 )
 
 func (gc *GuidingContent) IsValidUnitSystem() bool {
@@ -141,6 +142,17 @@ func (gc *GuidingContent) IsValidUnitSystem() bool {
 		return true
 	default:
 		return false
+	}
+}
+
+func (gc *GuidingContent) GetUnitSystemText() string {
+	switch gc.UnitSystem {
+	case USCustomary:
+		return "US Customary"
+	case Metric:
+		return "Metric"
+	default:
+		return "US Customary"
 	}
 }
 
