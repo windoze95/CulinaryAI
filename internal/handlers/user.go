@@ -242,14 +242,7 @@ func (h *UserHandler) LogoutUser(c *gin.Context) {
 
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	// Retrieve the user from the context
-	userID, err := util.GetUserIDFromContext(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Use the service to get the user
-	user, err := h.Service.GetUserByID(userID)
+	user, err := util.GetUserFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
