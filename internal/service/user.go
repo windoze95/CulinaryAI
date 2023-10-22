@@ -268,6 +268,10 @@ func fetchFacebookUserInfo(token *oauth2.Token, fbOauthConfig *oauth2.Config) (*
 	return &fbUser, nil
 }
 
+func (s *UserService) GetUserByID(userID uint) (*models.User, error) {
+	return s.Repo.GetUserByID(userID)
+}
+
 func (s *UserService) GetPreloadedUserByID(userID uint) (*models.User, error) {
 	return s.Repo.GetPreloadedUserByID(userID)
 }

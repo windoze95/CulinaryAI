@@ -51,6 +51,28 @@ func (r *UserRepository) GetUserByUsername(username string) (*models.User, error
 	return user, nil
 }
 
+func (r *UserRepository) GetUserByID(userID uint) (*models.User, error) {
+	user, err := r.UserDB.GetPreloadedUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	user = util.StripSensitiveUserData(user)
+
+	return user, nil
+}
+
+func (r *UserRepository) GetPreloadedUserByID(userID uint) (*models.User, error) {
+	user, err := r.UserDB.GetPreloadedUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	user = util.StripSensitiveUserData(user)
+
+	return user, nil
+}
+
 func (r *UserRepository) GetUserByFacebookID(facebookID string) (*models.User, error) {
 	user, err := r.UserDB.GetUserByFacebookID(facebookID)
 	if err != nil {
@@ -84,15 +106,4 @@ func (r *UserRepository) UpdateGuidingContent(userID uint, updatedGC *models.Gui
 
 func (r *UserRepository) UsernameExists(username string) (bool, error) {
 	return r.UserDB.UsernameExists(username)
-}
-
-func (r *UserRepository) GetPreloadedUserByID(userID uint) (*models.User, error) {
-	user, err := r.UserDB.GetPreloadedUserByID(userID)
-	if err != nil {
-		return nil, err
-	}
-
-	user = util.StripSensitiveUserData(user)
-
-	return user, nil
 }

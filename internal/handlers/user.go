@@ -240,6 +240,24 @@ func (h *UserHandler) LogoutUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User logged out successfully"})
 }
 
+func (h *UserHandler) GetUserByID(c *gin.Context) {
+	// Retrieve the user from the context
+	userID, err := util.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Use the service to get the user
+	user, err := h.Service.GetUserByID(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": user})
+}
+
 func (h *UserHandler) GetUserSettings(c *gin.Context) {
 	// Retrieve the user from the context
 	user, err := util.GetUserFromContext(c)

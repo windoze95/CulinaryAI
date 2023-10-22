@@ -105,6 +105,8 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 		apiProtected.GET("/users/verify", middleware.AttachUserToContext(userService), userHandler.VerifyToken)
 		// Logout a user
 		apiProtected.POST("/users/logout", middleware.AttachUserToContext(userService), userHandler.LogoutUser)
+		// Get a user by their ID
+		apiProtected.GET("/users/:user_id", middleware.AttachUserToContext(userService), userHandler.GetUserByID)
 		// Get a user's settings
 		apiProtected.GET("/users/settings", middleware.AttachUserToContext(userService), userHandler.GetUserSettings)
 		// Update a user's settings

@@ -56,6 +56,22 @@ func (db *UserDB) GetUserByUsername(username string) (*models.User, error) {
 	return &user, nil
 }
 
+func (db *UserDB) GetUserByID(userID uint) (*models.User, error) {
+	var user models.User
+	if err := db.DB.Where("id = ?", userID).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (db *UserDB) GetPreloadedUserByID(userID uint) (*models.User, error) {
+	var user models.User
+	if err := db.DB.Preload("Settings").Preload("GuidingContent").Where("id = ?", userID).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func (db *UserDB) GetUserByFacebookID(facebookID string) (*models.User, error) {
 	var user models.User
 	if err := db.DB.Where("facebook_id = ?", facebookID).First(&user).Error; err != nil {
@@ -107,12 +123,4 @@ func (db *UserDB) UsernameExists(username string) (bool, error) {
 		return false, err
 	}
 	return true, nil
-}
-
-func (db *UserDB) GetPreloadedUserByID(userID uint) (*models.User, error) {
-	var user models.User
-	if err := db.DB.Preload("Settings").Preload("GuidingContent").Where("id = ?", userID).First(&user).Error; err != nil {
-		return nil, err
-	}
-	return &user, nil
 }
