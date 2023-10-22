@@ -3,29 +3,23 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/windoze95/saltybytes-api/internal/service"
+	"github.com/windoze95/saltybytes-api/internal/util"
 )
 
 func AttachUserToContext(userService *service.UserService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userIDValue, exists := c.Get("user_id")
-		if !exists {
+		userID, err := util.GetUserIDFromContext(c)
+		if err != nil {
 			c.Set("user", nil)
 			c.Next()
 			return
 		}
 
-		userID, ok := userIDValue.(float64) // jwt-go defaults to float64 for numerical claims
-		if !ok || userID == 0 {
-			c.Set("user", nil)
-			c.Next()
-			return
-		}
-
-		user, err := userService.GetPreloadedUserByID(uint(userID))
+		// user, err := userService.GetPreloadedUserByID(uint(userID))
+		user, err := userService.GetUserByID(userID)
 		if err != nil {
 			c.Set("user", nil)
 		} else {
-			// user.Auth.HashedPassword = "" // Remove password from user object
 			c.Set("user", user)
 		}
 		c.Next()
