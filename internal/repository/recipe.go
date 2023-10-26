@@ -45,8 +45,8 @@ func (r *RecipeRepository) UpdateRecipeGenerationStatus(recipe *models.Recipe, i
 	return r.RecipeDB.UpdateRecipeGenerationStatus(recipe, isComplete)
 }
 
-func (r *RecipeRepository) UpdateFullRecipeJSON(recipe *models.Recipe) error {
-	return r.RecipeDB.UpdateFullRecipeJSON(recipe)
+func (r *RecipeRepository) UpdateGeneratedRecipeJSON(recipe *models.Recipe) error {
+	return r.RecipeDB.UpdateGeneratedRecipeJSON(recipe)
 }
 
 func (r *RecipeRepository) FindTagByName(tagName string) (*models.Tag, error) {

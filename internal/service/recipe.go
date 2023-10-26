@@ -38,8 +38,8 @@ func (s *RecipeService) GetRecipeByID(recipeID string) (*models.Recipe, error) {
 
 	if recipe.GenerationComplete {
 
-		// Deserialize the FullRecipeJSON field back into the FullRecipe struct
-		if err := recipe.DeserializeFullRecipe(); err != nil {
+		// Deserialize the GeneratedRecipeJSON field back into the GeneratedRecipe struct
+		if err := recipe.DeserializeGeneratedRecipe(); err != nil {
 			log.Printf("Failed to deserialize recipe: %v", err)
 			return nil, fmt.Errorf("failed to deserialize recipe: %w", err)
 		}
@@ -81,7 +81,7 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 	// Start the recipe generation process in a goroutine
 	go func(ctx context.Context) {
 		// Generate the full recipe
-		// s.generateFullRecipe(recipe, user, ctx)
+		// s.generateGeneratedRecipe(recipe, user, ctx)
 		// Choose an api key
 		key, err := chooseAPIKey(s.Cfg, user)
 		if err != nil {
@@ -106,23 +106,23 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 			return
 		}
 
-		recipe.FullRecipe = *recipeContent
+		recipe.GeneratedRecipe = *recipeContent
 
-		// Serialize FullRecipe to FullRecipeJSON
-		if err := recipe.SerializeFullRecipe(); err != nil {
-			log.Printf("error: failed to serialize FullRecipe: %v", err)
-			// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to serialize FullRecipe: " + err.Error()})
+		// Serialize GeneratedRecipe to GeneratedRecipeJSON
+		if err := recipe.SerializeGeneratedRecipe(); err != nil {
+			log.Printf("error: failed to serialize GeneratedRecipe: %v", err)
+			// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to serialize GeneratedRecipe: " + err.Error()})
 			return
 		}
 
-		if err := s.Repo.UpdateRecipeTitle(recipe, recipe.FullRecipe.Title); err != nil {
+		if err := s.Repo.UpdateRecipeTitle(recipe, recipe.GeneratedRecipe.Title); err != nil {
 			log.Printf("error: failed to update recipe title: %v", err)
 			return
 		}
 
-		// Update the existing recipe's FullRecipeJSON field in the database using the repository
-		if err := s.Repo.UpdateFullRecipeJSON(recipe); err != nil {
-			log.Printf("error: failed to update recipe with FullRecipeJSON: %v", err)
+		// Update the existing recipe's GeneratedRecipeJSON field in the database using the repository
+		if err := s.Repo.UpdateGeneratedRecipeJSON(recipe); err != nil {
+			log.Printf("error: failed to update recipe with GeneratedRecipeJSON: %v", err)
 			return
 		}
 
@@ -193,7 +193,7 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 func (s *RecipeService) AssociateTagsWithRecipe(recipe *models.Recipe) error {
 	var associatedTags []models.Tag
 
-	for _, hashtag := range recipe.FullRecipe.Hashtags {
+	for _, hashtag := range recipe.GeneratedRecipe.Hashtags {
 		cleanedHashtag := cleanHashtag(hashtag)
 
 		// Search for the tag by the cleaned name

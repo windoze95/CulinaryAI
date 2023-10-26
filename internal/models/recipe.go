@@ -10,19 +10,19 @@ import (
 
 type Recipe struct {
 	gorm.Model
-	Title              string
-	FullRecipeVersion  int        `gorm:"type:int"`
-	FullRecipe         FullRecipe `gorm:"-"`
-	FullRecipeJSON     string     `gorm:"type:text"`
-	Tags               []Tag      `gorm:"many2many:recipe_tags;"`
-	ImageURL           string
-	GeneratedBy        *User `gorm:"foreignKey:GeneratedByUserID"`
-	GeneratedByUserID  uint
-	UserPrompt         string
-	GuidingContentID   uint
-	GuidingContentUID  uuid.UUID
-	GuidingContent     *GuidingContent `gorm:"foreignKey:GuidingContentID"`
-	GenerationComplete bool
+	Title                  string
+	GeneratedRecipeVersion int             `gorm:"type:int"`
+	GeneratedRecipe        GeneratedRecipe `gorm:"-"`
+	GeneratedRecipeJSON    string          `gorm:"type:text"`
+	Tags                   []Tag           `gorm:"many2many:recipe_tags;"`
+	ImageURL               string
+	GeneratedBy            *User `gorm:"foreignKey:GeneratedByUserID"`
+	GeneratedByUserID      uint
+	UserPrompt             string
+	GuidingContentID       uint
+	GuidingContentUID      uuid.UUID
+	GuidingContent         *GuidingContent `gorm:"foreignKey:GuidingContentID"`
+	GenerationComplete     bool
 }
 
 type Tag struct {
@@ -43,7 +43,7 @@ type MainRecipe struct {
 	TimeToCook   int          `json:"time_to_cook"`
 }
 
-type FullRecipe struct {
+type GeneratedRecipe struct {
 	Title       string       `json:"title"`
 	MainRecipe  MainRecipe   `json:"main_recipe"`
 	SubRecipes  []MainRecipe `json:"sub_recipes"`
@@ -56,10 +56,10 @@ type FullRecipe struct {
 	// Hashtags    []string     `json:"hashtags"`
 }
 
-// SerializeFullRecipe serializes the FullRecipe field to a JSON string
-func (r *Recipe) SerializeFullRecipe() error {
+// SerializeGeneratedRecipe serializes the GeneratedRecipe field to a JSON string
+func (r *Recipe) SerializeGeneratedRecipe() error {
 	// Set the current version
-	r.FullRecipeVersion = 1
+	r.GeneratedRecipeVersion = 1
 
 	// Create an anonymous struct with only the fields you want to serialize
 	tempStruct := struct {
@@ -67,27 +67,27 @@ func (r *Recipe) SerializeFullRecipe() error {
 		SubRecipes  []MainRecipe `json:"sub_recipes"`
 		DallEPrompt string       `json:"dall_e_prompt"`
 	}{
-		MainRecipe:  r.FullRecipe.MainRecipe,
-		SubRecipes:  r.FullRecipe.SubRecipes,
-		DallEPrompt: r.FullRecipe.DallEPrompt,
+		MainRecipe:  r.GeneratedRecipe.MainRecipe,
+		SubRecipes:  r.GeneratedRecipe.SubRecipes,
+		DallEPrompt: r.GeneratedRecipe.DallEPrompt,
 	}
 
-	fullRecipeJSON, err := json.Marshal(tempStruct)
+	generatedRecipeJSON, err := json.Marshal(tempStruct)
 	if err != nil {
 		return err
 	}
-	r.FullRecipeJSON = string(fullRecipeJSON)
+	r.GeneratedRecipeJSON = string(generatedRecipeJSON)
 	return nil
 }
 
-// DeserializeFullRecipe deserializes the FullRecipeJSON field back into the FullRecipe struct
-func (r *Recipe) DeserializeFullRecipe() error {
-	// Use the version to determine how to deserialize FullRecipe
-	switch r.FullRecipeVersion {
+// DeserializeGeneratedRecipe deserializes the GeneratedRecipeJSON field back into the GeneratedRecipe struct
+func (r *Recipe) DeserializeGeneratedRecipe() error {
+	// Use the version to determine how to deserialize GeneratedRecipe
+	switch r.GeneratedRecipeVersion {
 	case 1:
-		// Deserialize directly into the FullRecipe field, populating all its fields
-		return json.Unmarshal([]byte(r.FullRecipeJSON), &r.FullRecipe)
+		// Deserialize directly into the GeneratedRecipe field, populating all its fields
+		return json.Unmarshal([]byte(r.GeneratedRecipeJSON), &r.GeneratedRecipe)
 	default:
-		return fmt.Errorf("unsupported FullRecipe version: %d", r.FullRecipeVersion)
+		return fmt.Errorf("unsupported GeneratedRecipe version: %d", r.GeneratedRecipeVersion)
 	}
 }

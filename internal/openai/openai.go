@@ -40,7 +40,7 @@ func NewOpenaiClient(decryptedAPIKey string) (*OpenaiClient, error) {
 	}, nil
 }
 
-func (c *OpenaiClient) CreateRecipeChatCompletion(guidingContent models.GuidingContent, userPrompt string) (*models.FullRecipe, error) {
+func (c *OpenaiClient) CreateRecipeChatCompletion(guidingContent models.GuidingContent, userPrompt string) (*models.GeneratedRecipe, error) {
 	// Initialize message history
 	messages := []openai.ChatCompletionMessage{
 		{
@@ -165,13 +165,13 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(guidingContent models.GuidingC
 		return nil, errors.New("OpenAI API returned an empty message")
 	}
 
-	var recipe models.FullRecipe
-	err = json.Unmarshal([]byte(resp.Choices[0].Message.FunctionCall.Arguments), &recipe)
+	var generatedRecipe models.GeneratedRecipe
+	err = json.Unmarshal([]byte(resp.Choices[0].Message.FunctionCall.Arguments), &generatedRecipe)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal recipe: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal generatedRecipe: %v", err)
 	}
 
-	return &recipe, nil
+	return &generatedRecipe, nil
 
 	// return resp.Choices[0].Message.FunctionCall.Arguments, nil
 }
@@ -211,12 +211,12 @@ func (c *OpenaiClient) CreateImage(prompt string) ([]byte, error) {
 	}
 
 	if len(respBase64.Data) == 0 || respBase64.Data[0].B64JSON == "" {
-		return nil, errors.New("OpenAI API returned an empty image")
+		return nil, errors.New("openAI API returned an empty image")
 	}
 
 	imgBytes, err := base64.StdEncoding.DecodeString(respBase64.Data[0].B64JSON)
 	if err != nil {
-		return nil, fmt.Errorf("Base64 decode error: %v", err)
+		return nil, fmt.Errorf("base64 decode error: %v", err)
 	}
 
 	return imgBytes, nil
