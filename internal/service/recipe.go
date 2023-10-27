@@ -36,14 +36,14 @@ func (s *RecipeService) GetRecipeByID(recipeID string) (*models.Recipe, error) {
 		return nil, err
 	}
 
-	if recipe.GenerationComplete {
+	// if recipe.GenerationComplete {
 
-		// Deserialize the GeneratedRecipeJSON field back into the GeneratedRecipe struct
-		if err := recipe.DeserializeGeneratedRecipe(); err != nil {
-			log.Printf("Failed to deserialize recipe: %v", err)
-			return nil, fmt.Errorf("failed to deserialize recipe: %w", err)
-		}
-	}
+	// 	// Deserialize the GeneratedRecipeJSON field back into the GeneratedRecipe struct
+	// 	if err := recipe.DeserializeGeneratedRecipe(); err != nil {
+	// 		log.Printf("Failed to deserialize recipe: %v", err)
+	// 		return nil, fmt.Errorf("failed to deserialize recipe: %w", err)
+	// 	}
+	// }
 
 	return recipe, nil
 }
@@ -99,35 +99,50 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 		}
 
 		// Create the chat completion with the user's prompt
-		recipeContent, err := chatService.CreateRecipeChatCompletion(user.GuidingContent, recipe.UserPrompt)
+		RecipeManager, err := chatService.CreateRecipeChatCompletion(user.GuidingContent, recipe.UserPrompt)
 		if err != nil {
 			log.Printf("error: failed to create recipe chat completion: %v", err)
 			// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create recipe: " + err.Error()})
 			return
 		}
 
-		recipe.GeneratedRecipe = *recipeContent
+		// recipe.GeneratedRecipe = *recipeContent
 
-		// Serialize GeneratedRecipe to GeneratedRecipeJSON
-		if err := recipe.SerializeGeneratedRecipe(); err != nil {
-			log.Printf("error: failed to serialize GeneratedRecipe: %v", err)
-			// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to serialize GeneratedRecipe: " + err.Error()})
+		// // Serialize GeneratedRecipe to JSON
+		// if err := recipe.SerializeGeneratedRecipe(); err != nil {
+		// 	log.Printf("error: failed to serialize GeneratedRecipe: %v", err)
+		// 	// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to serialize GeneratedRecipe: " + err.Error()})
+		// 	return
+		// }
+
+		// if err := s.Repo.UpdateRecipeTitle(recipe, RecipeManager.Title); err != nil {
+		// 	log.Printf("error: failed to update recipe title: %v", err)
+		// 	return
+		// }
+
+		// Set the recipe core fields
+		recipe.Title = RecipeManager.Title
+		mainRecipeJSON, err := util.SerializeToJSONString(RecipeManager.MainRecipe)
+		if err != nil {
+			log.Printf("error: failed to serialize main recipe: %v", err)
 			return
 		}
-
-		if err := s.Repo.UpdateRecipeTitle(recipe, recipe.GeneratedRecipe.Title); err != nil {
-			log.Printf("error: failed to update recipe title: %v", err)
+		recipe.MainRecipeJSON = mainRecipeJSON
+		subRecipesJSON, err := util.SerializeToJSONString(RecipeManager.SubRecipes)
+		if err != nil {
+			log.Printf("error: failed to serialize sub recipes: %v", err)
 			return
 		}
+		recipe.SubRecipesJSON = subRecipesJSON
 
-		// Update the existing recipe's GeneratedRecipeJSON field in the database using the repository
-		if err := s.Repo.UpdateGeneratedRecipeJSON(recipe); err != nil {
-			log.Printf("error: failed to update recipe with GeneratedRecipeJSON: %v", err)
+		// Update the existing recipe's core fields
+		if err := s.Repo.UpdateRecipeCoreFields(recipe); err != nil {
+			log.Printf("error: failed to update recipe core fields: %v", err)
 			return
 		}
 
 		// Associate tags with the recipe
-		if err := s.AssociateTagsWithRecipe(recipe); err != nil {
+		if err := s.AssociateTagsWithRecipe(recipe, RecipeManager.Hashtags); err != nil {
 			log.Printf("error: failed to associate tags with recipe: %v", err)
 			return
 		}
@@ -139,7 +154,7 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 			return
 		}
 
-		imageBytes, err := imageService.CreateImage(recipeContent.DallEPrompt)
+		imageBytes, err := imageService.CreateImage(RecipeManager.DallEPrompt)
 		if err != nil {
 			log.Printf("error: failed to create recipe image: %v", err)
 			// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create recipe image: " + err.Error()})
@@ -190,10 +205,10 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 
 // Checks if each hashtag exists as a Tag in the database.
 // If it does, it uses the existing Tag's ID and Name.
-func (s *RecipeService) AssociateTagsWithRecipe(recipe *models.Recipe) error {
+func (s *RecipeService) AssociateTagsWithRecipe(recipe *models.Recipe, tags []string) error {
 	var associatedTags []models.Tag
 
-	for _, hashtag := range recipe.GeneratedRecipe.Hashtags {
+	for _, hashtag := range tags {
 		cleanedHashtag := cleanHashtag(hashtag)
 
 		// Search for the tag by the cleaned name

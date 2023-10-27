@@ -17,6 +17,32 @@ type OpenaiClient struct {
 	Client *openai.Client
 }
 
+type RecipeManager struct {
+	Title       string   `json:"title"`
+	MainRecipe  Recipe   `json:"main_recipe"`
+	SubRecipes  []Recipe `json:"sub_recipes"`
+	DallEPrompt string   `json:"dall_e_prompt"`
+	UnitSystem  string   `json:"unit_system"` // This field will not be serialized, but will be deserialized
+	Hashtags    []string `json:"hashtags"`    // This field will not be serialized, but will be deserialized
+	// UnitSystem  string       `json:"-"`
+	// Hashtags    []string     `json:"-"`
+	// UnitSystem  string       `json:"unit_system"`
+	// Hashtags    []string     `json:"hashtags"`
+}
+
+type Ingredient struct {
+	Name   string  `json:"name"`
+	Unit   string  `json:"unit"`
+	Amount float64 `json:"amount"`
+}
+
+type Recipe struct {
+	RecipeName   string       `json:"recipe_name"`
+	Ingredients  []Ingredient `json:"ingredients"`
+	Instructions []string     `json:"instructions"`
+	TimeToCook   int          `json:"time_to_cook"`
+}
+
 func handleAPIError(respErr error) (shouldRetry bool, waitTime time.Duration, err error) {
 	e := &openai.APIError{}
 	if errors.As(respErr, &e) {
@@ -40,7 +66,7 @@ func NewOpenaiClient(decryptedAPIKey string) (*OpenaiClient, error) {
 	}, nil
 }
 
-func (c *OpenaiClient) CreateRecipeChatCompletion(guidingContent models.GuidingContent, userPrompt string) (*models.GeneratedRecipe, error) {
+func (c *OpenaiClient) CreateRecipeChatCompletion(guidingContent models.GuidingContent, userPrompt string) (*RecipeManager, error) {
 	// Initialize message history
 	messages := []openai.ChatCompletionMessage{
 		{
@@ -165,13 +191,13 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(guidingContent models.GuidingC
 		return nil, errors.New("OpenAI API returned an empty message")
 	}
 
-	var generatedRecipe models.GeneratedRecipe
-	err = json.Unmarshal([]byte(resp.Choices[0].Message.FunctionCall.Arguments), &generatedRecipe)
+	var RecipeManager *RecipeManager
+	err = json.Unmarshal([]byte(resp.Choices[0].Message.FunctionCall.Arguments), RecipeManager)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal generatedRecipe: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal RecipeManager: %v", err)
 	}
 
-	return &generatedRecipe, nil
+	return RecipeManager, nil
 
 	// return resp.Choices[0].Message.FunctionCall.Arguments, nil
 }

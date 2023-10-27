@@ -78,10 +78,12 @@ func (db *RecipeDB) UpdateRecipeGenerationStatus(recipe *models.Recipe, isComple
 // 	return db.DB.Model(recipe).Update("GeneratedRecipeJSON", recipe.GeneratedRecipeJSON).Error
 // }
 
-func (db *RecipeDB) UpdateGeneratedRecipeJSON(recipe *models.Recipe) error {
+func (db *RecipeDB) UpdateRecipeCoreFields(recipe *models.Recipe) error {
 	return db.DB.Model(recipe).Updates(map[string]interface{}{
-		"GeneratedRecipeJSON":    recipe.GeneratedRecipeJSON,
-		"GeneratedRecipeVersion": recipe.GeneratedRecipeVersion,
+		"Title":          recipe.Title,
+		"MainRecipeJSON": recipe.MainRecipeJSON,
+		"SubRecipesJSON": recipe.SubRecipesJSON,
+		// "GeneratedRecipeVersion": recipe.GeneratedRecipeVersion,
 	}).Error
 }
 
