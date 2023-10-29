@@ -12,15 +12,30 @@ type Recipe struct {
 	// GeneratedRecipe        openai.GeneratedRecipe `gorm:"-"`
 	MainRecipeJSON     string `gorm:"type:text"`
 	SubRecipesJSON     string `gorm:"type:text"`
-	Tags               []Tag  `gorm:"many2many:recipe_tags;"`
+	Hashtags           []Tag  `gorm:"many2many:recipe_tags;"`
+	ImagePrompt        string
 	ImageURL           string
 	GeneratedBy        *User `gorm:"foreignKey:GeneratedByUserID"`
 	GeneratedByUserID  uint
 	UserPrompt         string
 	GuidingContentID   uint
 	GuidingContentUID  uuid.UUID
-	GuidingContent     *GuidingContent `gorm:"foreignKey:GuidingContentID"`
+	GuidingContent     *GuidingContent    `gorm:"foreignKey:GuidingContentID"`
+	ChatHistoryID      uint               `gorm:"index;"`
+	ChatHistory        *RecipeChatHistory `gorm:"foreignKey:ChatHistoryID"`
 	GenerationComplete bool
+}
+
+type RecipeChatHistory struct {
+	gorm.Model
+	RecipeID uint `gorm:"uniqueIndex;"`
+	Messages []byte
+}
+
+// messages would be userInput, followed by generatedText, followed by userInput, etc.
+
+func (rcc *RecipeChatHistory) DecompressMessages() string {
+	return string(rcc.Messages)
 }
 
 type Tag struct {
@@ -37,11 +52,11 @@ type Tag struct {
 // 	tempStruct := struct {
 // 		MainRecipe  MainRecipe   `json:"main_recipe"`
 // 		SubRecipes  []MainRecipe `json:"sub_recipes"`
-// 		DallEPrompt string       `json:"dall_e_prompt"`
+// 		ImagePrompt string       `json:"image_prompt"`
 // 	}{
 // 		MainRecipe:  r.GeneratedRecipe.MainRecipe,
 // 		SubRecipes:  r.GeneratedRecipe.SubRecipes,
-// 		DallEPrompt: r.GeneratedRecipe.DallEPrompt,
+// 		ImagePrompt: r.GeneratedRecipe.ImagePrompt,
 // 	}
 
 // 	generatedRecipeJSON, err := json.Marshal(tempStruct)

@@ -41,22 +41,32 @@ func NewRecipeDB(gormDB *gorm.DB) *RecipeDB {
 // 	return &recipe, err
 // }
 
-func (db *RecipeDB) GetRecipeByID(id string) (*models.Recipe, error) {
+func (db *RecipeDB) GetRecipeByID(recipeID string) (*models.Recipe, error) {
 	var recipe models.Recipe
 	err := db.DB.Preload("GuidingContent").
 		Preload("Tags").
 		Preload("GeneratedBy", func(db *gorm.DB) *gorm.DB {
 			return db.Select("Username") // Select only Username
 		}).
-		Where("id = ?", id).
+		Where("id = ?", recipeID).
 		First(&recipe).Error
 	// log.Printf("Query complete. username retrieved: %+v, Error: %v", recipe.GeneratedBy, err)
 	return &recipe, err
 }
 
+func (db *RecipeDB) GetChatHistoryByRecipeID(recipeID uint) (*models.RecipeChatHistory, error) {
+	var chatHistory models.RecipeChatHistory
+	if err := db.DB.Where("RecipeID = ?", recipeID).First(&chatHistory).Error; err != nil {
+		return nil, err
+	}
+	return &chatHistory, nil
+}
+
 func (db *RecipeDB) CreateRecipe(recipe *models.Recipe) error {
 	return db.DB.Omit("GeneratedBy").Omit("GuidingContent").Create(recipe).Error
 }
+
+// Creating chat history might be restrained to a recipe for strict association requirements like recipeID
 
 // func (db *RecipeDB) UpdateRecipeFieldByID(id uint, field string, value interface{}) error {
 // 	return db.DB.Model(&models.Recipe{}).Where("id = ?", id).Update(field, value).Error
