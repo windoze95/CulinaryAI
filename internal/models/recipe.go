@@ -28,11 +28,17 @@ type Recipe struct {
 
 type RecipeChatHistory struct {
 	gorm.Model
-	RecipeID uint `gorm:"uniqueIndex;"`
-	Messages []byte
+	RecipeID uint                `gorm:"uniqueIndex;"`
+	Messages []RecipeChatMessage `gorm:"type:text"`
 }
 
 // messages would be userInput, followed by generatedText, followed by userInput, etc.
+
+type RecipeChatMessage struct {
+	gorm.Model
+	UserInput     string
+	GeneratedText string
+}
 
 func (rcc *RecipeChatHistory) DecompressMessages() string {
 	return string(rcc.Messages)
