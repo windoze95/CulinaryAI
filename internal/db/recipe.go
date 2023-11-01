@@ -122,18 +122,62 @@ func (db *RecipeDB) UpdateRecipeGenerationStatus(recipe *models.Recipe, isComple
 // 	return db.DB.Model(recipe).Update("GeneratedRecipeJSON", recipe.GeneratedRecipeJSON).Error
 // }
 
+//	func (db *RecipeDB) UpdateRecipeCoreFields(recipe *models.Recipe) error {
+//		err := db.DB.Model(recipe).
+//			Updates(map[string]interface{}{
+//				"Title":          recipe.Title,
+//				"MainRecipeJSON": recipe.MainRecipeJSON,
+//				"SubRecipesJSON": recipe.SubRecipesJSON,
+//				"ImagePrompt":        recipe.ImagePrompt,
+//				// "GeneratedRecipeVersion": recipe.GeneratedRecipeVersion,
+//			}).Error
+//		if err != nil {
+//			log.Printf("Error updating recipe core fields: %v", err)
+//			return err
+//		}
+//		return nil
+//	}
 func (db *RecipeDB) UpdateRecipeCoreFields(recipe *models.Recipe) error {
-	err := db.DB.Model(recipe).
+	// Start a new transaction.
+	tx := db.DB.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	// Update core fields of the recipe.
+	err := tx.Model(recipe).
 		Updates(map[string]interface{}{
 			"Title":          recipe.Title,
 			"MainRecipeJSON": recipe.MainRecipeJSON,
 			"SubRecipesJSON": recipe.SubRecipesJSON,
-			// "GeneratedRecipeVersion": recipe.GeneratedRecipeVersion,
+			"ImagePrompt":    recipe.ImagePrompt,
 		}).Error
 	if err != nil {
+		tx.Rollback()
 		log.Printf("Error updating recipe core fields: %v", err)
 		return err
 	}
+
+	// Update the chat history.
+	if recipe.ChatHistory != nil {
+		err = tx.Model(recipe.ChatHistory).
+			Updates(map[string]interface{}{
+				"MessagesJSON": recipe.ChatHistory.MessagesJSON,
+			}).Error
+		if err != nil {
+			tx.Rollback()
+			log.Printf("Error updating recipe chat history: %v", err)
+			return err
+		}
+	}
+
+	// Commit the transaction if all updates succeed.
+	err = tx.Commit().Error
+	if err != nil {
+		log.Printf("Error committing transaction: %v", err)
+		return err
+	}
+
 	return nil
 }
 
