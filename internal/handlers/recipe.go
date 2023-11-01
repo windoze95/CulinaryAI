@@ -62,7 +62,9 @@ func (h *RecipeHandler) CreateRecipe(c *gin.Context) {
 		return
 	}
 
+	go h.Service.CompleteRecipeGeneration(recipe, user)
+
 	c.JSON(http.StatusOK, gin.H{"recipe": recipe, "message": "Generating recipe"})
 
-	go h.Service.CompleteRecipeGeneration(recipe, user)
+	// go h.Service.CompleteRecipeGeneration(recipe, user)
 }

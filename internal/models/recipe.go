@@ -17,7 +17,7 @@ type Recipe struct {
 	ImageURL           string
 	GeneratedBy        *User `gorm:"foreignKey:GeneratedByUserID"`
 	GeneratedByUserID  uint
-	UserPrompt         string
+	InitialPrompt      string
 	GuidingContentID   uint
 	GuidingContentUID  uuid.UUID
 	GuidingContent     *GuidingContent    `gorm:"foreignKey:GuidingContentID"`
@@ -28,21 +28,13 @@ type Recipe struct {
 
 type RecipeChatHistory struct {
 	gorm.Model
-	RecipeID uint                `gorm:"uniqueIndex;"`
-	Messages []RecipeChatMessage `gorm:"type:text"`
+	RecipeID     uint `gorm:"uniqueIndex;"`
+	MessagesJSON []string
 }
 
-// messages would be userInput, followed by generatedText, followed by userInput, etc.
+// generated recipe json is given back as a json string and userInput is already provided as userPrompt(change the name of this variable)
 
-type RecipeChatMessage struct {
-	gorm.Model
-	UserInput     string
-	GeneratedText string
-}
-
-func (rcc *RecipeChatHistory) DecompressMessages() string {
-	return string(rcc.Messages)
-}
+// messages would be a serialized RecipeChatMessage; userInput, followed by generatedText, followed by userInput, etc.
 
 type Tag struct {
 	gorm.Model

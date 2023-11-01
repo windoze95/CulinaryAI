@@ -1,6 +1,8 @@
 package db
 
 import (
+	"log"
+
 	_ "github.com/heroku/x/hmetrics/onload"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -50,38 +52,70 @@ func (db *RecipeDB) GetRecipeByID(recipeID string) (*models.Recipe, error) {
 		}).
 		Where("id = ?", recipeID).
 		First(&recipe).Error
+	if err != nil {
+		log.Printf("Error retrieving recipe: %v", err)
+		return nil, err
+	}
 	// log.Printf("Query complete. username retrieved: %+v, Error: %v", recipe.GeneratedBy, err)
 	return &recipe, err
 }
 
 func (db *RecipeDB) GetChatHistoryByRecipeID(recipeID uint) (*models.RecipeChatHistory, error) {
 	var chatHistory models.RecipeChatHistory
-	if err := db.DB.Where("RecipeID = ?", recipeID).First(&chatHistory).Error; err != nil {
+	err := db.DB.Where("RecipeID = ?", recipeID).
+		First(&chatHistory).Error
+	if err != nil {
+		log.Printf("Error retrieving chat history: %v", err)
 		return nil, err
 	}
 	return &chatHistory, nil
 }
 
 func (db *RecipeDB) CreateRecipe(recipe *models.Recipe) error {
-	return db.DB.Omit("GeneratedBy").Omit("GuidingContent").Create(recipe).Error
+	err := db.DB.Omit("GeneratedBy").
+		Omit("GuidingContent").
+		Create(recipe).Error
+	if err != nil {
+		log.Printf("Error creating recipe: %v", err)
+		return err
+	}
+	return nil
 }
 
-// Creating chat history might be restrained to a recipe for strict association requirements like recipeID
+// Creating chat history might be restrained to a recipe for strict association requirements like setting recipeID
 
 // func (db *RecipeDB) UpdateRecipeFieldByID(id uint, field string, value interface{}) error {
 // 	return db.DB.Model(&models.Recipe{}).Where("id = ?", id).Update(field, value).Error
 // }
 
 func (db *RecipeDB) UpdateRecipeTitle(recipe *models.Recipe, title string) error {
-	return db.DB.Model(recipe).Update("Title", title).Error
+	err := db.DB.Model(recipe).
+		Update("Title", title).Error
+	if err != nil {
+		log.Printf("Error updating recipe title: %v", err)
+		return err
+	}
+	return nil
 }
 
 func (db *RecipeDB) UpdateRecipeImageURL(recipe *models.Recipe, imageURL string) error {
-	return db.DB.Model(recipe).Update("ImageURL", imageURL).Error
+	err := db.DB.Model(recipe).
+		Update("ImageURL", imageURL).Error
+	if err != nil {
+		log.Printf("Error updating recipe image URL: %v", err)
+		return err
+	}
+	return nil
 }
 
 func (db *RecipeDB) UpdateRecipeGenerationStatus(recipe *models.Recipe, isComplete bool) error {
-	return db.DB.Model(recipe).Update("GenerationComplete", isComplete).Error
+	err := db.DB.Model(recipe).
+		Update("GenerationComplete", isComplete).Error
+	if err != nil {
+		log.Printf("Error updating recipe generation status: %v", err)
+		return err
+	}
+	return nil
 }
 
 // func (db *RecipeDB) UpdateGeneratedRecipeJSON(recipe *models.Recipe) error {
@@ -89,17 +123,24 @@ func (db *RecipeDB) UpdateRecipeGenerationStatus(recipe *models.Recipe, isComple
 // }
 
 func (db *RecipeDB) UpdateRecipeCoreFields(recipe *models.Recipe) error {
-	return db.DB.Model(recipe).Updates(map[string]interface{}{
-		"Title":          recipe.Title,
-		"MainRecipeJSON": recipe.MainRecipeJSON,
-		"SubRecipesJSON": recipe.SubRecipesJSON,
-		// "GeneratedRecipeVersion": recipe.GeneratedRecipeVersion,
-	}).Error
+	err := db.DB.Model(recipe).
+		Updates(map[string]interface{}{
+			"Title":          recipe.Title,
+			"MainRecipeJSON": recipe.MainRecipeJSON,
+			"SubRecipesJSON": recipe.SubRecipesJSON,
+			// "GeneratedRecipeVersion": recipe.GeneratedRecipeVersion,
+		}).Error
+	if err != nil {
+		log.Printf("Error updating recipe core fields: %v", err)
+		return err
+	}
+	return nil
 }
 
 func (db *RecipeDB) FindTagByName(tagName string) (*models.Tag, error) {
 	var tag models.Tag
-	err := db.DB.Where("Hashtag = ?", tagName).First(&tag).Error
+	err := db.DB.Where("Hashtag = ?", tagName).
+		First(&tag).Error
 	if err != nil {
 		return nil, err
 	}
@@ -107,9 +148,21 @@ func (db *RecipeDB) FindTagByName(tagName string) (*models.Tag, error) {
 }
 
 func (db *RecipeDB) CreateTag(tag *models.Tag) error {
-	return db.DB.Create(tag).Error
+	err := db.DB.Create(tag).Error
+	if err != nil {
+		log.Printf("Error creating tag: %v", err)
+		return err
+	}
+	return nil
 }
 
 func (db *RecipeDB) UpdateRecipeTagsAssociation(recipe *models.Recipe, tags []models.Tag) error {
-	return db.DB.Model(&recipe).Association("Tags").Replace(tags).Error
+	err := db.DB.Model(&recipe).
+		Association("Tags").
+		Replace(tags).Error
+	if err != nil {
+		log.Printf("Error updating recipe tags association: %v", err)
+		return err
+	}
+	return nil
 }
