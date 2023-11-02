@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
+	"github.com/lib/pq"
 )
 
 type Recipe struct {
@@ -29,7 +30,7 @@ type Recipe struct {
 type RecipeChatHistory struct {
 	gorm.Model
 	// RecipeID     uint     `gorm:"uniqueIndex;"`
-	MessagesJSON []string `gorm:"type:text[]"`
+	MessagesJSON pq.StringArray `gorm:"type:text[]"`
 }
 
 // generated recipe json is given back as a json string and userInput is already provided as userPrompt(change the name of this variable)
