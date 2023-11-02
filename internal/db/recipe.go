@@ -210,7 +210,7 @@ func (db *RecipeDB) CreateTag(tag *models.Tag) error {
 
 func (db *RecipeDB) UpdateRecipeTagsAssociation(recipe *models.Recipe, tags []models.Tag) error {
 	err := db.DB.Model(&recipe).
-		Association("Tags").
+		Association("Hashtags").
 		Replace(tags).Error
 	if err != nil {
 		log.Printf("Error updating recipe tags association: %v", err)
