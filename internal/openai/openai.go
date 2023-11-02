@@ -53,7 +53,7 @@ type Recipe struct {
 	RecipeName   string       `json:"recipe_name"`
 	Ingredients  []Ingredient `json:"ingredients"`
 	Instructions []string     `json:"instructions"`
-	TimeToCook   int          `json:"time_to_cook"`
+	TimeToCook   float64      `json:"time_to_cook"`
 }
 
 type RecipeChatHistoryMessage struct { // this is a single message, it's serialized and appended to the messages array
