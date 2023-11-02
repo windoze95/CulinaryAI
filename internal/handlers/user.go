@@ -214,6 +214,9 @@ func generateAuthToken(userID uint, secretKey string) (string, error) {
 	claims := token.Claims.(jwt.MapClaims)
 	claims["user_id"] = userID
 
+	log.Printf("claims: %+v", claims)
+	log.Printf("claims[user_id]: %+v", claims["user_id"])
+
 	// Sign and get the complete encoded token as a string using the secret
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
