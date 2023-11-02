@@ -2,6 +2,7 @@ package util
 
 import (
 	"errors"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/windoze95/saltybytes-api/internal/models"
@@ -23,6 +24,7 @@ func GetUserFromContext(c *gin.Context) (*models.User, error) {
 
 func GetUserIDFromContext(c *gin.Context) (uint, error) {
 	val, ok := c.Get("user_id")
+	log.Println("GetUserIDFromContext val:", val)
 	if !ok {
 		return 0, errors.New("no user ID information")
 	}
