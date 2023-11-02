@@ -45,6 +45,9 @@ func (h *RecipeHandler) CreateRecipe(c *gin.Context) {
 		return
 	}
 
+	log.Printf("User: %+v", user)
+	log.Printf("User ID: %v", user.GuidingContent)
+
 	// Parse the request body for the user's prompt
 	var request struct {
 		UserPrompt string `json:"userPrompt"`

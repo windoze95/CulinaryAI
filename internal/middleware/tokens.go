@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -52,7 +51,6 @@ func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 			return []byte(cfg.Env.JwtSecretKey.Value()), nil
 		})
 		if err != nil {
-			log.Printf("error: VerifyTokenMiddleware: %v", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid or expired token"})
 			c.Abort()
 			return
@@ -75,7 +73,6 @@ func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 				return
 			}
 		} else {
-			log.Printf("error: VerifyTokenMiddleware: %v", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
 			c.Abort()
 			return

@@ -243,8 +243,6 @@ func (h *UserHandler) LogoutUser(c *gin.Context) {
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	// Retrieve the user from the context
 	user, err := util.GetUserFromContext(c)
-	log.Printf("user: %+v", user)
-	log.Printf("err: %+v", err)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
