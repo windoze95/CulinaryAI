@@ -623,21 +623,21 @@ func VerifyOpenAIKey(key string) (bool, error) {
 	return false, errors.New("failed to verify OpenAI key after multiple attempts")
 }
 
-// SerializeMessages serializes a slice of openai.ChatCompletionMessage to a JSON string
-func SerializeMessages(messages []openai.ChatCompletionMessage) (string, error) {
-	serializedMessages, err := util.SerializeToJSONStringWithBuffer(messages)
-	if err != nil {
-		return "", fmt.Errorf("failed to serialize chat context: %v", err)
-	}
-	return serializedMessages, nil
-}
+// // SerializeMessages serializes a slice of openai.ChatCompletionMessage to a JSON string
+// func SerializeMessages(messages []openai.ChatCompletionMessage) (string, error) {
+// 	serializedMessages, err := util.SerializeToJSONStringWithBuffer(messages)
+// 	if err != nil {
+// 		return "", fmt.Errorf("failed to serialize chat context: %v", err)
+// 	}
+// 	return serializedMessages, nil
+// }
 
-// DeserializeMessages deserializes a JSON string to a slice of openai.ChatCompletionMessage
-func DeserializeMessages(serializedMessages string) ([]openai.ChatCompletionMessage, error) {
-	var messages []openai.ChatCompletionMessage
-	err := util.DeserializeFromJSONString(serializedMessages, &messages)
-	if err != nil {
-		return nil, fmt.Errorf("failed to deserialize chat context: %v", err)
-	}
-	return messages, nil
-}
+// // DeserializeMessages deserializes a JSON string to a slice of openai.ChatCompletionMessage
+// func DeserializeMessages(serializedMessages string) ([]openai.ChatCompletionMessage, error) {
+// 	var messages []openai.ChatCompletionMessage
+// 	err := util.DeserializeFromJSONString(serializedMessages, &messages)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("failed to deserialize chat context: %v", err)
+// 	}
+// 	return messages, nil
+// }

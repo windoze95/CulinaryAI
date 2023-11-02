@@ -20,10 +20,10 @@ func SerializeToJSONString(v interface{}) (string, error) {
 }
 
 func SerializeToJSONStringWithBuffer(v interface{}) (string, error) {
-	// Check if v is a pointer
-	if reflect.ValueOf(v).Kind() != reflect.Ptr {
-		return "", errors.New("input must be a pointer")
-	}
+	// // Check if v is a pointer
+	// if reflect.ValueOf(v).Kind() != reflect.Ptr {
+	// 	return "", errors.New("input must be a pointer")
+	// }
 	var buffer bytes.Buffer
 	encoder := json.NewEncoder(&buffer)
 	if err := encoder.Encode(v); err != nil {
