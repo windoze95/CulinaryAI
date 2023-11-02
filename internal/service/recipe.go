@@ -60,6 +60,9 @@ func (s *RecipeService) CreateRecipe(user *models.User, userPrompt string) (*mod
 		// GuidingContent:    user.GuidingContent, // Set from user's existing GuidingContent
 		// GuidingContent:    &user.GuidingContent,    // Set from user's existing GuidingContent
 		GuidingContentUID: user.GuidingContent.UID, // Set from user's existing GuidingContent
+		ChatHistory: &models.RecipeChatHistory{
+			MessagesJSON: []string{},
+		},
 	}
 
 	// Create a Recipe with the basic Recipe details
@@ -178,7 +181,13 @@ func populateRecipeCoreFields(recipe *models.Recipe, recipeManager *openai.RealR
 	recipe.SubRecipesJSON = subRecipesJSON
 
 	recipe.ImagePrompt = recipeManager.ImagePrompt
+
+	if recipe.ChatHistory == nil {
+		return errors.New("recipe.ChatHistory is nil")
+	}
 	recipe.ChatHistory.MessagesJSON = recipeManager.RecipeChatHistoryMessagesJSON
+	// error here
+	// need to create chathistory in db and need to add it to fetches
 
 	return validateRecipeCoreFields(recipe)
 }
