@@ -467,6 +467,8 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(realRecipeManager *RealRecipeM
 		return nil, errors.New("OpenAI API returned an empty message")
 	}
 
+	log.Printf("responseArgumentsJSON: %+v\n", responseArgumentsJSON)
+
 	// Deserialize arguments
 	var functionCallArgument *FunctionCallArgument
 	if err := json.Unmarshal([]byte(responseArgumentsJSON), functionCallArgument); err != nil {
