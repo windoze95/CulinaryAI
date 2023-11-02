@@ -8,10 +8,10 @@ import (
 )
 
 func SerializeToJSONString(v interface{}) (string, error) {
-	// Check if v is a pointer
-	if reflect.ValueOf(v).Kind() != reflect.Ptr {
-		return "", errors.New("input must be a pointer")
-	}
+	// // Check if v is a pointer
+	// if reflect.ValueOf(v).Kind() != reflect.Ptr {
+	// 	return "", errors.New("input must be a pointer")
+	// }
 	jsonBytes, err := json.Marshal(v)
 	if err != nil {
 		return "", err
