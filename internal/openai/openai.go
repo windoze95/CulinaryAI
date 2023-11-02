@@ -470,12 +470,12 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(realRecipeManager *RealRecipeM
 	log.Printf("responseArgumentsJSON: %+v\n", responseArgumentsJSON)
 
 	// Deserialize arguments
-	var functionCallArgument *FunctionCallArgument
-	if err := json.Unmarshal([]byte(responseArgumentsJSON), functionCallArgument); err != nil {
+	var functionCallArgument FunctionCallArgument
+	if err := json.Unmarshal([]byte(responseArgumentsJSON), &functionCallArgument); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal FunctionCallArgument: %v", err)
 	}
 
-	realRecipeManager.FunctionCallArgument = functionCallArgument
+	realRecipeManager.FunctionCallArgument = &functionCallArgument
 
 	// *realRecipeManager.RecipeChatMessages = append(*realRecipeManager.RecipeChatMessages, RecipeChatMessage{
 	// 	UserPrompt:    realRecipeManager.FollowupPrompt,

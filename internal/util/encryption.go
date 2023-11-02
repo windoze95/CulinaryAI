@@ -17,11 +17,11 @@ type CipherConfig struct {
 
 func GetOpenAIKeyCipherConfig(encryptionKeyHex string) (*CipherConfig, error) {
 	if encryptionKeyHex == "" {
-		return nil, errors.New("Openai key encryption key must be set")
+		return nil, errors.New("openai key encryption key must be set")
 	}
 	encryptionKey, err := hex.DecodeString(encryptionKeyHex)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to decode openai key encryption key hex: %v", err)
+		return nil, fmt.Errorf("unable to decode openai key encryption key hex: %v", err)
 	}
 	return &CipherConfig{
 		EncryptionKey: encryptionKey,
