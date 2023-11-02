@@ -51,9 +51,7 @@ func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return cfg.Env.JwtSecretKey.Value(), nil
 		})
-		log.Printf("authHeader: %v", authHeader)
-		log.Printf("tokenString: %v", tokenString)
-		log.Printf("token: %v", token)
+		log.Printf("token err: %v", err)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid or expired token"})
 			c.Abort()
