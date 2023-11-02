@@ -28,8 +28,8 @@ type Recipe struct {
 
 type RecipeChatHistory struct {
 	gorm.Model
-	RecipeID     uint `gorm:"uniqueIndex;"`
-	MessagesJSON []string
+	// RecipeID     uint     `gorm:"uniqueIndex;"`
+	MessagesJSON []string `gorm:"type:text[]"`
 }
 
 // generated recipe json is given back as a json string and userInput is already provided as userPrompt(change the name of this variable)

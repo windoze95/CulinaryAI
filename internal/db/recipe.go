@@ -72,14 +72,22 @@ func (db *RecipeDB) GetChatHistoryByRecipeID(recipeID uint) (*models.RecipeChatH
 }
 
 func (db *RecipeDB) CreateRecipe(recipe *models.Recipe) error {
-	err := db.DB.Omit("GeneratedBy").
+	// Start a new transaction
+	tx := db.DB.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	err := tx.Omit("GeneratedBy").
 		Omit("GuidingContent").
 		Create(recipe).Error
 	if err != nil {
+		tx.Rollback()
 		log.Printf("Error creating recipe: %v", err)
 		return err
 	}
-	return nil
+
+	return tx.Commit().Error
 }
 
 // Creating chat history might be restrained to a recipe for strict association requirements like setting recipeID
