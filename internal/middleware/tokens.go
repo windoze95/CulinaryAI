@@ -49,6 +49,8 @@ func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 		tokenString := authHeader // Token is directly provided in the Authorization header
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			log.Printf("token: %v", token)
+			log.Printf("cfg.Env.JwtSecretKey.Value(): %v", cfg.Env.JwtSecretKey.Value())
 			return cfg.Env.JwtSecretKey.Value(), nil
 		})
 		log.Printf("token err: %v", err)
