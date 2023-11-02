@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -58,6 +59,8 @@ func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			c.Set("user_id", claims["user_id"])
+			log.Println("claims:", claims)
+			log.Println("claims[user_id]:", claims["user_id"])
 			c.Next()
 		} else {
 			c.JSON(401, gin.H{"message": "Unauthorized"})
