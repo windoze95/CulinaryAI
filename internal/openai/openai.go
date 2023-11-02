@@ -487,7 +487,7 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(realRecipeManager *RealRecipeM
 		GeneratedText: responseArgumentsJSON,
 	}
 
-	chatMessageJSON, err := util.SerializeToJSONStringWithBuffer(chatMessage)
+	chatMessageJSON, err := util.SerializeToJSONStringWithBuffer(&chatMessage)
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize chat message: %v", err)
 	}
