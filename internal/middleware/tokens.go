@@ -57,8 +57,21 @@ func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			c.Set("user_id", claims["user_id"])
-			c.Next()
+			// c.Set("user_id", claims["user_id"])
+			// c.Next()
+			// Type assert to float64 (default for JSON numbers)
+			if idFloat, ok := claims["user_id"].(float64); ok {
+				// Convert to uint
+				userID := uint(idFloat)
+				// Set the userID in the context
+				c.Set("user_id", userID)
+				c.Next()
+			} else {
+				// Handle error: claim is not a float64
+				c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid user_id in token"})
+				c.Abort()
+				return
+			}
 		} else {
 			c.JSON(401, gin.H{"message": "Unauthorized"})
 			c.Abort()
