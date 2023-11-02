@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/windoze95/saltybytes-api/internal/service"
 	"github.com/windoze95/saltybytes-api/internal/util"
@@ -9,6 +11,7 @@ import (
 func AttachUserToContext(userService *service.UserService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, err := util.GetUserIDFromContext(c)
+		log.Println("userID:", userID)
 		if err != nil {
 			c.Set("user", nil)
 			c.Next()
@@ -17,6 +20,8 @@ func AttachUserToContext(userService *service.UserService) gin.HandlerFunc {
 
 		// user, err := userService.GetPreloadedUserByID(uint(userID))
 		user, err := userService.GetUserByID(userID)
+		log.Println("user:", user)
+		log.Println("err:", err)
 		if err != nil {
 			c.Set("user", nil)
 		} else {
