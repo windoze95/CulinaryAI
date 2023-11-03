@@ -112,7 +112,7 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 			return
 		}
 
-		if err := s.Repo.UpdateRecipeCoreFields(recipe); err != nil {
+		if err := s.Repo.UpdateRecipeCoreFields(recipe, recipeManager.NextRecipeChatHistoryMessagesJSON); err != nil {
 			errChan <- err
 			return
 		}
@@ -185,9 +185,22 @@ func populateRecipeCoreFields(recipe *models.Recipe, recipeManager *openai.RealR
 	if recipe.ChatHistory == nil {
 		return errors.New("recipe.ChatHistory is nil")
 	}
-	recipe.ChatHistory.MessagesJSON = recipeManager.RecipeChatHistoryMessagesJSON
-	// error here
-	// need to create chathistory in db and need to add it to fetches
+	// Check if the lengths are different
+	recipeMessagesJSON := recipe.ChatHistory.MessagesJSON
+	managerMessagesJSON := recipeManager.RecipeChatHistoryMessagesJSON
+	if len(recipeMessagesJSON) != len(managerMessagesJSON) {
+		return errors.New("recipe.ChatHistory.MessagesJSON and recipeManager.RecipeChatHistoryMessagesJSON have different lengths")
+	}
+	// Compare elements
+	for i, v := range recipeMessagesJSON {
+		if v != managerMessagesJSON[i] {
+			return errors.New("recipe.ChatHistory.MessagesJSON and recipeManager.RecipeChatHistoryMessagesJSON have different elements")
+		}
+	}
+	log.Println("1 recipe.ChatHistory:", recipe.ChatHistory.MessagesJSON)
+	// Append the new message history to the existing messages history
+	recipe.ChatHistory.MessagesJSON = append(recipe.ChatHistory.MessagesJSON, recipeManager.NextRecipeChatHistoryMessagesJSON...)
+	log.Println("2 recipe.ChatHistory:", recipe.ChatHistory.MessagesJSON)
 
 	return validateRecipeCoreFields(recipe)
 }

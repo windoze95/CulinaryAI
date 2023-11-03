@@ -145,7 +145,7 @@ func (db *RecipeDB) UpdateRecipeGenerationStatus(recipe *models.Recipe, isComple
 //		}
 //		return nil
 //	}
-func (db *RecipeDB) UpdateRecipeCoreFields(recipe *models.Recipe) error {
+func (db *RecipeDB) UpdateRecipeCoreFields(recipe *models.Recipe, newRecipeChatHistoryMessages []string) error {
 	// Start a new transaction.
 	tx := db.DB.Begin()
 	if tx.Error != nil {
@@ -166,15 +166,25 @@ func (db *RecipeDB) UpdateRecipeCoreFields(recipe *models.Recipe) error {
 		return err
 	}
 
-	// Update the chat history.
-	if recipe.ChatHistory != nil {
-		err = tx.Model(recipe.ChatHistory).
-			Updates(map[string]interface{}{
-				"MessagesJSON": recipe.ChatHistory.MessagesJSON,
-			}).Error
+	// // Update the chat history.
+	// if recipe.ChatHistory != nil {
+	// 	err = tx.Model(recipe.ChatHistory).
+	// 		Updates(map[string]interface{}{
+	// 			"MessagesJSON": recipe.ChatHistory.MessagesJSON,
+	// 		}).Error
+	// 	if err != nil {
+	// 		tx.Rollback()
+	// 		log.Printf("Error updating recipe chat history: %v", err)
+	// 		return err
+	// 	}
+	// }
+	// Append new messages to the chat history.
+	// if recipe.ChatHistory != nil && len(newRecipeChatHistoryMessages) > 0 {
+	if len(newRecipeChatHistoryMessages) > 0 {
+		err = tx.Exec("UPDATE recipe_chat_histories SET messages_json = array_cat(messages_json, ?) WHERE id = ?", newRecipeChatHistoryMessages, recipe.ChatHistory.ID).Error
 		if err != nil {
 			tx.Rollback()
-			log.Printf("Error updating recipe chat history: %v", err)
+			log.Printf("Error appending messages to recipe chat history: %v", err)
 			return err
 		}
 	}

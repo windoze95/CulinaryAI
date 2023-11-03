@@ -19,13 +19,14 @@ type OpenaiClient struct {
 }
 
 type RealRecipeManager struct {
-	InitialRequestPrompt          string
-	FollowupPrompt                string
-	Requirements                  string
-	UnitSystem                    string
-	RecipeChatHistoryMessages     []*RecipeChatHistoryMessage
-	RecipeChatHistoryMessagesJSON []string
-	ImageBytes                    []byte
+	InitialRequestPrompt              string
+	FollowupPrompt                    string
+	Requirements                      string
+	UnitSystem                        string
+	RecipeChatHistoryMessages         []*RecipeChatHistoryMessage
+	RecipeChatHistoryMessagesJSON     []string
+	NextRecipeChatHistoryMessagesJSON []string
+	ImageBytes                        []byte
 	*FunctionCallArgument
 }
 
@@ -98,9 +99,9 @@ func (r *RealRecipeManager) GenerateNewRecipe(key string) error {
 		r.FollowupPrompt = ""
 		log.Printf("warning: FollowupPrompt was not empty, but was set to empty")
 	}
-	if r.RecipeChatHistoryMessages != nil {
-		r.RecipeChatHistoryMessages = nil
-		r.RecipeChatHistoryMessagesJSON = nil
+	if r.RecipeChatHistoryMessages == nil || len(r.RecipeChatHistoryMessages) > 0 {
+		r.RecipeChatHistoryMessages = []*RecipeChatHistoryMessage{}
+		r.RecipeChatHistoryMessagesJSON = []string{}
 		log.Printf("warning: RecipeChatHistoryMessagesJSON was not nil, but was set to nil")
 	}
 	chatCompletionMessages, err := createChatCompletionMessages(r)
@@ -200,6 +201,10 @@ func (r *RealRecipeManager) GenerateRecipeImage(key string) error {
 }
 
 func (r *RealRecipeManager) SetRecipeChatHistoryMessages() error {
+	if r.RecipeChatHistoryMessagesJSON == nil || len(r.RecipeChatHistoryMessagesJSON) == 0 {
+		return errors.New("RecipeChatHistoryMessagesJSON is nil or empty")
+	}
+
 	// Deserialize the chat completion messages
 	var recipeChatMessages []*RecipeChatHistoryMessage
 	for _, messageJSON := range r.RecipeChatHistoryMessagesJSON {
@@ -460,14 +465,10 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(realRecipeManager *RealRecipeM
 		return nil, fmt.Errorf("exhausted maximum retries. Exiting. ChatCompletion error: %v", chatCompletionRespErr)
 	}
 
-	responseMessage := resp.Choices[0].Message
-	responseArgumentsJSON := responseMessage.FunctionCall.Arguments
-
-	if len(resp.Choices) == 0 || responseArgumentsJSON == "" {
+	if len(resp.Choices) == 0 || resp.Choices[0].Message.FunctionCall.Arguments == "" {
 		return nil, errors.New("OpenAI API returned an empty message")
 	}
-
-	log.Printf("responseArgumentsJSON: %+v\n", responseArgumentsJSON)
+	responseArgumentsJSON := resp.Choices[0].Message.FunctionCall.Arguments
 
 	// Deserialize arguments
 	var functionCallArgument FunctionCallArgument
@@ -492,9 +493,12 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(realRecipeManager *RealRecipeM
 		return nil, fmt.Errorf("failed to serialize chat message: %v", err)
 	}
 
-	messageHistory := append(realRecipeManager.RecipeChatHistoryMessagesJSON, chatMessageJSON)
-	realRecipeManager.RecipeChatHistoryMessagesJSON = messageHistory
+	realRecipeManager.NextRecipeChatHistoryMessagesJSON = []string{chatMessageJSON}
 
+	// messageHistory := append(realRecipeManager.RecipeChatHistoryMessagesJSON, chatMessageJSON)
+	// realRecipeManager.RecipeChatHistoryMessagesJSON = messageHistory
+
+	///////////////////////////////////////////////////////////////////////
 	// print realRecipeManager.RecipeChatMessages in the service layer for testing
 
 	// // print responseMessage
