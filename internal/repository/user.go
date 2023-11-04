@@ -77,6 +77,8 @@ func (r *UserRepository) GetUserByID(userID uint) (*models.User, error) {
 	var user models.User
 	if err := r.DB.Preload("Settings").
 		Preload("GuidingContent").
+		Preload("Subscription").
+		Preload("Auth").
 		Where("id = ?", userID).
 		First(&user).Error; err != nil {
 		return nil, err
