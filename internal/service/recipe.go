@@ -127,7 +127,7 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 			return
 		}
 
-		if err := s.Repo.UpdateRecipeImageURL(recipe, recipe.ImageURL); err != nil {
+		if err := s.Repo.UpdateRecipeImageURL(recipe.ID, recipe.ImageURL); err != nil {
 			errChan <- err
 			return
 		}
@@ -142,7 +142,7 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 			return
 		}
 
-		if err := s.Repo.UpdateRecipeGenerationStatus(recipe, true); err != nil {
+		if err := s.Repo.UpdateRecipeGenerationStatus(recipe.ID, true); err != nil {
 			log.Printf("error: failed to update GenerationComplete: %v", err)
 			return
 		}
@@ -411,7 +411,7 @@ func (s *RecipeService) AssociateTagsWithRecipe(recipe *models.Recipe, tags []st
 	}
 
 	recipe.Hashtags = associatedTags
-	if err := s.Repo.UpdateRecipeTagsAssociation(recipe, associatedTags); err != nil {
+	if err := s.Repo.UpdateRecipeTagsAssociation(recipe.ID, associatedTags); err != nil {
 		return fmt.Errorf("failed to update recipe with tags: %v", err)
 	}
 

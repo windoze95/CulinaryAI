@@ -33,6 +33,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}
+	defer database.Close()
 
 	// // Load new store
 	// store := sessions.NewCookieStore([]byte(cfg.Env.SessionKey.Value()))

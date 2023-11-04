@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/windoze95/saltybytes-api/internal/config"
-	"github.com/windoze95/saltybytes-api/internal/db"
 	"github.com/windoze95/saltybytes-api/internal/handlers"
 	"github.com/windoze95/saltybytes-api/internal/middleware"
 	"github.com/windoze95/saltybytes-api/internal/repository"
@@ -68,14 +67,14 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 	})
 
 	// User-related routes setup
-	userDB := db.NewUserDB(database)
-	userRepo := repository.NewUserRepository(userDB)
+	// userDB := db.NewUserDB(database)
+	userRepo := repository.NewUserRepository(database)
 	userService := service.NewUserService(cfg, userRepo)
 	userHandler := handlers.NewUserHandler(userService)
 
 	// Recipe-related routes setup
-	recipeDB := db.NewRecipeDB(database)
-	recipeRepo := repository.NewRecipeRepository(recipeDB)
+	// recipeDB := db.NewRecipeDB(database)
+	recipeRepo := repository.NewRecipeRepository(database)
 	recipeService := service.NewRecipeService(cfg, recipeRepo)
 	recipeHandler := handlers.NewRecipeHandler(recipeService)
 

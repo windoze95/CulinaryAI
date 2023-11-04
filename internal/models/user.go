@@ -21,9 +21,9 @@ import (
 type User struct {
 	gorm.Model
 	Username         string         `gorm:"unique;index"`
-	FirstName        *string        `gorm:"default:null"`
-	Email            *string        `gorm:"unique;default:null"`
-	FacebookID       *string        `gorm:"unique;default:null;index"`
+	FirstName        string         `gorm:"default:null"`
+	Email            string         `gorm:"unique;default:null"`
+	FacebookID       string         `gorm:"unique;default:null;index"`
 	Auth             UserAuth       `gorm:"foreignKey:UserID"`
 	Subscription     Subscription   `gorm:"foreignKey:UserID"`
 	Settings         UserSettings   `gorm:"foreignKey:UserID"`

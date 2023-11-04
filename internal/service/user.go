@@ -56,8 +56,8 @@ func (s *UserService) CreateUser(username, firstName, email, password string) (*
 	// Create User and UserSettings
 	user := &models.User{
 		Username:  username,
-		FirstName: &firstName,
-		Email:     &email,
+		FirstName: firstName,
+		Email:     email,
 		Auth: models.UserAuth{
 			HashedPassword: &hashedPasswordStr,
 			AuthType:       "standard",
@@ -158,8 +158,8 @@ func (s *UserService) CreateFacebookUser(username, code string) (*models.User, e
 		// Create User and UserSettings
 		user = &models.User{
 			Username:   username,
-			Email:      &fbUser.Email,
-			FacebookID: &fbUser.ID,
+			Email:      fbUser.Email,
+			FacebookID: fbUser.ID,
 			Auth: models.UserAuth{
 				AuthType: "facebook",
 			},
@@ -194,8 +194,8 @@ func (s *UserService) CreateFacebookUser(username, code string) (*models.User, e
 		}
 	} else {
 		// Update the user's email if it has changed
-		if user.Email != &fbUser.Email {
-			user.Email = &fbUser.Email
+		if user.Email != fbUser.Email {
+			user.Email = fbUser.Email
 			if err := s.Repo.UpdateUserEmail(user.ID, fbUser.Email); err != nil {
 				return nil, fmt.Errorf("error updating user email: %v", err)
 			}
@@ -239,8 +239,8 @@ func (s *UserService) TryFacebookLogin(code string) (*models.User, error) {
 	}
 
 	// Update the user's email if it has changed
-	if user.Email != &fbUser.Email {
-		user.Email = &fbUser.Email
+	if user.Email != fbUser.Email {
+		user.Email = fbUser.Email
 		if err := s.Repo.UpdateUserEmail(user.ID, fbUser.Email); err != nil {
 			return nil, fmt.Errorf("error updating user email: %v", err)
 		}
