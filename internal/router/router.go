@@ -83,6 +83,18 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 	{
 		// Create a new user
 		apiPublic.POST("/users", userHandler.CreateUser)
+		apiPublic.GET("/users/test", func(c *gin.Context) {
+			user, _ := userHandler.Service.CreateUser("someusername", "firstname", "someemail@email.com", "somepassworD1!")
+			c.JSON(200, gin.H{
+				"message": user.ID,
+			})
+		})
+		apiPublic.GET("/users/test2", func(c *gin.Context) {
+			user, _ := userHandler.Service.GetUserByID(1)
+			c.JSON(200, gin.H{
+				"message": user,
+			})
+		})
 		// Login a user
 		apiPublic.POST("/auth/login", userHandler.LoginUser)
 		// Facebook OAuth routes

@@ -113,8 +113,8 @@ func (s *Subscription) BeforeUpdate(tx *gorm.DB) (err error) {
 
 type UserSettings struct {
 	gorm.Model
-	UserID             uint   `gorm:"unique;index"`
-	KeepScreenAwake    bool   `gorm:"default:true"`
+	UserID uint `gorm:"unique;index"`
+	// KeepScreenAwake    bool   `gorm:"default:true"`
 	UsePersonalAPIKey  bool   `gorm:"default:false"`
 	EncryptedOpenAIKey string `gorm:"default:''"`
 }

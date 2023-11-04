@@ -52,22 +52,22 @@ func (r *UserRepository) GetUserAuthByUsername(username string) (*models.User, e
 	return &user, nil
 }
 
-func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
-	// user, err := r.UserDB.GetUserByUsername(username)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	var user models.User
-	if err := r.DB.Where("username = ?", username).
-		First(&user).Error; err != nil {
-		return nil, err
-	}
-	// return &user, nil
+// func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
+// 	// user, err := r.UserDB.GetUserByUsername(username)
+// 	// if err != nil {
+// 	// 	return nil, err
+// 	// }
+// 	var user models.User
+// 	if err := r.DB.Where("username = ?", username).
+// 		First(&user).Error; err != nil {
+// 		return nil, err
+// 	}
+// 	// return &user, nil
 
-	// user = util.StripSensitiveUserData(&user)
+// 	// user = util.StripSensitiveUserData(&user)
 
-	return util.StripSensitiveUserData(&user), nil
-}
+// 	return util.StripSensitiveUserData(&user), nil
+// }
 
 func (r *UserRepository) GetUserByID(userID uint) (*models.User, error) {
 	// user, err := r.UserDB.GetPreloadedUserByID(userID)
