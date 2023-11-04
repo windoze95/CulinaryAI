@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,8 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/windoze95/saltybytes-api/internal/service"
 	"github.com/windoze95/saltybytes-api/internal/util"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/facebook"
 )
 
 type UserHandler struct {
@@ -134,75 +131,6 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 	// })
 
 	// c.JSON(http.StatusOK, gin.H{"message": "User logged in successfully", "user": user})
-	c.JSON(http.StatusOK, gin.H{"access_token": tokenString, "message": "User logged in successfully", "user": user})
-}
-
-func (h *UserHandler) FacebookAuth(c *gin.Context) {
-	// Construct OAuth2 config here
-	fbOauthConfig := &oauth2.Config{
-		RedirectURL:  h.Service.Cfg.Env.FacebookRedirectURL.Value(),
-		ClientID:     h.Service.Cfg.Env.FacebookClientID.Value(),
-		ClientSecret: h.Service.Cfg.Env.FacebookClientSecret.Value(),
-		Scopes:       []string{"email"},
-		Endpoint:     facebook.Endpoint,
-	}
-
-	// Generate OAuth2 URL and redirect user to Facebook for authentication
-	authURL := fbOauthConfig.AuthCodeURL("", oauth2.AccessTypeOffline)
-	c.Redirect(http.StatusFound, authURL)
-}
-
-func (h *UserHandler) FacebookCallback(c *gin.Context) {
-	// Extract 'code' from query parameters
-	code := c.DefaultQuery("code", "")
-	if code == "" {
-		log.Printf("error: handlers.FacebookCallback: %v", errors.New("missing code"))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing code"})
-		return
-	}
-
-	// Try to fetch the user information
-	user, err := h.Service.TryFacebookLogin(code)
-	if err == nil {
-		// Log the user in
-		tokenString, err := generateAuthToken(user.ID, h.Service.Cfg.Env.JwtSecretKey.Value())
-		if err != nil {
-			log.Printf("error: handlers.FacebookCallback: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{"access_token": tokenString, "message": "User logged in successfully", "user": user})
-		return
-	}
-
-	// If user doesn't exist, ask for a username to complete the signup.
-	c.JSON(http.StatusOK, gin.H{"message": "Please provide a username", "code": code})
-}
-
-func (h *UserHandler) CompleteFacebookSignup(c *gin.Context) {
-	var details struct {
-		Code     string `json:"code" binding:"required"`
-		Username string `json:"username" binding:"required"`
-	}
-	if err := c.ShouldBindJSON(&details); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "All fields are required"})
-		return
-	}
-	user, err := h.Service.CreateFacebookUser(details.Username, details.Code)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Log the user in
-	tokenString, err := generateAuthToken(user.ID, h.Service.Cfg.Env.JwtSecretKey.Value())
-	if err != nil {
-		log.Printf("error: handlers.CompleteFacebookSignup: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
 	c.JSON(http.StatusOK, gin.H{"access_token": tokenString, "message": "User logged in successfully", "user": user})
 }
 

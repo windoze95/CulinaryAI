@@ -19,7 +19,12 @@ func NewRecipeHandler(recipeService *service.RecipeService) *RecipeHandler {
 }
 
 func (h *RecipeHandler) GetRecipe(c *gin.Context) {
-	recipeID := c.Param("recipe_id")
+	recipeIDStr := c.Param("recipe_id")
+	recipeID, err := parseUintParam(recipeIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid recipe ID"})
+		return
+	}
 
 	recipe, err := h.Service.GetRecipeByID(recipeID)
 	if err != nil {
@@ -44,9 +49,6 @@ func (h *RecipeHandler) CreateRecipe(c *gin.Context) {
 		c.Abort()
 		return
 	}
-
-	log.Printf("User: %+v", user)
-	log.Printf("User ID: %v", user.GuidingContent)
 
 	// Parse the request body for the user's prompt
 	var request struct {

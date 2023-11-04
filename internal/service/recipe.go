@@ -30,7 +30,7 @@ func NewRecipeService(cfg *config.Config, repo *repository.RecipeRepository) *Re
 	}
 }
 
-func (s *RecipeService) GetRecipeByID(recipeID string) (*models.Recipe, error) {
+func (s *RecipeService) GetRecipeByID(recipeID uint) (*models.Recipe, error) {
 	// Fetch the recipe by its ID from the repository
 	recipe, err := s.Repo.GetRecipeByID(recipeID)
 	if err != nil {
@@ -52,13 +52,11 @@ func (s *RecipeService) GetRecipeByID(recipeID string) (*models.Recipe, error) {
 func (s *RecipeService) CreateRecipe(user *models.User, userPrompt string) (*models.Recipe, error) {
 	// Populate initial fields of the Recipe struct
 	recipe := &models.Recipe{
-		// GeneratedBy:       *user,
-		// GeneratedBy: user,
-		GeneratedByUserID: user.ID, // Set from user's ID
-		InitialPrompt:     userPrompt,
-		GuidingContentID:  user.GuidingContent.ID, // Set from user's existing GuidingContent ID
-		// GuidingContent:    user.GuidingContent, // Set from user's existing GuidingContent
-		// GuidingContent:    &user.GuidingContent,    // Set from user's existing GuidingContent
+		GeneratedBy: user,
+		// GeneratedByUserID: user.ID, // Set from user's ID
+		InitialPrompt:  userPrompt,
+		GuidingContent: &user.GuidingContent, // Set from user's existing GuidingContent
+		// GuidingContentID:  user.GuidingContent.ID, // Set from user's existing GuidingContent ID
 		GuidingContentUID: user.GuidingContent.UID, // Set from user's existing GuidingContent
 		ChatHistory: &models.RecipeChatHistory{
 			MessagesJSON: []string{},

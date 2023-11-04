@@ -8,8 +8,9 @@ import (
 )
 
 type Config struct {
-	Title string `json:"title"`
-	Env   Env    `json:"env"`
+	Title               string `json:"title"`
+	Env                 Env    `json:"env"`
+	DefaultRequirements string `json:"defaultRequirements"`
 }
 
 type EnvVar string

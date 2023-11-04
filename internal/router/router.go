@@ -81,6 +81,8 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 	// Group for API routes that don't require token verification
 	apiPublic := r.Group("/v1")
 	{
+		// User-related routes
+
 		// Create a new user
 		apiPublic.POST("/users", userHandler.CreateUser)
 		apiPublic.GET("/users/test", func(c *gin.Context) {
@@ -92,16 +94,17 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 		apiPublic.GET("/users/test2", func(c *gin.Context) {
 			// user, _ := userHandler.Service.GetUserByID(1)
 			user, _ := userHandler.Service.Repo.GetUserAuthByUsername("someusername")
+			recipeCreated, _ := recipeHandler.Service.CreateRecipe(user, "something nice")
+			recipeFetched, _ := recipeHandler.Service.Repo.GetRecipeByID(recipeCreated.ID)
 			c.JSON(200, gin.H{
-				"message": user,
+				"message": recipeFetched,
 			})
 		})
 		// Login a user
 		apiPublic.POST("/auth/login", userHandler.LoginUser)
-		// Facebook OAuth routes
-		apiPublic.POST("/auth/facebook", userHandler.FacebookAuth)
-		apiPublic.POST("/auth/facebook/callback", userHandler.FacebookCallback)
-		apiPublic.POST("/auth/facebook/complete", userHandler.CompleteFacebookSignup)
+
+		// Recipe-related routes
+
 		// Get a single recipe by it's ID
 		apiPublic.GET("/recipes/:recipe_id", recipeHandler.GetRecipe)
 	}

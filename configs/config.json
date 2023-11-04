@@ -13,5 +13,6 @@
         "facebookClientID": "FACEBOOK_CLIENT_ID",
         "facebookClientSecret": "FACEBOOK_CLIENT_SECRET",
         "facebookRedirectUrl": "FACEBOOK_REDIRECT_URL"
-    }
+    },
+    "defaultRequirements": "No hydrodgenated oils. No seed oils. No soy. High carb. High protein."
 }

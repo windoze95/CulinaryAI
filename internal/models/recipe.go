@@ -22,14 +22,14 @@ type Recipe struct {
 	GuidingContentID   uint
 	GuidingContentUID  uuid.UUID
 	GuidingContent     *GuidingContent    `gorm:"foreignKey:GuidingContentID"`
-	ChatHistoryID      uint               `gorm:"index;"`
+	ChatHistoryID      uint               `gorm:"unique;index"`
 	ChatHistory        *RecipeChatHistory `gorm:"foreignKey:ChatHistoryID"`
 	GenerationComplete bool
 }
 
 type RecipeChatHistory struct {
 	gorm.Model
-	// RecipeID     uint     `gorm:"uniqueIndex;"`
+	// RecipeID     uint           `gorm:"uniqueIndex;"`
 	MessagesJSON pq.StringArray `gorm:"type:text[]"`
 }
 

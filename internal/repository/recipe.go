@@ -23,7 +23,7 @@ func NewRecipeRepository(db *gorm.DB) *RecipeRepository {
 	return &RecipeRepository{DB: db}
 }
 
-func (r *RecipeRepository) GetRecipeByID(recipeID string) (*models.Recipe, error) {
+func (r *RecipeRepository) GetRecipeByID(recipeID uint) (*models.Recipe, error) {
 	// recipe, err := r.RecipeDB.GetRecipeByID(recipeID)
 	var recipe models.Recipe
 	err := r.DB.Preload("GuidingContent").
@@ -66,9 +66,7 @@ func (r *RecipeRepository) CreateRecipe(recipe *models.Recipe) error {
 		return tx.Error
 	}
 
-	err := tx.Omit("GeneratedBy").
-		Omit("GuidingContent").
-		Create(recipe).Error
+	err := tx.Create(recipe).Error
 	if err != nil {
 		tx.Rollback()
 		log.Printf("Error creating recipe: %v", err)

@@ -1,8 +1,6 @@
 package service
 
 import (
-	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -17,8 +15,6 @@ import (
 	"github.com/windoze95/saltybytes-api/internal/repository"
 	"github.com/windoze95/saltybytes-api/internal/util"
 	"golang.org/x/crypto/bcrypt"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/facebook"
 )
 
 type UserService struct {
@@ -59,20 +55,21 @@ func (s *UserService) CreateUser(username, firstName, email, password string) (*
 		FirstName: firstName,
 		Email:     email,
 		Auth: models.UserAuth{
-			HashedPassword: &hashedPasswordStr,
-			AuthType:       "standard",
+			HashedPassword: hashedPasswordStr,
+			AuthType:       models.Standard,
 		},
 		Subscription: models.Subscription{
 			SubscriptionTier: models.Free,
 			ExpiresAt:        time.Now().AddDate(0, 1, 0), // One month from now
 		},
 		Settings: models.UserSettings{
-			// KeepScreenAwake:    true,  // Default value
+			KeepScreenAwake: true, // Default value
 			// UsePersonalAPIKey:  false, // Default value
 			// EncryptedOpenAIKey: "",    // Default value
 		},
 		GuidingContent: models.GuidingContent{
-			UnitSystem: models.USCustomary, // Default value
+			// UnitSystem: models.USCustomary, // Default value
+			Requirements: s.Cfg.DefaultRequirements,
 		},
 		CollectedRecipes: []models.Recipe{},
 	}
@@ -108,164 +105,16 @@ func (s *UserService) LoginUser(username, password string) (*models.User, error)
 		return nil, err
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(*user.Auth.HashedPassword), []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Auth.HashedPassword), []byte(password)); err != nil {
 		return nil, errors.New("invalid username or password")
 	}
 
 	// Clear the hashed password before returning the user
 	// user.HashedPassword = ""
 
-	user = util.StripSensitiveUserData(user)
+	// user = util.StripSensitiveUserData(user)
 
-	return user, nil
-}
-
-type FacebookUser struct {
-	ID        string `json:"id"`
-	FirstName string `json:"first_name"`
-	Email     string `json:"email"`
-}
-
-func (s *UserService) CreateFacebookUser(username, code string) (*models.User, error) {
-	// Construct OAuth2 config
-	fbOauthConfig := &oauth2.Config{
-		RedirectURL:  s.Cfg.Env.FacebookRedirectURL.Value(),
-		ClientID:     s.Cfg.Env.FacebookClientID.Value(),
-		ClientSecret: s.Cfg.Env.FacebookClientSecret.Value(),
-		Scopes:       []string{"email"},
-		Endpoint:     facebook.Endpoint,
-	}
-
-	// Exchange the received code for a token
-	token, err := fbOauthConfig.Exchange(context.Background(), code)
-	if err != nil {
-		return nil, err
-	}
-
-	// Fetch user info
-	fbUser, err := fetchFacebookUserInfo(token, fbOauthConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	if fbUser.Email == "" {
-		fbUser.Email = fbUser.ID + "@facebook.com"
-	}
-
-	// Check if the user already exists in the database; if not, create a new user
-	user, err := s.Repo.GetUserByFacebookID(fbUser.ID)
-	if err != nil {
-		// Create User and UserSettings
-		user = &models.User{
-			Username:   username,
-			Email:      fbUser.Email,
-			FacebookID: fbUser.ID,
-			Auth: models.UserAuth{
-				AuthType: "facebook",
-			},
-			Subscription: models.Subscription{
-				SubscriptionTier: models.Free,
-				ExpiresAt:        time.Now().AddDate(0, 1, 0), // One month from now
-			},
-			Settings:         models.UserSettings{},
-			GuidingContent:   models.GuidingContent{},
-			CollectedRecipes: []models.Recipe{},
-		}
-
-		// settings := &models.UserSettings{}
-		// gc := &models.GuidingContent{}
-		// gc.UnitSystem = 1 // Default value
-
-		// if err := s.Repo.CreateUser(user); err != nil {
-		// 	if pgErr, ok := err.(*pq.Error); ok {
-		// 		if pgErr.Code == "23505" { // Unique constraint violation
-		// 			if strings.Contains(pgErr.Error(), "username") {
-		// 				return nil, fmt.Errorf("username already in use")
-		// 			} else if strings.Contains(pgErr.Error(), "email") {
-		// 				return nil, fmt.Errorf("email already in use")
-		// 			}
-		// 		}
-		// 	}
-		// 	return nil, fmt.Errorf("error creating user: %v", err)
-		// }
-		user, err = s.Repo.CreateUser(user)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		// Update the user's email if it has changed
-		if user.Email != fbUser.Email {
-			user.Email = fbUser.Email
-			if err := s.Repo.UpdateUserEmail(user.ID, fbUser.Email); err != nil {
-				return nil, fmt.Errorf("error updating user email: %v", err)
-			}
-		}
-	}
-
-	return user, nil
-}
-
-func (s *UserService) TryFacebookLogin(code string) (*models.User, error) {
-	// Construct OAuth2 config
-	fbOauthConfig := &oauth2.Config{
-		RedirectURL:  s.Cfg.Env.FacebookRedirectURL.Value(),
-		ClientID:     s.Cfg.Env.FacebookClientID.Value(),
-		ClientSecret: s.Cfg.Env.FacebookClientSecret.Value(),
-		Scopes:       []string{"email"},
-		Endpoint:     facebook.Endpoint,
-	}
-
-	// Exchange the received code for a token
-	token, err := fbOauthConfig.Exchange(context.Background(), code)
-	if err != nil {
-		return nil, err
-	}
-
-	// Fetch user info
-	fbUser, err := fetchFacebookUserInfo(token, fbOauthConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	// Check if the user already exists in the database by their Facebook ID
-	user, err := s.Repo.GetUserByFacebookID(fbUser.ID)
-	if err != nil {
-		// User does not exist; return an error to signify that signup is needed
-		return nil, fmt.Errorf("user does not exist")
-	}
-
-	if fbUser.Email == "" {
-		fbUser.Email = fbUser.ID + "@facebook.com"
-	}
-
-	// Update the user's email if it has changed
-	if user.Email != fbUser.Email {
-		user.Email = fbUser.Email
-		if err := s.Repo.UpdateUserEmail(user.ID, fbUser.Email); err != nil {
-			return nil, fmt.Errorf("error updating user email: %v", err)
-		}
-	}
-
-	return user, nil // User exists, return the user
-}
-
-func fetchFacebookUserInfo(token *oauth2.Token, fbOauthConfig *oauth2.Config) (*FacebookUser, error) {
-	// Use the token to make an HTTP request to Facebook API to get user's info
-	client := fbOauthConfig.Client(context.Background(), token)
-	resp, err := client.Get("https://graph.facebook.com/me?fields=id,first_name,email")
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	// Decode the response into a struct
-	var fbUser FacebookUser
-
-	if err := json.NewDecoder(resp.Body).Decode(&fbUser); err != nil {
-		return nil, err
-	}
-
-	return &fbUser, nil
+	return util.StripSensitiveUserData(user), nil
 }
 
 func (s *UserService) GetUserByID(userID uint) (*models.User, error) {

@@ -43,12 +43,13 @@ func (r *UserRepository) CreateUser(user *models.User) (*models.User, error) {
 }
 
 func (r *UserRepository) GetUserAuthByUsername(username string) (*models.User, error) {
-	// return r.UserDB.GetUserByUsername(username)
 	var user models.User
-	if err := r.DB.Where("username = ?", username).
+	if err := r.DB.Preload("Auth").
+		Where("username = ?", username).
 		First(&user).Error; err != nil {
 		return nil, err
 	}
+
 	return &user, nil
 }
 
@@ -78,7 +79,6 @@ func (r *UserRepository) GetUserByID(userID uint) (*models.User, error) {
 	if err := r.DB.Preload("Settings").
 		Preload("GuidingContent").
 		Preload("Subscription").
-		// Preload("Auth").
 		Where("id = ?", userID).
 		First(&user).Error; err != nil {
 		return nil, err

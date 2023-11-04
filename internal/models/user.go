@@ -20,10 +20,10 @@ import (
 
 type User struct {
 	gorm.Model
-	Username         string         `gorm:"unique;index"`
-	FirstName        string         `gorm:"default:null"`
-	Email            string         `gorm:"unique;default:null"`
-	FacebookID       string         `gorm:"unique;default:null;index"`
+	Username  string `gorm:"unique;index"`
+	FirstName string `gorm:"default:null"`
+	Email     string `gorm:"unique;default:null"`
+	// FacebookID       *string         `gorm:"unique;default:null;index"` // Pointer to allow null
 	Auth             UserAuth       `gorm:"foreignKey:UserID"`
 	Subscription     Subscription   `gorm:"foreignKey:UserID"`
 	Settings         UserSettings   `gorm:"foreignKey:UserID"`
@@ -34,8 +34,8 @@ type User struct {
 type UserAuth struct {
 	gorm.Model
 	UserID         uint `gorm:"unique;index"`
-	HashedPassword *string
-	AuthType       string `gorm:"type:text"`
+	HashedPassword string
+	AuthType       UserAuthType `gorm:"type:text"`
 }
 
 type UserAuthType string
