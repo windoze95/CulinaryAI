@@ -272,9 +272,9 @@ func (s *UserService) GetUserByID(userID uint) (*models.User, error) {
 	return s.Repo.GetUserByID(userID)
 }
 
-func (s *UserService) GetPreloadedUserByID(userID uint) (*models.User, error) {
-	return s.Repo.GetPreloadedUserByID(userID)
-}
+// func (s *UserService) GetPreloadedUserByID(userID uint) (*models.User, error) {
+// 	return s.Repo.GetPreloadedUserByID(userID)
+// }
 
 func (s *UserService) VerifyOpenAIKeyInUserSettings(user *models.User) (bool, error) {
 	// Decrypt the OpenAI key

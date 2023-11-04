@@ -78,34 +78,33 @@ func (r *UserRepository) GetUserByID(userID uint) (*models.User, error) {
 	if err := r.DB.Preload("Settings").
 		Preload("GuidingContent").
 		Preload("Subscription").
-		Preload("Auth").
+		// Preload("Auth").
 		Where("id = ?", userID).
 		First(&user).Error; err != nil {
 		return nil, err
 	}
 
-	// user = *util.StripSensitiveUserData(&user)
-
-	return util.StripSensitiveUserData(&user), nil
+	// return util.StripSensitiveUserData(&user), nil
+	return &user, nil
 }
 
-func (r *UserRepository) GetPreloadedUserByID(userID uint) (*models.User, error) {
-	// user, err := r.UserDB.GetPreloadedUserByID(userID)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	var user models.User
-	if err := r.DB.Preload("Settings").
-		Preload("GuidingContent").
-		Where("id = ?", userID).
-		First(&user).Error; err != nil {
-		return nil, err
-	}
+// func (r *UserRepository) GetPreloadedUserByID(userID uint) (*models.User, error) {
+// 	// user, err := r.UserDB.GetPreloadedUserByID(userID)
+// 	// if err != nil {
+// 	// 	return nil, err
+// 	// }
+// 	var user models.User
+// 	if err := r.DB.Preload("Settings").
+// 		Preload("GuidingContent").
+// 		Where("id = ?", userID).
+// 		First(&user).Error; err != nil {
+// 		return nil, err
+// 	}
 
-	// user = util.StripSensitiveUserData(user)
+// 	// user = util.StripSensitiveUserData(user)
 
-	return util.StripSensitiveUserData(&user), nil
-}
+// 	return util.StripSensitiveUserData(&user), nil
+// }
 
 func (r *UserRepository) GetUserByFacebookID(facebookID string) (*models.User, error) {
 	// user, err := r.UserDB.GetUserByFacebookID(facebookID)

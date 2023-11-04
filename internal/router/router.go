@@ -90,7 +90,8 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 			})
 		})
 		apiPublic.GET("/users/test2", func(c *gin.Context) {
-			user, _ := userHandler.Service.GetUserByID(1)
+			// user, _ := userHandler.Service.GetUserByID(1)
+			user, _ := userHandler.Service.Repo.GetUserAuthByUsername("someusername")
 			c.JSON(200, gin.H{
 				"message": user,
 			})
