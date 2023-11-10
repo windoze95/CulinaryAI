@@ -24,6 +24,8 @@ type Recipe struct {
 	GuidingContent     *GuidingContent    `gorm:"foreignKey:GuidingContentID"`
 	ChatHistoryID      uint               `gorm:"unique;index"`
 	ChatHistory        *RecipeChatHistory `gorm:"foreignKey:ChatHistoryID"`
+	SpinOnRecipeID     *uint
+	SpinOnRecipe       *Recipe `gorm:"foreignKey:SpinOnRecipeID"`
 	GenerationComplete bool
 }
 
