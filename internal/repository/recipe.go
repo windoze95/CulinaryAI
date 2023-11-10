@@ -35,10 +35,10 @@ func (r *RecipeRepository) GetRecipeByID(recipeID uint) (*models.Recipe, error) 
 		First(&recipe).Error
 	if err != nil {
 		log.Printf("Error retrieving recipe: %v", err)
-		return nil, err
-	}
-	// log.Printf("Query complete. username retrieved: %+v, Error: %v", recipe.GeneratedBy, err)
-	if err != nil {
+		// 	return nil, err
+		// }
+		// log.Printf("Query complete. username retrieved: %+v, Error: %v", recipe.GeneratedBy, err)
+		// if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return nil, NotFoundError{message: "Recipe not found"}
 		}

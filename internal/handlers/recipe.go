@@ -33,7 +33,7 @@ func (h *RecipeHandler) GetRecipe(c *gin.Context) {
 		case repository.NotFoundError:
 			c.JSON(http.StatusNotFound, gin.H{"error": e.Error()})
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": e.Error()})
 		}
 		return
 	}
