@@ -392,7 +392,7 @@ func generateAndUploadImage(s *RecipeService, recipe *models.Recipe, recipeManag
 // If it does, it uses the existing Tag's ID and Name.
 func (s *RecipeService) AssociateTagsWithRecipe(recipe *models.Recipe, tags []string) error {
 	var associatedTags []models.Tag
-	log.Println("tags:", tags)
+
 	for _, hashtag := range tags {
 		cleanedHashtag := cleanHashtag(hashtag)
 
@@ -412,6 +412,8 @@ func (s *RecipeService) AssociateTagsWithRecipe(recipe *models.Recipe, tags []st
 	}
 
 	recipe.Hashtags = associatedTags
+	log.Printf("associatedTags: %v", associatedTags)
+	log.Printf("recipe.Hashtags: %v", recipe.Hashtags)
 	if err := s.Repo.UpdateRecipeTagsAssociation(recipe.ID, associatedTags); err != nil {
 		return fmt.Errorf("failed to update recipe with tags: %v", err)
 	}

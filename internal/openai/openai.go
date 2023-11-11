@@ -479,9 +479,6 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(realRecipeManager *RealRecipeM
 
 	realRecipeManager.FunctionCallArgument = &functionCallArgument
 
-	log.Println("FunctionCallArgument: ", functionCallArgument.Hashtags)
-	log.Println("realRecipeManager.FunctionCallArgument: ", realRecipeManager.FunctionCallArgument.Hashtags)
-
 	// *realRecipeManager.RecipeChatMessages = append(*realRecipeManager.RecipeChatMessages, RecipeChatMessage{
 	// 	UserPrompt:    realRecipeManager.FollowupPrompt,
 	// 	GeneratedText: responseArgumentsJSON,
