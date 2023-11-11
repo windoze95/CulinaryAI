@@ -63,6 +63,11 @@ func (s *RecipeService) CreateRecipe(user *models.User, userPrompt string) (*mod
 		},
 	}
 
+	if recipe.GuidingContent == nil {
+		log.Println("user's GuidingContent is nil")
+		return nil, errors.New("user's GuidingContent is nil")
+	}
+
 	// Create a Recipe with the basic Recipe details
 	if err := s.Repo.CreateRecipe(recipe); err != nil {
 		return nil, fmt.Errorf("failed to save recipe record: %w", err)
