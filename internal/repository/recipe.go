@@ -28,7 +28,7 @@ func (r *RecipeRepository) GetRecipeByID(recipeID uint) (*models.Recipe, error) 
 	// recipe, err := r.RecipeDB.GetRecipeByID(recipeID)
 	var recipe models.Recipe
 	err := r.DB.Preload("GuidingContent").
-		Preload("Tags").
+		Preload("Hashtags").
 		Preload("GeneratedBy", func(db *gorm.DB) *gorm.DB {
 			return db.Select("Username") // Select only Username
 		}).

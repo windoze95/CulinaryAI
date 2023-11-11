@@ -171,6 +171,18 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 		return
 	}
 	log.Println("newfetchedrecipeJSON:", newfetchedrecipeJSON)
+	fetchedChatHist, err := s.Repo.GetChatHistoryByRecipeID(recipe.ID)
+	if err != nil {
+		log.Printf("error: failed to fetch chat history: %v", err)
+		return
+	}
+	// Serialize the fetchedChatHist to JSON
+	fetchedChatHistJSON, err := util.SerializeToJSONString(fetchedChatHist)
+	if err != nil {
+		log.Printf("error: failed to serialize chat history: %v", err)
+		return
+	}
+	log.Println("fetchedChatHistJSON:", fetchedChatHistJSON)
 }
 
 // 	select {
