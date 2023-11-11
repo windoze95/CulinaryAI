@@ -51,7 +51,7 @@ func (s *RecipeService) GetRecipeByID(recipeID uint) (*models.Recipe, error) {
 
 func (s *RecipeService) CreateRecipe(user *models.User, userPrompt string) (*models.Recipe, error) {
 	if user.GuidingContent.ID == 0 {
-		log.Println("user's GuidingContent is nil")
+		log.Printf("user %d GuidingContent is nil", user.ID)
 		return nil, errors.New("user's GuidingContent is nil")
 	}
 
@@ -157,32 +157,6 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 		log.Println("error:", err)
 		return
 	}
-
-	// Debugging
-	newfetchedrecipe, err := s.Repo.GetRecipeByID(recipe.ID)
-	if err != nil {
-		log.Printf("error: failed to fetch recipe: %v", err)
-		return
-	}
-	// Serialize the newfetchedrecipe to JSON
-	newfetchedrecipeJSON, err := util.SerializeToJSONString(newfetchedrecipe)
-	if err != nil {
-		log.Printf("error: failed to serialize recipe: %v", err)
-		return
-	}
-	log.Println("newfetchedrecipeJSON:", newfetchedrecipeJSON)
-	fetchedChatHist, err := s.Repo.GetChatHistoryByID(newfetchedrecipe.ChatHistoryID)
-	if err != nil {
-		log.Printf("error: failed to fetch chat history: %v", err)
-		return
-	}
-	// Serialize the fetchedChatHist to JSON
-	fetchedChatHistJSON, err := util.SerializeToJSONString(fetchedChatHist)
-	if err != nil {
-		log.Printf("error: failed to serialize chat history: %v", err)
-		return
-	}
-	log.Println("fetchedChatHistJSON:", fetchedChatHistJSON)
 }
 
 // 	select {
@@ -438,8 +412,6 @@ func (s *RecipeService) AssociateTagsWithRecipe(recipe *models.Recipe, tags []st
 			return fmt.Errorf("database error while searching for tag: %v", err)
 		}
 	}
-
-	log.Printf("recipe.Hashtags: %v", recipe.Hashtags)
 
 	recipe.Hashtags = associatedTags
 	if err := s.Repo.UpdateRecipeTagsAssociation(recipe.ID, associatedTags); err != nil {
