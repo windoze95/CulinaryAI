@@ -48,14 +48,23 @@ func (r *RecipeRepository) GetRecipeByID(recipeID uint) (*models.Recipe, error) 
 	return &recipe, nil
 }
 
-func (r *RecipeRepository) GetChatHistoryByRecipeID(recipeID uint) (*models.RecipeChatHistory, error) {
+//	func (r *RecipeRepository) GetChatHistoryByRecipeID(chatHistoryID uint) (*models.RecipeChatHistory, error) {
+//		var chatHistory models.RecipeChatHistory
+//		err := r.DB.Where("id = ?", chatHistoryID).
+//			First(&chatHistory).Error
+//		if err != nil {
+//			log.Printf("Error retrieving chat history: %v", err)
+//			return nil, err
+//		}
+//		return &chatHistory, nil
+//	}
+func (r *RecipeRepository) GetChatHistoryByID(chatHistoryID uint) (*models.RecipeChatHistory, error) {
 	var chatHistory models.RecipeChatHistory
-	err := r.DB.Where("RecipeID = ?", recipeID).
-		First(&chatHistory).Error
-	if err != nil {
-		log.Printf("Error retrieving chat history: %v", err)
-		return nil, err
+	result := r.DB.First(&chatHistory, chatHistoryID)
+	if result.Error != nil {
+		return nil, result.Error
 	}
+
 	return &chatHistory, nil
 }
 

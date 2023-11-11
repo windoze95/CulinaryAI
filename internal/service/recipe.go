@@ -171,7 +171,7 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 		return
 	}
 	log.Println("newfetchedrecipeJSON:", newfetchedrecipeJSON)
-	fetchedChatHist, err := s.Repo.GetChatHistoryByRecipeID(recipe.ID)
+	fetchedChatHist, err := s.Repo.GetChatHistoryByID(recipe.ID)
 	if err != nil {
 		log.Printf("error: failed to fetch chat history: %v", err)
 		return
