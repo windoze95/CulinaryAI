@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/jinzhu/gorm"
+	"github.com/lib/pq"
 	"github.com/windoze95/saltybytes-api/internal/models"
 )
 
@@ -147,17 +148,30 @@ func (r *RecipeRepository) UpdateRecipeCoreFields(recipe *models.Recipe, newReci
 	// 		return err
 	// 	}
 	// }
+
 	if len(newRecipeChatHistoryMessages) > 0 {
-		// Convert the new messages into a PostgreSQL array literal
-		// newMessagesPGArray := "{" + strings.Join(newRecipeChatHistoryMessages, ",") + "}"
-		err = tx.Exec("UPDATE recipe_chat_histories SET messages_json = array_cat(messages_json, ?) WHERE id = ?", newRecipeChatHistoryMessages, recipe.ChatHistory.ID).Error
-		// err = tx.Exec(`UPDATE recipe_chat_histories SET messages_json = array_cat(messages_json, ?) WHERE id = ?`, newMessagesPGArray, recipe.ChatHistory.ID).Error
+		// // Convert newRecipeChatHistoryMessages to a PostgreSQL-compatible array format
+		// pgArray := "{" + strings.Join(newRecipeChatHistoryMessages, ",") + "}"
+
+		// Use a parameterized query to safely append messages
+		err = tx.Exec("UPDATE recipe_chat_histories SET messages_json = array_cat(messages_json, ?::text[]) WHERE id = ?", pq.Array(newRecipeChatHistoryMessages), recipe.ChatHistory.ID).Error
 		if err != nil {
 			tx.Rollback()
 			log.Printf("Error appending messages to recipe chat history: %v", err)
 			return err
 		}
 	}
+	// if len(newRecipeChatHistoryMessages) > 0 {
+	// 	// Convert the new messages into a PostgreSQL array literal
+	// 	// newMessagesPGArray := "{" + strings.Join(newRecipeChatHistoryMessages, ",") + "}"
+	// 	err = tx.Exec("UPDATE recipe_chat_histories SET messages_json = array_cat(messages_json, ?) WHERE id = ?", newRecipeChatHistoryMessages, recipe.ChatHistory.ID).Error
+	// 	// err = tx.Exec(`UPDATE recipe_chat_histories SET messages_json = array_cat(messages_json, ?) WHERE id = ?`, newMessagesPGArray, recipe.ChatHistory.ID).Error
+	// 	if err != nil {
+	// 		tx.Rollback()
+	// 		log.Printf("Error appending messages to recipe chat history: %v", err)
+	// 		return err
+	// 	}
+	// }
 
 	// // Commit the transaction if all updates succeed.
 	// err = tx.Commit().Error

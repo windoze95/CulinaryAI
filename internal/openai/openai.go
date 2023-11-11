@@ -484,13 +484,11 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(realRecipeManager *RealRecipeM
 	// 	GeneratedText: responseArgumentsJSON,
 	// })
 
-	log.Printf("BEFORE: %s ", responseArgumentsJSON)
 	// Reserialize the argument for consistency
 	responseArgumentsJSON, err := util.SerializeToJSONStringWithBuffer(functionCallArgument)
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize FunctionCallArgument: %v", err)
 	}
-	log.Printf("AFTER: %s ", responseArgumentsJSON)
 
 	chatMessage := RecipeChatHistoryMessage{
 		UserPrompt:    realRecipeManager.FollowupPrompt,

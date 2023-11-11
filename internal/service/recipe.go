@@ -200,10 +200,8 @@ func populateRecipeCoreFields(recipe *models.Recipe, recipeManager *openai.RealR
 			return errors.New("recipe.ChatHistory.MessagesJSON and recipeManager.RecipeChatHistoryMessagesJSON have different elements")
 		}
 	}
-	log.Println("1 recipe.ChatHistory:", recipe.ChatHistory.MessagesJSON)
 	// Append the new message history to the existing messages history
 	recipe.ChatHistory.MessagesJSON = append(recipe.ChatHistory.MessagesJSON, recipeManager.NextRecipeChatHistoryMessagesJSON...)
-	log.Println("2 recipe.ChatHistory:", recipe.ChatHistory.MessagesJSON)
 
 	return validateRecipeCoreFields(recipe)
 }
