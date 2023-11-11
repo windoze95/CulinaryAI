@@ -411,6 +411,8 @@ func (s *RecipeService) AssociateTagsWithRecipe(recipe *models.Recipe, tags []st
 		}
 	}
 
+	log.Printf("recipe.Hashtags: %v", recipe.Hashtags)
+
 	recipe.Hashtags = associatedTags
 	if err := s.Repo.UpdateRecipeTagsAssociation(recipe.ID, associatedTags); err != nil {
 		return fmt.Errorf("failed to update recipe with tags: %v", err)
