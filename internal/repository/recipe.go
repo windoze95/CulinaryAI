@@ -205,6 +205,11 @@ func (r *RecipeRepository) CreateTag(tag *models.Tag) error {
 
 func (r *RecipeRepository) UpdateRecipeTagsAssociation(recipeID uint, tags []models.Tag) error {
 	// return r.RecipeDB.UpdateRecipeTagsAssociation(recipe, tags)
+	// Debug logs
+	log.Printf("Updating tags for recipe ID: %d", recipeID)
+	for _, tag := range tags {
+		log.Printf("Tag ID: %d, Hashtag: %s", tag.ID, tag.Hashtag)
+	}
 	err := r.DB.Model(&models.Recipe{}).
 		Where("id = ?", recipeID).
 		Association("Hashtags").
