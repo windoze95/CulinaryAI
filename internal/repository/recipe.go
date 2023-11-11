@@ -203,21 +203,39 @@ func (r *RecipeRepository) CreateTag(tag *models.Tag) error {
 	return err
 }
 
-func (r *RecipeRepository) UpdateRecipeTagsAssociation(recipeID uint, tags []models.Tag) error {
-	// return r.RecipeDB.UpdateRecipeTagsAssociation(recipe, tags)
-	// Debug logs
-	log.Printf("Updating tags for recipe ID: %d", recipeID)
-	for _, tag := range tags {
-		log.Printf("Tag ID: %d, Hashtag: %s", tag.ID, tag.Hashtag)
+// func (r *RecipeRepository) UpdateRecipeTagsAssociation(recipeID uint, tags []models.Tag) error {
+// 	// return r.RecipeDB.UpdateRecipeTagsAssociation(recipe, tags)
+// 	// Debug logs
+// 	log.Printf("Updating tags for recipe ID: %d", recipeID)
+// 	for _, tag := range tags {
+// 		log.Printf("Tag ID: %d, Hashtag: %s", tag.ID, tag.Hashtag)
+// 	}
+// 	err := r.DB.Model(&models.Recipe{}).
+// 		Where("id = ?", recipeID).
+// 		Association("Hashtags").
+// 		Replace(tags).Error
+// 	if err != nil {
+// 		log.Printf("Error updating recipe tags association: %v", err)
+// 	}
+// 	return err
+// }
+
+func (r *RecipeRepository) UpdateRecipeTagsAssociation(recipeID uint, newTags []models.Tag) error {
+	var recipe models.Recipe
+	result := r.DB.First(&recipe, recipeID)
+	if result.Error != nil {
+		return result.Error
 	}
-	err := r.DB.Model(&models.Recipe{}).
-		Where("id = ?", recipeID).
+
+	// Replace existing associations with new tags
+	err := r.DB.Model(&recipe).
 		Association("Hashtags").
-		Replace(tags).Error
+		Replace(newTags).Error
 	if err != nil {
-		log.Printf("Error updating recipe tags association: %v", err)
+		return err
 	}
-	return err
+
+	return nil
 }
 
 // func (r *RecipeRepository) UpdateRecipeTagsAssociation(recipeID uint, tags []models.Tag) error {
