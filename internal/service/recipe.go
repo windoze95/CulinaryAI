@@ -392,7 +392,7 @@ func generateAndUploadImage(s *RecipeService, recipe *models.Recipe, recipeManag
 // If it does, it uses the existing Tag's ID and Name.
 func (s *RecipeService) AssociateTagsWithRecipe(recipe *models.Recipe, tags []string) error {
 	var associatedTags []models.Tag
-
+	log.Println("tags:", tags)
 	for _, hashtag := range tags {
 		cleanedHashtag := cleanHashtag(hashtag)
 
