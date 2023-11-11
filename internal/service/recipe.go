@@ -157,6 +157,20 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 		log.Println("error:", err)
 		return
 	}
+
+	// Debugging
+	newfetchedrecipe, err := s.Repo.GetRecipeByID(recipe.ID)
+	if err != nil {
+		log.Printf("error: failed to fetch recipe: %v", err)
+		return
+	}
+	// Serialize the newfetchedrecipe to JSON
+	newfetchedrecipeJSON, err := util.SerializeToJSONString(newfetchedrecipe)
+	if err != nil {
+		log.Printf("error: failed to serialize recipe: %v", err)
+		return
+	}
+	log.Println("newfetchedrecipeJSON:", newfetchedrecipeJSON)
 }
 
 // 	select {
