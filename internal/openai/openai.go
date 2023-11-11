@@ -471,7 +471,7 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(realRecipeManager *RealRecipeM
 	}
 	responseArgumentsJSON := resp.Choices[0].Message.FunctionCall.Arguments
 
-	// Deserialize arguments
+	// Deserialize argument
 	var functionCallArgument FunctionCallArgument
 	if err := json.Unmarshal([]byte(responseArgumentsJSON), &functionCallArgument); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal FunctionCallArgument: %v", err)
@@ -483,6 +483,14 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(realRecipeManager *RealRecipeM
 	// 	UserPrompt:    realRecipeManager.FollowupPrompt,
 	// 	GeneratedText: responseArgumentsJSON,
 	// })
+
+	log.Printf("BEFORE: %s ", responseArgumentsJSON)
+	// Reserialize the argument for consistency
+	responseArgumentsJSON, err := util.SerializeToJSONStringWithBuffer(functionCallArgument)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize FunctionCallArgument: %v", err)
+	}
+	log.Printf("AFTER: %s ", responseArgumentsJSON)
 
 	chatMessage := RecipeChatHistoryMessage{
 		UserPrompt:    realRecipeManager.FollowupPrompt,

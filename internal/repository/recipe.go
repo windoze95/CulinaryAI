@@ -2,7 +2,6 @@ package repository
 
 import (
 	"log"
-	"strings"
 
 	"github.com/jinzhu/gorm"
 	"github.com/windoze95/saltybytes-api/internal/models"
@@ -137,11 +136,22 @@ func (r *RecipeRepository) UpdateRecipeCoreFields(recipe *models.Recipe, newReci
 	}
 
 	// Append new messages to the chat history.
+	// for _, message := range newRecipeChatHistoryMessages {
+	// 	// Properly escape the JSON string for SQL query
+	// 	escapedMessage := strings.ReplaceAll(message, "'", "''")
+
+	// 	err = tx.Exec(`UPDATE recipe_chat_histories SET messages_json = array_append(messages_json, ?) WHERE id = ?`, escapedMessage, recipe.ChatHistory.ID).Error
+	// 	if err != nil {
+	// 		tx.Rollback()
+	// 		log.Printf("Error appending message to recipe chat history: %v", err)
+	// 		return err
+	// 	}
+	// }
 	if len(newRecipeChatHistoryMessages) > 0 {
 		// Convert the new messages into a PostgreSQL array literal
-		newMessagesPGArray := "{" + strings.Join(newRecipeChatHistoryMessages, ",") + "}"
-		// err = tx.Exec("UPDATE recipe_chat_histories SET messages_json = array_cat(messages_json, ?) WHERE id = ?", newRecipeChatHistoryMessages, recipe.ChatHistory.ID).Error
-		err = tx.Exec(`UPDATE recipe_chat_histories SET messages_json = array_cat(messages_json, ?) WHERE id = ?`, newMessagesPGArray, recipe.ChatHistory.ID).Error
+		// newMessagesPGArray := "{" + strings.Join(newRecipeChatHistoryMessages, ",") + "}"
+		err = tx.Exec("UPDATE recipe_chat_histories SET messages_json = array_cat(messages_json, ?) WHERE id = ?", newRecipeChatHistoryMessages, recipe.ChatHistory.ID).Error
+		// err = tx.Exec(`UPDATE recipe_chat_histories SET messages_json = array_cat(messages_json, ?) WHERE id = ?`, newMessagesPGArray, recipe.ChatHistory.ID).Error
 		if err != nil {
 			tx.Rollback()
 			log.Printf("Error appending messages to recipe chat history: %v", err)
