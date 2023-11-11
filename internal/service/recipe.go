@@ -50,6 +50,11 @@ func (s *RecipeService) GetRecipeByID(recipeID uint) (*models.Recipe, error) {
 }
 
 func (s *RecipeService) CreateRecipe(user *models.User, userPrompt string) (*models.Recipe, error) {
+	if user.GuidingContent.ID == 0 {
+		log.Println("user's GuidingContent is nil")
+		return nil, errors.New("user's GuidingContent is nil")
+	}
+
 	// Populate initial fields of the Recipe struct
 	recipe := &models.Recipe{
 		GeneratedBy: user,
@@ -61,11 +66,6 @@ func (s *RecipeService) CreateRecipe(user *models.User, userPrompt string) (*mod
 		ChatHistory: &models.RecipeChatHistory{
 			MessagesJSON: []string{},
 		},
-	}
-
-	if recipe.GuidingContent == nil {
-		log.Println("user's GuidingContent is nil")
-		return nil, errors.New("user's GuidingContent is nil")
 	}
 
 	// Create a Recipe with the basic Recipe details
