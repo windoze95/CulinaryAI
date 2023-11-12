@@ -228,7 +228,13 @@ func (r *RecipeRepository) UpdateRecipeCoreFields(recipe *models.Recipe, newReci
 	// 	return err
 	// }
 
-	return tx.Commit().Error
+	err = tx.Commit().Error
+	if err != nil {
+		log.Printf("Error committing transaction in UpdateRecipeCoreFields: %v", err)
+		return err
+	}
+
+	return nil
 }
 
 func (r *RecipeRepository) FindTagByName(tagName string) (*models.Tag, error) {
