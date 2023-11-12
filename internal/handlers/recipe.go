@@ -41,6 +41,29 @@ func (h *RecipeHandler) GetRecipe(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"recipe": recipe})
 }
 
+func (h *RecipeHandler) GetRecipeChatHistory(c *gin.Context) {
+	chatHistoryIDStr := c.Param("recipe_chat_history_id")
+	chatHistoryID, err := parseUintParam(chatHistoryIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid recipe chat history ID"})
+		return
+	}
+
+	chatHistory, err := h.Service.GetRecipeChatHistoryByID(chatHistoryID)
+	if err != nil {
+		log.Printf("Error getting recipe chat history: %v", err)
+		switch e := err.(type) {
+		case repository.NotFoundError:
+			c.JSON(http.StatusNotFound, gin.H{"error": e.Error()})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": e.Error()})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"recipeChatHistory": chatHistory})
+}
+
 func (h *RecipeHandler) CreateRecipe(c *gin.Context) {
 	// Retrieve the user from the context
 	user, err := util.GetUserFromContext(c)

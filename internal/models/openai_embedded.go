@@ -2,8 +2,8 @@ package models
 
 type FunctionCallArgument struct {
 	Title       string            `json:"title"`
-	MainRecipe  GeneratedRecipe   `json:"main_recipe"`
-	SubRecipes  []GeneratedRecipe `json:"sub_recipes"`
+	MainRecipe  GeneratedRecipe   `gorm:"type:json" json:"main_recipe"`
+	SubRecipes  []GeneratedRecipe `gorm:"type:json" json:"sub_recipes"`
 	ImagePrompt string            `json:"image_prompt"`
 	UnitSystem  string            `json:"unit_system"` // This field will not be serialized, but will be deserialized
 	Hashtags    []string          `json:"hashtags"`    // This field will not be serialized, but will be deserialized
@@ -23,12 +23,7 @@ type Ingredient struct {
 // type Recipe struct {
 type GeneratedRecipe struct {
 	RecipeName   string       `json:"recipe_name"`
-	Ingredients  []Ingredient `json:"ingredients"`
+	Ingredients  []Ingredient `gorm:"type:json" json:"ingredients"`
 	Instructions []string     `json:"instructions"`
 	TimeToCook   float64      `json:"time_to_cook"`
-}
-
-type RecipeChatHistoryMessage struct { // this is a single message, it's serialized and appended to the messages array
-	UserPrompt    string
-	GeneratedText FunctionCallArgument // recipeManger is serialized and placed here
 }

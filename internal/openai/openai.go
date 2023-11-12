@@ -11,6 +11,7 @@ import (
 
 	openai "github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
+	"github.com/windoze95/saltybytes-api/internal/models"
 	"github.com/windoze95/saltybytes-api/internal/util"
 )
 
@@ -19,48 +20,49 @@ type OpenaiClient struct {
 }
 
 type RealRecipeManager struct {
-	InitialRequestPrompt              string
-	FollowupPrompt                    string
-	Requirements                      string
-	UnitSystem                        string
-	RecipeChatHistoryMessages         []*RecipeChatHistoryMessage
-	RecipeChatHistoryMessagesJSON     []string
-	NextRecipeChatHistoryMessagesJSON []string
-	ImageBytes                        []byte
-	*FunctionCallArgument
+	InitialRequestPrompt          string
+	FollowupPrompt                string
+	Requirements                  string
+	UnitSystem                    string
+	RecipeChatHistoryMessages     []models.RecipeChatHistoryMessage
+	RecipeChatHistoryMessagesJSON []string
+	// NextRecipeChatHistoryMessagesJSON []string
+	NextRecipeChatHistoryMessage models.RecipeChatHistoryMessage
+	ImageBytes                   []byte
+	*models.FunctionCallArgument
 }
 
-type FunctionCallArgument struct {
-	Title       string   `json:"title"`
-	MainRecipe  Recipe   `json:"main_recipe"`
-	SubRecipes  []Recipe `json:"sub_recipes"`
-	ImagePrompt string   `json:"image_prompt"`
-	UnitSystem  string   `json:"unit_system"` // This field will not be serialized, but will be deserialized
-	Hashtags    []string `json:"hashtags"`    // This field will not be serialized, but will be deserialized
-	// ChatContext string   `json:"chat_context"`
-	// UnitSystem  string       `json:"-"`
-	// Hashtags    []string     `json:"-"`
-	// UnitSystem  string       `json:"unit_system"`
-	// Hashtags    []string     `json:"hashtags"`
-}
+// type FunctionCallArgument struct {
+// 	Title       string   `json:"title"`
+// 	MainRecipe  Recipe   `json:"main_recipe"`
+// 	SubRecipes  []Recipe `json:"sub_recipes"`
+// 	ImagePrompt string   `json:"image_prompt"`
+// 	UnitSystem  string   `json:"unit_system"` // This field will not be serialized, but will be deserialized
+// 	Hashtags    []string `json:"hashtags"`    // This field will not be serialized, but will be deserialized
+// 	// ChatContext string   `json:"chat_context"`
+// 	// UnitSystem  string       `json:"-"`
+// 	// Hashtags    []string     `json:"-"`
+// 	// UnitSystem  string       `json:"unit_system"`
+// 	// Hashtags    []string     `json:"hashtags"`
+// }
 
-type Ingredient struct {
-	Name   string  `json:"name"`
-	Unit   string  `json:"unit"`
-	Amount float64 `json:"amount"`
-}
+// type Ingredient struct {
+// 	Name   string  `json:"name"`
+// 	Unit   string  `json:"unit"`
+// 	Amount float64 `json:"amount"`
+// }
 
-type Recipe struct {
-	RecipeName   string       `json:"recipe_name"`
-	Ingredients  []Ingredient `json:"ingredients"`
-	Instructions []string     `json:"instructions"`
-	TimeToCook   float64      `json:"time_to_cook"`
-}
+// type Recipe struct {
+// 	RecipeName   string       `json:"recipe_name"`
+// 	Ingredients  []Ingredient `json:"ingredients"`
+// 	Instructions []string     `json:"instructions"`
+// 	TimeToCook   float64      `json:"time_to_cook"`
+// }
 
-type RecipeChatHistoryMessage struct { // this is a single message, it's serialized and appended to the messages array
-	UserPrompt    string
-	GeneratedText string // recipeManger is serialized and placed here
-}
+// type RecipeChatHistoryMessage struct { // this is a single message, it's serialized and appended to the messages array
+// 	UserPrompt    string
+// 	GeneratedText FunctionCallArgument // recipeManger is serialized and placed here
+// }
 
 func handleAPIError(respErr error) (shouldRetry bool, waitTime time.Duration, err error) {
 	e := &openai.APIError{}
@@ -100,7 +102,7 @@ func (r *RealRecipeManager) GenerateNewRecipe(key string) error {
 		log.Printf("warning: FollowupPrompt was not empty, but was set to empty")
 	}
 	if r.RecipeChatHistoryMessages == nil || len(r.RecipeChatHistoryMessages) > 0 {
-		r.RecipeChatHistoryMessages = []*RecipeChatHistoryMessage{}
+		r.RecipeChatHistoryMessages = []models.RecipeChatHistoryMessage{}
 		r.RecipeChatHistoryMessagesJSON = []string{}
 		log.Printf("warning: RecipeChatHistoryMessagesJSON was not nil, but was set to nil")
 	}
@@ -206,9 +208,9 @@ func (r *RealRecipeManager) SetRecipeChatHistoryMessages() error {
 	}
 
 	// Deserialize the chat completion messages
-	var recipeChatMessages []*RecipeChatHistoryMessage
+	var recipeChatMessages []models.RecipeChatHistoryMessage
 	for _, messageJSON := range r.RecipeChatHistoryMessagesJSON {
-		var message *RecipeChatHistoryMessage
+		var message models.RecipeChatHistoryMessage
 		err := json.Unmarshal([]byte(messageJSON), &message)
 		if err != nil {
 			log.Printf("error: failed to deserialize chat completion message: %v", err)
@@ -248,13 +250,18 @@ func createChatCompletionMessages(realRecipeManager *RealRecipeManager) (*[]open
 	}
 
 	for _, message := range realRecipeManager.RecipeChatHistoryMessages {
+		// Serialize the recipe chat history message
+		argumentJSON, err := util.SerializeToJSONStringWithBuffer(message.GeneratedText)
+		if err != nil {
+			return nil, fmt.Errorf("failed to serialize chat completion message: %v", err)
+		}
 		// Get the first version of the recipe
 		if message.UserPrompt == "" {
 			messages = append(messages, openai.ChatCompletionMessage{
 				Role: openai.ChatMessageRoleAssistant,
 				FunctionCall: &openai.FunctionCall{
 					Name:      "create_recipe",
-					Arguments: message.GeneratedText,
+					Arguments: argumentJSON,
 				},
 			})
 		}
@@ -267,7 +274,7 @@ func createChatCompletionMessages(realRecipeManager *RealRecipeManager) (*[]open
 			Role: openai.ChatMessageRoleAssistant,
 			FunctionCall: &openai.FunctionCall{
 				Name:      "create_recipe",
-				Arguments: message.GeneratedText,
+				Arguments: argumentJSON,
 			},
 		})
 	}
@@ -472,7 +479,7 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(realRecipeManager *RealRecipeM
 	responseArgumentsJSON := resp.Choices[0].Message.FunctionCall.Arguments
 
 	// Deserialize argument
-	var functionCallArgument FunctionCallArgument
+	var functionCallArgument models.FunctionCallArgument
 	if err := json.Unmarshal([]byte(responseArgumentsJSON), &functionCallArgument); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal FunctionCallArgument: %v", err)
 	}
@@ -484,23 +491,26 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(realRecipeManager *RealRecipeM
 	// 	GeneratedText: responseArgumentsJSON,
 	// })
 
-	// Reserialize the argument for consistency
-	responseArgumentsJSON, err := util.SerializeToJSONStringWithBuffer(functionCallArgument)
-	if err != nil {
-		return nil, fmt.Errorf("failed to serialize FunctionCallArgument: %v", err)
-	}
+	// // Reserialize the argument for consistency
+	// responseArgumentsJSON, err := util.SerializeToJSONStringWithBuffer(functionCallArgument)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to serialize FunctionCallArgument: %v", err)
+	// }
 
-	chatMessage := RecipeChatHistoryMessage{
+	// log.Printf("responseArgumentsJSON: %s", responseArgumentsJSON)
+
+	chatMessage := models.RecipeChatHistoryMessage{
 		UserPrompt:    realRecipeManager.FollowupPrompt,
-		GeneratedText: responseArgumentsJSON,
+		GeneratedText: functionCallArgument,
 	}
 
-	chatMessageJSON, err := util.SerializeToJSONStringWithBuffer(&chatMessage)
-	if err != nil {
-		return nil, fmt.Errorf("failed to serialize chat message: %v", err)
-	}
+	// chatMessageJSON, err := util.SerializeToJSONStringWithBuffer(&chatMessage)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to serialize chat message: %v", err)
+	// }
 
-	realRecipeManager.NextRecipeChatHistoryMessagesJSON = []string{chatMessageJSON}
+	// realRecipeManager.NextRecipeChatHistoryMessagesJSON = []string{chatMessageJSON}
+	realRecipeManager.NextRecipeChatHistoryMessage = chatMessage
 
 	// messageHistory := append(realRecipeManager.RecipeChatHistoryMessagesJSON, chatMessageJSON)
 	// realRecipeManager.RecipeChatHistoryMessagesJSON = messageHistory

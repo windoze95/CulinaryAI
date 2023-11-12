@@ -107,6 +107,8 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 
 		// Get a single recipe by it's ID
 		apiPublic.GET("/recipes/:recipe_id", recipeHandler.GetRecipe)
+		// Get a single recipe chat history by the chat history's ID
+		apiPublic.GET("/recipes/chat-history/:recipe_chat_history_id", recipeHandler.GetRecipeChatHistory)
 	}
 
 	// Group for API routes that require token verification

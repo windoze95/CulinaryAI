@@ -49,6 +49,28 @@ func (s *RecipeService) GetRecipeByID(recipeID uint) (*models.Recipe, error) {
 	return recipe, nil
 }
 
+type ChatHistoryResponse struct {
+	ChatHistory *models.RecipeChatHistory `json:"chatHistory"`
+}
+
+func (s *RecipeService) GetRecipeChatHistoryByID(chatHistoryID uint) ([]models.RecipeChatHistoryMessage, error) {
+	// Fetch the recipe by its ID from the repository
+	chatHistory, err := s.Repo.GetChatHistoryByID(chatHistoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	recipeManager := &openai.RealRecipeManager{
+		RecipeChatHistoryMessages: chatHistory.Messages,
+	}
+	err = recipeManager.SetRecipeChatHistoryMessages()
+	if err != nil {
+		return nil, fmt.Errorf("failed to set recipe chat history messages: %w", err)
+	}
+
+	return recipeManager.RecipeChatHistoryMessages, nil
+}
+
 func (s *RecipeService) CreateRecipe(user *models.User, userPrompt string) (*models.Recipe, error) {
 	if user.GuidingContent.ID == 0 {
 		log.Printf("user %d GuidingContent is nil", user.ID)
@@ -64,7 +86,8 @@ func (s *RecipeService) CreateRecipe(user *models.User, userPrompt string) (*mod
 		// GuidingContentID:  user.GuidingContent.ID, // Set from user's existing GuidingContent ID
 		GuidingContentUID: user.GuidingContent.UID, // Set from user's existing GuidingContent
 		ChatHistory: &models.RecipeChatHistory{
-			MessagesJSON: []string{},
+			// MessagesJSON: []string{},
+			Messages: []models.RecipeChatHistoryMessage{},
 		},
 	}
 
@@ -117,7 +140,7 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 			return
 		}
 
-		if err := s.Repo.UpdateRecipeCoreFields(recipe, recipeManager.NextRecipeChatHistoryMessagesJSON); err != nil {
+		if err := s.Repo.UpdateRecipeCoreFields(recipe, recipeManager.NextRecipeChatHistoryMessage); err != nil {
 			errChan <- err
 			return
 		}
@@ -191,19 +214,22 @@ func populateRecipeCoreFields(recipe *models.Recipe, recipeManager *openai.RealR
 		return errors.New("recipe.ChatHistory is nil")
 	}
 	// Check if the lengths are different
-	recipeMessagesJSON := recipe.ChatHistory.MessagesJSON
-	managerMessagesJSON := recipeManager.RecipeChatHistoryMessagesJSON
-	if len(recipeMessagesJSON) != len(managerMessagesJSON) {
+	// recipeMessagesJSON := recipe.ChatHistory.MessagesJSON
+	recipeMessages := recipe.ChatHistory.Messages
+	// managerMessagesJSON := recipeManager.RecipeChatHistoryMessagesJSON
+	managerMessages := recipeManager.RecipeChatHistoryMessages
+	if len(recipeMessages) != len(managerMessages) {
 		return errors.New("recipe.ChatHistory.MessagesJSON and recipeManager.RecipeChatHistoryMessagesJSON have different lengths")
 	}
-	// Compare elements
-	for i, v := range recipeMessagesJSON {
-		if v != managerMessagesJSON[i] {
-			return errors.New("recipe.ChatHistory.MessagesJSON and recipeManager.RecipeChatHistoryMessagesJSON have different elements")
-		}
-	}
+	// // Compare elements
+	// for i, v := range recipeMessages {
+	// 	if v != managerMessages[i] {
+	// 		return errors.New("recipe.ChatHistory.MessagesJSON and recipeManager.RecipeChatHistoryMessagesJSON have different elements")
+	// 	}
+	// }
 	// Append the new message history to the existing messages history
-	recipe.ChatHistory.MessagesJSON = append(recipe.ChatHistory.MessagesJSON, recipeManager.NextRecipeChatHistoryMessagesJSON...)
+	// recipe.ChatHistory.MessagesJSON = append(recipe.ChatHistory.MessagesJSON, recipeManager.NextRecipeChatHistoryMessagesJSON...)
+	recipe.ChatHistory.Messages = append(recipe.ChatHistory.Messages, recipeManager.RecipeChatHistoryMessages...)
 
 	return validateRecipeCoreFields(recipe)
 }
@@ -214,7 +240,7 @@ func validateRecipeCoreFields(recipe *models.Recipe) error {
 		recipe.MainRecipeJSON == "" ||
 		recipe.SubRecipesJSON == "" ||
 		recipe.ImagePrompt == "" ||
-		recipe.ChatHistory.MessagesJSON == nil {
+		recipe.ChatHistory.Messages == nil {
 		return errors.New("missing required fields in Recipe")
 	}
 

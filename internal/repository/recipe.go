@@ -1,10 +1,10 @@
 package repository
 
 import (
+	"errors"
 	"log"
 
 	"github.com/jinzhu/gorm"
-	"github.com/lib/pq"
 	"github.com/windoze95/saltybytes-api/internal/models"
 )
 
@@ -60,10 +60,18 @@ func (r *RecipeRepository) GetRecipeByID(recipeID uint) (*models.Recipe, error) 
 //	}
 func (r *RecipeRepository) GetChatHistoryByID(chatHistoryID uint) (*models.RecipeChatHistory, error) {
 	var chatHistory models.RecipeChatHistory
-	result := r.DB.First(&chatHistory, chatHistoryID)
-	if result.Error != nil {
-		return nil, result.Error
+	// err := r.DB.Order("created_at ASC").
+	// 	Find(&chatHistory, "recipe_chat_history_id = ?", chatHistoryID).Error
+	err := r.DB.Preload("Messages", func(db *gorm.DB) *gorm.DB {
+		return db.Order("created_at ASC")
+	}).First(&chatHistory, chatHistoryID).Error
+	if err != nil {
+		return nil, err
 	}
+	// result := r.DB.First(&chatHistory, chatHistoryID)
+	// if result.Error != nil {
+	// 	return nil, result.Error
+	// }
 
 	return &chatHistory, nil
 }
@@ -122,7 +130,7 @@ func (r *RecipeRepository) UpdateRecipeGenerationStatus(recipeID uint, isComplet
 	return err
 }
 
-func (r *RecipeRepository) UpdateRecipeCoreFields(recipe *models.Recipe, newRecipeChatHistoryMessages []string) error {
+func (r *RecipeRepository) UpdateRecipeCoreFields(recipe *models.Recipe, newRecipeChatHistoryMessage models.RecipeChatHistoryMessage) error {
 	// return r.RecipeDB.UpdateRecipeCoreFields(recipe, newRecipeChatHistoryMessages)
 	// Start a new transaction.
 	tx := r.DB.Begin()
@@ -158,18 +166,49 @@ func (r *RecipeRepository) UpdateRecipeCoreFields(recipe *models.Recipe, newReci
 	// 	}
 	// }
 
-	if len(newRecipeChatHistoryMessages) > 0 {
-		// // Convert newRecipeChatHistoryMessages to a PostgreSQL-compatible array format
-		// pgArray := "{" + strings.Join(newRecipeChatHistoryMessages, ",") + "}"
+	// if len(newRecipeChatHistoryMessages) > 0 {
+	// 	// // Convert newRecipeChatHistoryMessages to a PostgreSQL-compatible array format
+	// 	// pgArray := "{" + strings.Join(newRecipeChatHistoryMessages, ",") + "}"
 
-		// Use a parameterized query to safely append messages
-		err = tx.Exec("UPDATE recipe_chat_histories SET messages_json = array_cat(messages_json, ?::text[]) WHERE id = ?", pq.Array(newRecipeChatHistoryMessages), recipe.ChatHistory.ID).Error
-		if err != nil {
-			tx.Rollback()
-			log.Printf("Error appending messages to recipe chat history: %v", err)
-			return err
-		}
+	// 	// Use a parameterized query to safely append messages
+	// 	err = tx.Exec("UPDATE recipe_chat_histories SET messages_json = array_cat(messages_json, ?::text[]) WHERE id = ?", pq.Array(newRecipeChatHistoryMessages), recipe.ChatHistory.ID).Error
+	// 	if err != nil {
+	// 		tx.Rollback()
+	// 		log.Printf("Error appending messages to recipe chat history: %v", err)
+	// 		return err
+	// 	}
+	// }
+
+	// Check if ChatHistoryID is set in the Recipe
+	if recipe.ChatHistoryID == 0 {
+		tx.Rollback()
+		err = errors.New("chat history ID not set in recipe")
+		log.Printf("Error: %v", err)
+		return err
 	}
+
+	newRecipeChatHistoryMessage.RecipeChatHistoryID = recipe.ChatHistoryID
+
+	// Insert the new message into the database
+	err = r.DB.Create(&newRecipeChatHistoryMessage).Error
+	if err != nil {
+		tx.Rollback()
+		log.Printf("Error creating new recipe chat history message: %v", err)
+		return err
+	}
+
+	// // Iterate over the slice of new messages
+	// for i := range newRecipeChatHistoryMessages {
+	// 	// Set the foreign key to link each new message to the specific RecipeChatHistory
+	// 	newRecipeChatHistoryMessages[i].RecipeChatHistoryID = recipe.ChatHistoryID
+
+	// 	// Directly insert each new message into the database
+	// 	err = tx.Create(&newRecipeChatHistoryMessages[i]).Error
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
+
 	// if len(newRecipeChatHistoryMessages) > 0 {
 	// 	// Convert the new messages into a PostgreSQL array literal
 	// 	// newMessagesPGArray := "{" + strings.Join(newRecipeChatHistoryMessages, ",") + "}"

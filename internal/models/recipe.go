@@ -3,7 +3,6 @@ package models
 import (
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
-	"github.com/lib/pq"
 )
 
 type Recipe struct {
@@ -32,7 +31,15 @@ type Recipe struct {
 type RecipeChatHistory struct {
 	gorm.Model
 	// RecipeID     uint           `gorm:"uniqueIndex;"`
-	MessagesJSON pq.StringArray `gorm:"type:text[]"`
+	// MessagesJSON pq.StringArray `gorm:"type:text[]"`
+	Messages []RecipeChatHistoryMessage `gorm:"foreignKey:RecipeChatHistoryID"`
+}
+
+type RecipeChatHistoryMessage struct { // this is a single message, it's serialized and appended to the messages array
+	gorm.Model
+	RecipeChatHistoryID uint // Foreign key (belongs to RecipeChatHistory)
+	UserPrompt          string
+	GeneratedText       FunctionCallArgument `gorm:"type:json"` // recipeManger is serialized and placed here
 }
 
 // generated recipe json is given back as a json string and userInput is already provided as userPrompt(change the name of this variable)
