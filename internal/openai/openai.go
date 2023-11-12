@@ -61,7 +61,7 @@ type RealRecipeManager struct {
 
 // type RecipeChatHistoryMessage struct { // this is a single message, it's serialized and appended to the messages array
 // 	UserPrompt    string
-// 	GeneratedText FunctionCallArgument // recipeManger is serialized and placed here
+// 	GeneratedResponse FunctionCallArgument // recipeManger is serialized and placed here
 // }
 
 func handleAPIError(respErr error) (shouldRetry bool, waitTime time.Duration, err error) {
@@ -251,7 +251,7 @@ func createChatCompletionMessages(realRecipeManager *RealRecipeManager) (*[]open
 
 	for _, message := range realRecipeManager.RecipeChatHistoryMessages {
 		// Serialize the recipe chat history message
-		argumentJSON, err := util.SerializeToJSONStringWithBuffer(message.GeneratedText)
+		argumentJSON, err := util.SerializeToJSONStringWithBuffer(message.GeneratedResponse)
 		if err != nil {
 			return nil, fmt.Errorf("failed to serialize chat completion message: %v", err)
 		}
@@ -488,7 +488,7 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(realRecipeManager *RealRecipeM
 
 	// *realRecipeManager.RecipeChatMessages = append(*realRecipeManager.RecipeChatMessages, RecipeChatMessage{
 	// 	UserPrompt:    realRecipeManager.FollowupPrompt,
-	// 	GeneratedText: responseArgumentsJSON,
+	// 	GeneratedResponse: responseArgumentsJSON,
 	// })
 
 	// // Reserialize the argument for consistency
@@ -500,8 +500,8 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(realRecipeManager *RealRecipeM
 	// log.Printf("responseArgumentsJSON: %s", responseArgumentsJSON)
 
 	chatMessage := models.RecipeChatHistoryMessage{
-		UserPrompt:    realRecipeManager.FollowupPrompt,
-		GeneratedText: functionCallArgument,
+		UserPrompt:        realRecipeManager.FollowupPrompt,
+		GeneratedResponse: functionCallArgument,
 	}
 
 	// chatMessageJSON, err := util.SerializeToJSONStringWithBuffer(&chatMessage)
@@ -533,7 +533,7 @@ func (c *OpenaiClient) CreateRecipeChatCompletion(realRecipeManager *RealRecipeM
 
 	// newChatHistoryMessage := &models.RecipeChatMessage{
 	// 	UserInput:     userPrompt,
-	// 	GeneratedText: responseMessage.FunctionCall.Arguments,
+	// 	GeneratedResponse: responseMessage.FunctionCall.Arguments,
 	// }
 
 	return realRecipeManager, nil
