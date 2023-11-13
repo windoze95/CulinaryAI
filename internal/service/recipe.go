@@ -60,7 +60,7 @@ func (s *RecipeService) GetRecipeChatHistoryByID(chatHistoryID uint) ([]models.R
 		return nil, err
 	}
 
-	recipeManager := &openai.RealRecipeManager{
+	recipeManager := &openai.RecipeManager{
 		RecipeChatHistoryMessages: chatHistory.Messages,
 	}
 	err = recipeManager.SetRecipeChatHistoryMessages()
@@ -123,7 +123,7 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 			return
 		}
 
-		recipeManager := &openai.RealRecipeManager{
+		recipeManager := &openai.RecipeManager{
 			InitialRequestPrompt: recipe.InitialPrompt,
 			UnitSystem:           recipe.GuidingContent.GetUnitSystemText(),
 			Requirements:         recipe.GuidingContent.Requirements,
@@ -193,7 +193,7 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 // }
 
 // populateRecipeFields populates the fields of the Recipe struct.
-func populateRecipeCoreFields(recipe *models.Recipe, recipeManager *openai.RealRecipeManager) error {
+func populateRecipeCoreFields(recipe *models.Recipe, recipeManager *openai.RecipeManager) error {
 	recipe.Title = recipeManager.Title
 
 	mainRecipeJSON, err := util.SerializeToJSONString(recipeManager.MainRecipe)
@@ -248,7 +248,7 @@ func validateRecipeCoreFields(recipe *models.Recipe) error {
 }
 
 // generateAndUploadImage handles the logic related to generating and uploading an image.
-func generateAndUploadImage(s *RecipeService, recipe *models.Recipe, recipeManager *openai.RealRecipeManager, key string) error {
+func generateAndUploadImage(s *RecipeService, recipe *models.Recipe, recipeManager *openai.RecipeManager, key string) error {
 	if err := recipeManager.GenerateRecipeImage(key); err != nil {
 		return errors.New("failed to create recipe image: " + err.Error())
 	}
@@ -279,7 +279,7 @@ func generateAndUploadImage(s *RecipeService, recipe *models.Recipe, recipeManag
 // 			return
 // 		}
 
-// 		recipeManager := &openai.RealRecipeManager{}
+// 		recipeManager := &openai.RecipeManager{}
 // 		recipeManager.InitialRequestPrompt = recipe.InitialPrompt
 // 		recipeManager.FollowupPrompt = ""
 // 		recipeManager.Requirements = user.GuidingContent.Requirements
