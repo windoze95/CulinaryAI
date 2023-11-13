@@ -125,8 +125,8 @@ func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *mo
 
 		recipeManager := &openai.RealRecipeManager{
 			InitialRequestPrompt: recipe.InitialPrompt,
-			UnitSystem:           user.GuidingContent.GetUnitSystemText(),
-			Requirements:         user.GuidingContent.Requirements,
+			UnitSystem:           recipe.GuidingContent.GetUnitSystemText(),
+			Requirements:         recipe.GuidingContent.Requirements,
 			// RecipeChatHistoryMessagesJSON: &recipe.ChatHistory.Messages,
 		}
 
