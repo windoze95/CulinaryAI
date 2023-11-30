@@ -24,6 +24,7 @@ type RecipeService struct {
 
 // Recipe response struct
 type RecipeResponse struct {
+	ID                  uint         `json:"recipeID"`
 	Title               string       `json:"title"`
 	MainRecipeJSON      string       `json:"mainRecipeJSON"`
 	SubRecipesJSON      string       `json:"subRecipesJSON"`
@@ -481,6 +482,7 @@ func toRecipeResponse(r *models.Recipe) *RecipeResponse {
 	}
 
 	return &RecipeResponse{
+		ID:                  r.ID,
 		Title:               r.Title,
 		MainRecipeJSON:      r.MainRecipeJSON,
 		SubRecipesJSON:      r.SubRecipesJSON,
