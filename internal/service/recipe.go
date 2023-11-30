@@ -475,6 +475,11 @@ func toRecipeResponse(r *models.Recipe) *RecipeResponse {
 		spinOnRecipeID = *r.SpinOnRecipeID
 	}
 
+	var spinOnRecipeName string
+	if r.SpinOnRecipe != nil {
+		spinOnRecipeName = r.SpinOnRecipe.Title
+	}
+
 	return &RecipeResponse{
 		Title:               r.Title,
 		MainRecipeJSON:      r.MainRecipeJSON,
@@ -486,7 +491,7 @@ func toRecipeResponse(r *models.Recipe) *RecipeResponse {
 		GuidingContentID:    r.GuidingContentID,
 		ChatHistoryID:       r.ChatHistoryID,
 		SpinOnRecipeID:      spinOnRecipeID,
-		SpinOnRecipeName:    r.SpinOnRecipe.Title,
+		SpinOnRecipeName:    spinOnRecipeName,
 		GenerationComplete:  r.GenerationComplete,
 	}
 }
