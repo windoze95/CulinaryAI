@@ -54,6 +54,8 @@ func (s *RecipeService) GetRecipeByID(recipeID uint) (*RecipeResponse, error) {
 		return nil, err
 	}
 
+	log.Printf("recipe.MainRecipeJSON: %v", recipe.MainRecipeJSON)
+
 	// if recipe.GenerationComplete {
 
 	// 	// Deserialize the GeneratedRecipeJSON field back into the GeneratedRecipe struct
