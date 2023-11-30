@@ -24,7 +24,7 @@ type RecipeService struct {
 
 // Recipe response struct
 type RecipeResponse struct {
-	ID                  uint         `json:"recipeID"`
+	ID                  uint         `json:"ID"`
 	Title               string       `json:"title"`
 	MainRecipeJSON      string       `json:"mainRecipeJSON"`
 	SubRecipesJSON      string       `json:"subRecipesJSON"`
