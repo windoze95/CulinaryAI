@@ -66,8 +66,6 @@ func (s *RecipeService) GetRecipeByID(recipeID uint) (*RecipeResponse, error) {
 	// Create a RecipeResponse from the Recipe
 	recipeResponse := toRecipeResponse(recipe)
 
-	log.Printf("recipeResponse.MainRecipeJSON: %v", recipeResponse.MainRecipeJSON)
-
 	return recipeResponse, nil
 }
 
