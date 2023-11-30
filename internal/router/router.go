@@ -94,8 +94,8 @@ func SetupRouter(cfg *config.Config, database *gorm.DB) *gin.Engine {
 		apiPublic.GET("/users/test2", func(c *gin.Context) {
 			// user, _ := userHandler.Service.GetUserByID(1)
 			user, _ := userHandler.Service.Repo.GetUserAuthByUsername("someusername")
-			recipeCreated, _ := recipeHandler.Service.CreateRecipe(user, "something nice")
-			recipeFetched, _ := recipeHandler.Service.Repo.GetRecipeByID(recipeCreated.ID)
+			_, recipeCreated, _ := recipeHandler.Service.CreateRecipe(user, "something nice")
+			recipeFetched, _ := recipeHandler.Service.GetRecipeByID(recipeCreated.ID)
 			c.JSON(200, gin.H{
 				"message": recipeFetched,
 			})

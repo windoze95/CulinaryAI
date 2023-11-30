@@ -26,7 +26,7 @@ func (h *RecipeHandler) GetRecipe(c *gin.Context) {
 		return
 	}
 
-	recipe, err := h.Service.GetRecipeByID(recipeID)
+	recipeResponse, err := h.Service.GetRecipeByID(recipeID)
 	if err != nil {
 		log.Printf("Error getting recipe: %v", err)
 		switch e := err.(type) {
@@ -38,7 +38,7 @@ func (h *RecipeHandler) GetRecipe(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"recipe": recipe})
+	c.JSON(http.StatusOK, gin.H{"recipe": recipeResponse})
 }
 
 func (h *RecipeHandler) GetRecipeChatHistory(c *gin.Context) {
@@ -83,7 +83,7 @@ func (h *RecipeHandler) CreateRecipe(c *gin.Context) {
 		return
 	}
 
-	recipe, err := h.Service.CreateRecipe(user, request.UserPrompt)
+	recipeResponse, recipe, err := h.Service.CreateRecipe(user, request.UserPrompt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create recipe: " + err.Error()})
@@ -92,7 +92,7 @@ func (h *RecipeHandler) CreateRecipe(c *gin.Context) {
 
 	go h.Service.CompleteRecipeGeneration(recipe, user)
 
-	c.JSON(http.StatusOK, gin.H{"recipe": recipe, "message": "Generating recipe"})
+	c.JSON(http.StatusOK, gin.H{"recipe": recipeResponse, "message": "Generating recipe"})
 
 	// go h.Service.CompleteRecipeGeneration(recipe, user)
 }
