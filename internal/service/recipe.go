@@ -33,7 +33,7 @@ type RecipeResponse struct {
 	GeneratedByUsername string       `json:"generatedByUsername"`
 	GuidingContentID    uint         `json:"guidingContentID"`
 	ChatHistoryID       uint         `json:"chatHistoryID"`
-	SpinOnRecipeID      *uint        `json:"spinOnRecipeID"`
+	SpinOnRecipeID      uint         `json:"spinOnRecipeID"`
 	SpinOnRecipeName    string       `json:"spinOnRecipeName"`
 	GenerationComplete  bool         `json:"generationComplete"`
 }
@@ -470,6 +470,11 @@ func (s *RecipeService) AssociateTagsWithRecipe(recipe *models.Recipe, tags []st
 
 // Convert a Recipe to a RecipeResponse
 func toRecipeResponse(r *models.Recipe) *RecipeResponse {
+	var spinOnRecipeID uint
+	if r.SpinOnRecipeID != nil && *r.SpinOnRecipeID != 0 {
+		spinOnRecipeID = *r.SpinOnRecipeID
+	}
+
 	return &RecipeResponse{
 		Title:               r.Title,
 		MainRecipeJSON:      r.MainRecipeJSON,
@@ -480,7 +485,7 @@ func toRecipeResponse(r *models.Recipe) *RecipeResponse {
 		GeneratedByUsername: r.GeneratedBy.Username,
 		GuidingContentID:    r.GuidingContentID,
 		ChatHistoryID:       r.ChatHistoryID,
-		SpinOnRecipeID:      r.SpinOnRecipeID,
+		SpinOnRecipeID:      spinOnRecipeID,
 		SpinOnRecipeName:    r.SpinOnRecipe.Title,
 		GenerationComplete:  r.GenerationComplete,
 	}
