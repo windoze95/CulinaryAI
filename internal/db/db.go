@@ -37,7 +37,17 @@ func connectToDatabaseWithRetry(dbURL string) (*gorm.DB, error) {
 	// Set a 5-second timeout for all queries in this session
 	// db.Exec("SET statement_timeout = 5000")
 
-	database.AutoMigrate(&models.User{}, &models.UserAuth{}, &models.Subscription{}, &models.UserSettings{}, &models.GuidingContent{}, &models.Recipe{}, &models.Tag{}, &models.RecipeChatHistory{})
+	database.AutoMigrate(
+		&models.User{},
+		&models.UserAuth{},
+		&models.Subscription{},
+		&models.UserSettings{},
+		&models.GuidingContent{},
+		&models.Recipe{},
+		&models.Tag{},
+		&models.RecipeChatHistory{},
+		&models.RecipeChatHistoryMessage{},
+	)
 
 	return database, err
 }
