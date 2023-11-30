@@ -33,8 +33,8 @@ type RecipeResponse struct {
 	GeneratedByUsername string       `json:"generatedByUsername"`
 	GuidingContentID    uint         `json:"guidingContentID"`
 	ChatHistoryID       uint         `json:"chatHistoryID"`
-	SpinOnRecipeID      *uint        `json:"spinOnRecipeID"`
-	SpinOnRecipeName    *string      `json:"spinOnRecipeName"`
+	SpinOnRecipeID      uint         `json:"spinOnRecipeID"`
+	SpinOnRecipeName    string       `json:"spinOnRecipeName"`
 	GenerationComplete  bool         `json:"generationComplete"`
 }
 
@@ -480,8 +480,8 @@ func toRecipeResponse(r *models.Recipe) *RecipeResponse {
 		GeneratedByUsername: r.GeneratedBy.Username,
 		GuidingContentID:    r.GuidingContentID,
 		ChatHistoryID:       r.ChatHistoryID,
-		SpinOnRecipeID:      r.SpinOnRecipeID,
-		SpinOnRecipeName:    &r.SpinOnRecipe.Title,
+		SpinOnRecipeID:      *r.SpinOnRecipeID,
+		SpinOnRecipeName:    r.SpinOnRecipe.Title,
 		GenerationComplete:  r.GenerationComplete,
 	}
 }
