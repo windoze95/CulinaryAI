@@ -40,6 +40,7 @@ type RecipeChatHistoryMessage struct {
 	RecipeChatHistoryID uint // Foreign key (belongs to RecipeChatHistory)
 	UserPrompt          string
 	GeneratedResponse   FunctionCallArgument `gorm:"type:jsonb"` // Embedded struct
+	// GeneratedResponseJSON pgtype.JSONB `gorm:"type:text"`
 }
 
 type Tag struct {

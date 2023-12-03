@@ -1,5 +1,12 @@
 package models
 
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+	"fmt"
+)
+
 type FunctionCallArgument struct {
 	Title       string            `json:"title"`
 	MainRecipe  GeneratedRecipe   `json:"main_recipe"`
@@ -12,6 +19,28 @@ type FunctionCallArgument struct {
 	// Hashtags    []string     `json:"-"`
 	// UnitSystem  string       `json:"unit_system"`
 	// Hashtags    []string     `json:"hashtags"`
+}
+
+// Scan scan value into Jsonb, implements sql.Scanner interface
+func (j *FunctionCallArgument) Scan(value interface{}) error {
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
+	}
+
+	result := FunctionCallArgument{}
+	err := json.Unmarshal(bytes, &result)
+	*j = FunctionCallArgument(result)
+	return err
+}
+
+// Value return json value, implement driver.Valuer interface
+func (j FunctionCallArgument) Value() (driver.Value, error) {
+	// if len(j) == 0 {
+	// 	return nil, nil
+	// }
+	// return json.RawMessage(j).MarshalJSON()
+	return json.Marshal(j)
 }
 
 type Ingredient struct {
