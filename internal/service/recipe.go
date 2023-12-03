@@ -82,15 +82,17 @@ func (s *RecipeService) GetRecipeChatHistoryByID(chatHistoryID uint) ([]models.R
 
 	log.Printf("chatHistory: %v", chatHistory)
 
-	recipeManager := &openai.RecipeManager{
-		RecipeChatHistoryMessages: chatHistory.Messages,
-	}
-	err = recipeManager.SetRecipeChatHistoryMessages()
-	if err != nil {
-		return nil, fmt.Errorf("failed to set recipe chat history messages: %w", err)
-	}
+	// recipeManager := &openai.RecipeManager{
+	// 	RecipeChatHistoryMessages: chatHistory.Messages,
+	// }
+	// err = recipeManager.SetRecipeChatHistoryMessages()
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to set recipe chat history messages: %w", err)
+	// }
 
-	return recipeManager.RecipeChatHistoryMessages, nil
+	// return recipeManager.RecipeChatHistoryMessages, nil
+
+	return chatHistory.Messages, nil
 }
 
 func (s *RecipeService) CreateRecipe(user *models.User, userPrompt string) (*RecipeResponse, *models.Recipe, error) {
