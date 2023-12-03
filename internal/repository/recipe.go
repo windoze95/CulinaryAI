@@ -74,6 +74,7 @@ func (r *RecipeRepository) GetChatHistoryByID(chatHistoryID uint) (*models.Recip
 	// }
 
 	log.Printf("Repo: Chat history fetched: %+v", chatHistory)
+	log.Printf("Repo: Chat history messages main recipe name: %+v", chatHistory.Messages[0].GeneratedResponse.MainRecipe.RecipeName)
 
 	return &chatHistory, nil
 }
