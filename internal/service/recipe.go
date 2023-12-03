@@ -80,6 +80,8 @@ func (s *RecipeService) GetRecipeChatHistoryByID(chatHistoryID uint) ([]models.R
 		return nil, err
 	}
 
+	log.Printf("chatHistory: %v", chatHistory)
+
 	recipeManager := &openai.RecipeManager{
 		RecipeChatHistoryMessages: chatHistory.Messages,
 	}
