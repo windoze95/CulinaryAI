@@ -191,10 +191,8 @@ func (r *RecipeRepository) UpdateRecipeCoreFields(recipe *models.Recipe, newReci
 
 	newRecipeChatHistoryMessage.RecipeChatHistoryID = recipe.ChatHistoryID
 
-	log.Printf("Repo: New recipe chat history message: %+v", newRecipeChatHistoryMessage)
-
 	// Insert the new message into the database
-	err = r.DB.Create(&newRecipeChatHistoryMessage).Error
+	err = tx.Create(&newRecipeChatHistoryMessage).Error
 	if err != nil {
 		tx.Rollback()
 		log.Printf("Error creating new recipe chat history message: %v", err)
