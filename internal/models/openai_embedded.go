@@ -2,8 +2,8 @@ package models
 
 type FunctionCallArgument struct {
 	Title       string            `json:"title"`
-	MainRecipe  GeneratedRecipe   `gorm:"type:json" json:"main_recipe"`
-	SubRecipes  []GeneratedRecipe `gorm:"type:json" json:"sub_recipes"`
+	MainRecipe  GeneratedRecipe   `json:"main_recipe"`
+	SubRecipes  []GeneratedRecipe `json:"sub_recipes"`
 	ImagePrompt string            `json:"image_prompt"`
 	UnitSystem  string            `json:"unit_system"`
 	Hashtags    []string          `json:"hashtags"`
@@ -23,7 +23,7 @@ type Ingredient struct {
 // type Recipe struct {
 type GeneratedRecipe struct {
 	RecipeName   string       `json:"recipe_name"`
-	Ingredients  []Ingredient `gorm:"type:json" json:"ingredients"`
+	Ingredients  []Ingredient `json:"ingredients"`
 	Instructions []string     `json:"instructions"`
 	TimeToCook   float64      `json:"time_to_cook"`
 }
