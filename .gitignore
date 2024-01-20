@@ -21,3 +21,9 @@
 
 # Go workspace file
 go.work
+
+# Ignore everything in...
+/configs/*
+
+# Except for...
+!/configs/config.json

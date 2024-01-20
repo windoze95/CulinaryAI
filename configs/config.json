@@ -1,5 +1,4 @@
 {
-    "title": "SaltyBytes",
     "env": {
         "port": "PORT",
         "databaseUrl": "HEROKU_POSTGRESQL_BRONZE_URL",
@@ -10,9 +9,7 @@
         "awsAccessKeyID": "AWS_ACCESS_KEY_ID",
         "awsSecretAccessKey": "AWS_SECRET_ACCESS_KEY",
         "s3Bucket": "S3_BUCKET",
-        "facebookClientID": "FACEBOOK_CLIENT_ID",
-        "facebookClientSecret": "FACEBOOK_CLIENT_SECRET",
-        "facebookRedirectUrl": "FACEBOOK_REDIRECT_URL"
-    },
-    "defaultRequirements": "No hydrodgenated oils. No seed oils. No soy. High carb. High protein."
+        "openaiPromptsFilePath": "OPENAI_PROMPTS_FILE_PATH",
+        "openaiKeysFilePath": "OPENAI_KEYS_FILE_PATH"
+    }
 }
