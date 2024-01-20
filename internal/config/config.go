@@ -12,25 +12,27 @@ import (
 )
 
 type Config struct {
-	Env                   Env `json:"env"`
-	OpenaiPrompts         Prompts
-	OpenaiKeys            []string
+	Env Env `json:"env"`
+	// Prompts are the templates for the OpenAI prompts.
+	// Use the FetchSysPrompt and FetchUserPrompt methods to retrieve a prompt.
+	OpenaiPrompts         Prompts  `json:"openai_prompts"`
+	OpenaiKeys            []string `json:"openai_keys"`
 	CurrentOpenaiKeyIndex int
 	Mutex                 sync.RWMutex
 }
 
 type Env struct {
 	Port                   EnvVar `json:"port"`
-	DatabaseUrl            EnvVar `json:"databaseUrl"`
-	OpenAIKeyEncryptionKey EnvVar `json:"openAIKeyEncryptionKey"`
-	JwtSecretKey           EnvVar `json:"jwtSecretKey"`
-	PublicOpenAIKey        EnvVar `json:"publicOpenAIKey"`
-	AWSRegion              EnvVar `json:"awsRegion"`
-	AWSAccessKeyID         EnvVar `json:"awsAccessKeyID"`
-	AWSSecretAccessKey     EnvVar `json:"awsSecretAccessKey"`
-	S3Bucket               EnvVar `json:"s3Bucket"`
-	OpenaiPromptsFilePath  EnvVar `json:"openaiPromptsFilePath"`
-	OpenaiKeysFilePath     EnvVar `json:"openaiKeysFilePath"`
+	DatabaseUrl            EnvVar `json:"database_url"`
+	OpenAIKeyEncryptionKey EnvVar `json:"openai_key_encryption_key"`
+	JwtSecretKey           EnvVar `json:"jwt_secret_key"`
+	PublicOpenAIKey        EnvVar `json:"public_openai_key"`
+	AWSRegion              EnvVar `json:"aws_region"`
+	AWSAccessKeyID         EnvVar `json:"aws_access_key_id"`
+	AWSSecretAccessKey     EnvVar `json:"aws_secret_access_key"`
+	S3Bucket               EnvVar `json:"s3_bucket"`
+	OpenaiPromptsFilePath  EnvVar `json:"openai_prompts_file_path"`
+	OpenaiKeysFilePath     EnvVar `json:"openai_keys_file_path"`
 }
 
 type EnvVar string
@@ -40,31 +42,35 @@ func (e EnvVar) Value() string {
 	return os.Getenv(string(e))
 }
 
+// Prompts are the templates for the OpenAI prompts.
+// Use the FetchSysPrompt and FetchUserPrompt methods to retrieve a prompt.
 type Prompts struct {
-	GenNewRecipeSys              string `json:"genNewRecipeSys"`
-	GenNewRecipeUser             string `json:"genNewRecipeUser"`
-	GenNewVisionImportArgsSys    string `json:"genNewVisionImportArgsSys"`
-	GenNewVisionImportArgsUser   string `json:"genNewVisionImportArgsUser"`
-	GenNewVisionImportRecipeSys  string `json:"genNewVisionImportRecipeSys"`
-	GenNewVisionImportRecipeUser string `json:"genNewVisionImportRecipeUser"`
-	ReGenRecipeSys               string `json:"reGenRecipeSys"`
-	ReGenRecipeUser              string `json:"reGenRecipeUser"`
+	GenNewRecipeUser             OpenaiPrompt `json:"gen_new_recipe_user"`
+	GenNewRecipeSys              OpenaiPrompt `json:"gen_new_recipe_sys"`
+	GenNewVisionImportArgsSys    OpenaiPrompt `json:"gen_new_vision_import_args_sys"`
+	GenNewVisionImportArgsUser   OpenaiPrompt `json:"gen_new_vision_import_args_user"`
+	GenNewVisionImportRecipeSys  OpenaiPrompt `json:"gen_new_vision_import_recipe_sys"`
+	GenNewVisionImportRecipeUser OpenaiPrompt `json:"gen_new_vision_import_recipe_user"`
+	ReGenRecipeSys               OpenaiPrompt `json:"regen_recipe_sys"`
+	ReGenRecipeUser              OpenaiPrompt `json:"regen_recipe_user"`
 }
 
 type OpenaiPrompt string
 
-const (
-	GenNewRecipeSys              OpenaiPrompt = "GenNewRecipeSys"
-	GenNewRecipeUser             OpenaiPrompt = "GenNewRecipeUser"
-	GenNewVisionImportArgsSys    OpenaiPrompt = "GenNewVisionImportArgsSys"
-	GenNewVisionImportArgsUser   OpenaiPrompt = "GenNewVisionImportArgsUser"
-	GenNewVisionImportRecipeSys  OpenaiPrompt = "GenNewVisionImportRecipeSys"
-	GenNewVisionImportRecipeUser OpenaiPrompt = "GenNewVisionImportRecipeUser"
-	ReGenRecipeSys               OpenaiPrompt = "ReGenRecipeSys"
-	ReGenRecipeUser              OpenaiPrompt = "ReGenRecipeUser"
-)
-
 // LoadConfig reads a JSON configuration file and returns a Config struct.
+// Other (all untracked) config files are expected to maintain the same format as config.json.
+// Example:
+// {
+//   "openai_prompts": {
+//     "gen_new_recipe_sys": ...
+// },
+//
+// {
+//   "openai_keys": [
+//     "key1",
+//     ...
+//   ]
+// }
 func LoadConfig(filePath string) (*Config, error) {
 	file, err := os.ReadFile(filePath)
 	if err != nil {
@@ -77,6 +83,7 @@ func LoadConfig(filePath string) (*Config, error) {
 	}
 
 	config.RefreshAPIKeys()
+	config.RefreshPrompts()
 
 	return &config, nil
 }
@@ -120,6 +127,7 @@ func checkFieldsRecursive(v reflect.Value) error {
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -176,7 +184,7 @@ func loadAPIKeysFromFile(filePath string) []string {
 	}
 
 	var data struct {
-		APIKeys []string `json:"api_keys"`
+		OpenaiKeys []string `json:"openai_keys"`
 	}
 
 	if err := json.Unmarshal(bytes, &data); err != nil {
@@ -184,7 +192,7 @@ func loadAPIKeysFromFile(filePath string) []string {
 		return []string{}
 	}
 
-	return data.APIKeys
+	return data.OpenaiKeys
 }
 
 // loadPromptsFromFile reads a JSON file with prompt templates and returns a Prompts struct.
@@ -194,28 +202,20 @@ func loadPromptsFromFile(filePath string) (*Prompts, error) {
 		return nil, err
 	}
 
-	var prompts Prompts
-	if err := json.Unmarshal(file, &prompts); err != nil {
+	var data struct {
+		OpenaiPrompts Prompts `json:"openai_prompts"`
+	}
+
+	if err := json.Unmarshal(file, &data); err != nil {
 		return nil, err
 	}
 
-	return &prompts, nil
+	return &data.OpenaiPrompts, nil
 }
 
 // FetchSysPrompt fetches a system prompt and replaces placeholders.
-func (p *Prompts) FetchSysPrompt(promptType string, unitSystem string, requirements string) string {
-	prompt := ""
-
-	switch promptType {
-	case "GenNewRecipeSys":
-		prompt = p.GenNewRecipeSys
-	case "GenNewVisionImportArgsSys":
-		prompt = p.GenNewVisionImportArgsSys
-	case "GenNewVisionImportRecipeSys":
-		prompt = p.GenNewVisionImportRecipeSys
-	case "ReGenRecipeSys":
-		prompt = p.ReGenRecipeSys
-	}
+func (p *Prompts) FetchSysPrompt(promptTemplate OpenaiPrompt, unitSystem string, requirements string) string {
+	prompt := string(promptTemplate)
 
 	prompt = strings.Replace(prompt, "{unitSystem}", unitSystem, -1)
 	prompt = strings.Replace(prompt, "{requirements}", requirements, -1)
@@ -224,19 +224,8 @@ func (p *Prompts) FetchSysPrompt(promptType string, unitSystem string, requireme
 }
 
 // FetchUserPrompt fetches a user prompt and replaces placeholders.
-func (p *Prompts) FetchUserPrompt(promptType string, userPrompt string) string {
-	prompt := ""
-
-	switch promptType {
-	case "GenNewRecipeUser":
-		prompt = p.GenNewRecipeUser
-	case "GenNewVisionImportArgsUser":
-		prompt = p.GenNewVisionImportArgsUser
-	case "GenNewVisionImportRecipeUser":
-		prompt = p.GenNewVisionImportRecipeUser
-	case "ReGenRecipeUser":
-		prompt = p.ReGenRecipeUser
-	}
+func (p *Prompts) FetchUserPrompt(promptTemplate OpenaiPrompt, userPrompt string) string {
+	prompt := string(promptTemplate)
 
 	prompt = strings.Replace(prompt, "{userPrompt}", userPrompt, -1)
 
