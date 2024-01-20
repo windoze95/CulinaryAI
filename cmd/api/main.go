@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
@@ -22,6 +23,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}
+	// Reload API keys file every hour
+	ticker := time.NewTicker(1 * time.Hour) // 1 hour
+	go func() {
+		for range ticker.C {
+			cfg.RefreshAPIKeys()
+			cfg.RefreshPrompts()
+		}
+	}()
 
 	err = config.CheckConfigFields(cfg)
 	if err != nil {
