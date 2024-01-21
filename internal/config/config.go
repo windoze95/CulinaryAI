@@ -13,10 +13,10 @@ import (
 
 type Config struct {
 	Env Env `json:"env"`
-	// Prompts are the templates for the OpenAI prompts.
-	// Use the FetchSysPrompt and FetchUserPrompt methods to retrieve a prompt.
-	OpenaiPrompts         Prompts  `json:"openai_prompts"`
-	OpenaiKeys            []string `json:"openai_keys"`
+	// Prompts are actually the templates to construct the usable prompts.
+	// Use the FillSysPrompt and FillUserPrompt methods to retrieve a prompt.
+	OpenaiPrompts         OpenaiPrompts `json:"openai_prompts"`
+	OpenaiKeys            []string      `json:"openai_keys"`
 	CurrentOpenaiKeyIndex int
 	Mutex                 sync.RWMutex
 }
@@ -42,20 +42,20 @@ func (e EnvVar) Value() string {
 	return os.Getenv(string(e))
 }
 
-// Prompts are the templates for the OpenAI prompts.
-// Use the FetchSysPrompt and FetchUserPrompt methods to retrieve a prompt.
-type Prompts struct {
-	GenNewRecipeUser             OpenaiPrompt `json:"gen_new_recipe_user"`
-	GenNewRecipeSys              OpenaiPrompt `json:"gen_new_recipe_sys"`
-	GenNewVisionImportArgsSys    OpenaiPrompt `json:"gen_new_vision_import_args_sys"`
-	GenNewVisionImportArgsUser   OpenaiPrompt `json:"gen_new_vision_import_args_user"`
-	GenNewVisionImportRecipeSys  OpenaiPrompt `json:"gen_new_vision_import_recipe_sys"`
-	GenNewVisionImportRecipeUser OpenaiPrompt `json:"gen_new_vision_import_recipe_user"`
-	ReGenRecipeSys               OpenaiPrompt `json:"regen_recipe_sys"`
-	ReGenRecipeUser              OpenaiPrompt `json:"regen_recipe_user"`
+// Prompts are actually the templates to construct the usable prompts.
+// Use the FillSysPrompt and FillUserPrompt methods to retrieve a prompt.
+type OpenaiPrompts struct {
+	GenNewRecipeSys              OpenaiPromptTemplate `json:"gen_new_recipe_sys"`
+	GenNewRecipeUser             OpenaiPromptTemplate `json:"gen_new_recipe_user"`
+	GenNewVisionImportArgsSys    OpenaiPromptTemplate `json:"gen_new_vision_import_args_sys"`
+	GenNewVisionImportArgsUser   OpenaiPromptTemplate `json:"gen_new_vision_import_args_user"`
+	GenNewVisionImportRecipeSys  OpenaiPromptTemplate `json:"gen_new_vision_import_recipe_sys"`
+	GenNewVisionImportRecipeUser OpenaiPromptTemplate `json:"gen_new_vision_import_recipe_user"`
+	RegenRecipeSys               OpenaiPromptTemplate `json:"regen_recipe_sys"`
+	RegenRecipeUser              OpenaiPromptTemplate `json:"regen_recipe_user"`
 }
 
-type OpenaiPrompt string
+type OpenaiPromptTemplate string
 
 // LoadConfig reads a JSON configuration file and returns a Config struct.
 // Other (all untracked) config files are expected to maintain the same format as config.json.
@@ -196,14 +196,14 @@ func loadAPIKeysFromFile(filePath string) []string {
 }
 
 // loadPromptsFromFile reads a JSON file with prompt templates and returns a Prompts struct.
-func loadPromptsFromFile(filePath string) (*Prompts, error) {
+func loadPromptsFromFile(filePath string) (*OpenaiPrompts, error) {
 	file, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}
 
 	var data struct {
-		OpenaiPrompts Prompts `json:"openai_prompts"`
+		OpenaiPrompts OpenaiPrompts `json:"openai_prompts"`
 	}
 
 	if err := json.Unmarshal(file, &data); err != nil {
@@ -213,8 +213,8 @@ func loadPromptsFromFile(filePath string) (*Prompts, error) {
 	return &data.OpenaiPrompts, nil
 }
 
-// FetchSysPrompt fetches a system prompt and replaces placeholders.
-func (p *Prompts) FetchSysPrompt(promptTemplate OpenaiPrompt, unitSystem string, requirements string) string {
+// FillSysPrompt fetches a system prompt and replaces placeholders.
+func (p *OpenaiPrompts) FillSysPrompt(promptTemplate OpenaiPromptTemplate, unitSystem string, requirements string) string {
 	prompt := string(promptTemplate)
 
 	prompt = strings.Replace(prompt, "{unitSystem}", unitSystem, -1)
@@ -223,8 +223,8 @@ func (p *Prompts) FetchSysPrompt(promptTemplate OpenaiPrompt, unitSystem string,
 	return prompt
 }
 
-// FetchUserPrompt fetches a user prompt and replaces placeholders.
-func (p *Prompts) FetchUserPrompt(promptTemplate OpenaiPrompt, userPrompt string) string {
+// FillUserPrompt fetches a user prompt and replaces placeholders.
+func (p *OpenaiPrompts) FillUserPrompt(promptTemplate OpenaiPromptTemplate, userPrompt string) string {
 	prompt := string(promptTemplate)
 
 	prompt = strings.Replace(prompt, "{userPrompt}", userPrompt, -1)
