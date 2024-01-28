@@ -125,12 +125,22 @@ func (s *RecipeService) FinishGenerateRecipeWithChat(recipe *models.Recipe, user
 		Cfg:          s.Cfg,
 	}
 
-	// goroutine to handle recipe generation
-	go func(ctx context.Context, recipeErrChan chan<- error) {
+	// Goroutine to handle recipe generation
+	go func(ctx context.Context, recipeErrChan chan<- error, imageErrChan chan<- error) {
 		if err := recipeManager.GenerateRecipeWithChat(); err != nil {
 			recipeErrChan <- err
 			return
 		}
+
+		// Goroutine to handle image generation and upload
+		go func(ctx context.Context, imageErrChan chan<- error) {
+			if err := recipeManager.GenerateRecipeImage(); err != nil {
+				imageErrChan <- err
+				return
+			}
+
+			imageErrChan <- nil
+		}(ctx, imageErrChan)
 
 		if err := populateRecipeCoreFields(recipe, recipeManager); err != nil {
 			recipeErrChan <- err
@@ -147,17 +157,7 @@ func (s *RecipeService) FinishGenerateRecipeWithChat(recipe *models.Recipe, user
 		}
 
 		recipeErrChan <- nil
-	}(ctx, recipeErrChan)
-
-	// Goroutine to handle image generation and upload
-	go func(ctx context.Context, imageErrChan chan<- error) {
-		if err := recipeManager.GenerateRecipeImage(); err != nil {
-			imageErrChan <- err
-			return
-		}
-
-		imageErrChan <- nil
-	}(ctx, imageErrChan)
+	}(ctx, recipeErrChan, imageErrChan)
 
 	// Wait for the recipe generation goroutine to finish or timeout
 	select {
