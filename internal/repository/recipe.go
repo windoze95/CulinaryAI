@@ -52,6 +52,7 @@ func (r *RecipeRepository) GetHistoryByID(historyID uint) (*models.RecipeHistory
 		return nil, err
 	}
 
+	log.Printf("first message in history: %v", history.Messages[0].RecipeResponse)
 	return history, nil
 }
 
