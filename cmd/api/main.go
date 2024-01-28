@@ -36,11 +36,12 @@ func main() {
 		log.Fatalf("Error checking config fields: %v", err)
 	}
 
-	// Load API keys and prompts
+	// Load OpenAI API keys
 	if err := cfg.LoadOpenaiKeys(); err != nil {
 		log.Fatalf("Error loading OpenAI keys: %v", err)
 	}
-	log.Printf("Loaded OpenAI keys: %v", cfg.OpenaiKeys)
+
+	// Load OpenAI prompts
 	if err := cfg.LoadOpenaiPrompts(); err != nil {
 		log.Fatalf("Error loading OpenAI prompts: %v", err)
 	}

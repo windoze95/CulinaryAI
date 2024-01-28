@@ -2,7 +2,6 @@ package util
 
 import (
 	"errors"
-	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/windoze95/saltybytes-api/internal/models"
@@ -31,8 +30,6 @@ func GetUserIDFromContext(c *gin.Context) (uint, error) {
 	}
 
 	userID, ok := val.(uint)
-	log.Println("userID:", userID)
-	log.Println("ok:", ok)
 	if !ok {
 		return 0, errors.New("user ID information is of the wrong type")
 	}

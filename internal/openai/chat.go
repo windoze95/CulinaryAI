@@ -12,8 +12,8 @@ import (
 // GenerateNewRecipe generates a new recipe.
 func generateRecipeWithChat(r *RecipeManager) error {
 	// New recipe, there shouldn't be a history
-	if r.RecipeHistoryMessages != nil || len(r.RecipeHistoryMessages) > 0 {
-		return errors.New("RecipeHistoryMessages was not empty")
+	if r.RecipeHistoryEntries != nil || len(r.RecipeHistoryEntries) > 0 {
+		return errors.New("RecipeHistoryEntries was not empty")
 	}
 
 	// Build the chat completion message stream
@@ -54,7 +54,7 @@ func generateRecipeWithChat(r *RecipeManager) error {
 	r.RecipeDef = &functionCallArgument
 
 	// Set the next history message
-	r.NextRecipeHistoryMessage = models.RecipeHistoryMessage{
+	r.NextRecipeHistoryEntry = models.RecipeHistoryEntry{
 		UserPrompt:     r.UserPrompt,
 		RecipeResponse: functionCallArgument,
 		RecipeType:     models.RecipeTypeChat,

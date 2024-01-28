@@ -19,16 +19,16 @@ type OpenaiClient struct {
 
 // RecipeManager is a wrapper for the recipe generation process.
 type RecipeManager struct {
-	UserPrompt               string
-	Requirements             string
-	UnitSystem               string
-	CreateType               models.RecipeType
-	RecipeHistoryMessages    []models.RecipeHistoryMessage
-	NextRecipeHistoryMessage models.RecipeHistoryMessage
-	VisionImageURL           string
-	ImageBytes               []byte
-	Cfg                      *config.Config
-	RecipeDef                *models.RecipeDef
+	UserPrompt             string
+	Requirements           string
+	UnitSystem             string
+	CreateType             models.RecipeType
+	RecipeHistoryEntries   []models.RecipeHistoryEntry
+	NextRecipeHistoryEntry models.RecipeHistoryEntry
+	VisionImageURL         string
+	ImageBytes             []byte
+	Cfg                    *config.Config
+	RecipeDef              *models.RecipeDef
 }
 
 // GenerateRecipeWithChat generates a new recipe using chat.
@@ -49,7 +49,6 @@ func (rm *RecipeManager) GenerateRecipeImage() error {
 
 // newOpenaiClient creates a new OpenAI client.
 func newOpenaiClient(cfg *config.Config) (*OpenaiClient, error) {
-	log.Printf("current api key string: %v", cfg.GetCurrentAPIKey())
 	return &OpenaiClient{
 		Client: openai.NewClient(cfg.GetCurrentAPIKey()),
 	}, nil

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -62,7 +61,6 @@ func (s *SSMService) GetSecureParameterList(path string) ([]string, error) {
 		}
 
 		for _, param := range page.Parameters {
-			log.Printf("parameter name: %v", *param.Value)
 			if param.Type == types.ParameterTypeSecureString {
 				keys := strings.Split(*param.Value, ",")
 				apiKeys = append(apiKeys, keys...)

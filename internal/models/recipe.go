@@ -34,11 +34,11 @@ type Recipe struct {
 // RecipeHistory is the model for a recipe history.
 type RecipeHistory struct {
 	gorm.Model
-	Messages []RecipeHistoryMessage `gorm:"foreignKey:RecipeHistoryID"`
+	Entries []RecipeHistoryEntry `gorm:"foreignKey:RecipeHistoryID"`
 }
 
-// RecipeHistoryMessage is the model for a recipe history message.
-type RecipeHistoryMessage struct {
+// RecipeHistoryEntry is the model for a recipe history entry.
+type RecipeHistoryEntry struct {
 	gorm.Model
 	RecipeHistoryID uint // Foreign key (belongs to RecipeHistory)
 	UserPrompt      string

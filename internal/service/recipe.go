@@ -69,7 +69,7 @@ func (s *RecipeService) GetRecipeByID(recipeID uint) (*RecipeResponse, error) {
 
 // HistoryResponse is the response object for recipe history-related operations.
 type HistoryResponse struct {
-	Messages []models.RecipeHistoryMessage `json:"chat_history"`
+	Entries []models.RecipeHistoryEntry `json:"entries"`
 }
 
 // GetRecipeHistoryByID fetches a recipe history by its ID.
@@ -80,7 +80,7 @@ func (s *RecipeService) GetRecipeHistoryByID(historyID uint) (*HistoryResponse, 
 		return nil, err
 	}
 
-	historyResponse := &HistoryResponse{Messages: history.Messages}
+	historyResponse := &HistoryResponse{Entries: history.Entries}
 
 	return historyResponse, nil
 }
@@ -97,7 +97,7 @@ func (s *RecipeService) InitGenerateRecipeWithChat(user *models.User) (*RecipeRe
 		CreatedBy:          user,
 		PersonalizationUID: user.Personalization.UID, // Set from user's existing Personalization
 		History: &models.RecipeHistory{
-			Messages: []models.RecipeHistoryMessage{},
+			Entries: []models.RecipeHistoryEntry{},
 		},
 	}
 
@@ -149,7 +149,7 @@ func (s *RecipeService) FinishGenerateRecipeWithChat(recipe *models.Recipe, user
 			return
 		}
 
-		if err := s.Repo.UpdateRecipeDef(recipe, recipeManager.NextRecipeHistoryMessage); err != nil {
+		if err := s.Repo.UpdateRecipeDef(recipe, recipeManager.NextRecipeHistoryEntry); err != nil {
 			recipeErrChan <- err
 			return
 		}
@@ -251,8 +251,8 @@ func populateRecipeCoreFields(recipe *models.Recipe, recipeManager *openai.Recip
 		return errors.New("recipe history is nil")
 	}
 
-	// Append the new message history to the existing messages history
-	recipe.History.Messages = append(recipe.History.Messages, recipeManager.RecipeHistoryMessages...)
+	// Append the new entry history to the existing entries history
+	recipe.History.Entries = append(recipe.History.Entries, recipeManager.RecipeHistoryEntries...)
 
 	return validateRecipeCoreFields(recipe)
 }
@@ -263,7 +263,7 @@ func validateRecipeCoreFields(recipe *models.Recipe) error {
 		recipe.Ingredients == nil ||
 		recipe.Instructions == nil ||
 		recipe.ImagePrompt == "" ||
-		recipe.History.Messages == nil {
+		recipe.History.Entries == nil {
 		return errors.New("missing required fields in Recipe")
 	}
 

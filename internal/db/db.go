@@ -48,7 +48,7 @@ func connectToDatabaseWithRetry(dbURL string) (*gorm.DB, error) {
 		&models.Recipe{},
 		&models.Tag{},
 		&models.RecipeHistory{},
-		&models.RecipeHistoryMessage{},
+		&models.RecipeHistoryEntry{},
 	)
 
 	return database, err

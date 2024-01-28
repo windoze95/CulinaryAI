@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"reflect"
 	"strings"
@@ -153,8 +152,6 @@ func (c *Config) LoadOpenaiKeys() error {
 		return fmt.Errorf("failed to get all parameters: %v", err)
 	}
 
-	log.Printf("api keys path: %v", c.Env.OpenaiKeysPath.Value())
-	log.Printf("api keys: %v", apiKeys)
 	// This is a temporary workaround for Heroku
 	apiKeys = strings.Split(os.Getenv("HEROKU_OPENAI_API_KEYS"), ",")
 
@@ -179,8 +176,6 @@ func (c *Config) LoadOpenaiPrompts() error {
 	prompts.GenNewRecipeSys = OpenaiPromptTemplate(os.Getenv("HEROKU_OPENAI_PROMPT_GEN_NEW_RECIPE_SYS"))
 
 	c.OpenaiPrompts = *prompts
-
-	log.Printf("openai prompts: %s", c.OpenaiPrompts.GenNewRecipeSys)
 
 	return nil
 }

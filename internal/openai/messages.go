@@ -8,19 +8,19 @@ import (
 	"github.com/windoze95/saltybytes-api/internal/util"
 )
 
-// processExistingRecipeHistoryMessages processes existing recipe history messages and returns a slice of chat completion messages
-func processExistingRecipeHistoryMessages(historyIn []models.RecipeHistoryMessage) ([]openai.ChatCompletionMessage, error) {
+// processExistingRecipeHistoryEntries processes existing recipe history messages and returns a slice of chat completion messages
+func processExistingRecipeHistoryEntries(historyIn []models.RecipeHistoryEntry) ([]openai.ChatCompletionMessage, error) {
 	var messagesOut []openai.ChatCompletionMessage
 
-	for _, messageIn := range historyIn {
+	for _, entryIn := range historyIn {
 		// Serialize the recipe history message
-		argumentJSON, err := util.SerializeToJSONStringWithBuffer(messageIn.RecipeResponse)
+		argumentJSON, err := util.SerializeToJSONStringWithBuffer(entryIn.RecipeResponse)
 		if err != nil {
 			return nil, fmt.Errorf("failed to serialize chat completion message: %v", err)
 		}
 
 		// Build the message stream
-		switch messageIn.RecipeType {
+		switch entryIn.RecipeType {
 		case models.RecipeTypeManualEntry:
 			// Manual type entry is a special case where we want to simulate a revision of the recipe for context.
 			messagesOut = append(messagesOut, openai.ChatCompletionMessage{
@@ -30,7 +30,7 @@ func processExistingRecipeHistoryMessages(historyIn []models.RecipeHistoryMessag
 		default:
 			messagesOut = append(messagesOut, openai.ChatCompletionMessage{
 				Role:    openai.ChatMessageRoleUser,
-				Content: messageIn.UserPrompt,
+				Content: entryIn.UserPrompt,
 			})
 		}
 

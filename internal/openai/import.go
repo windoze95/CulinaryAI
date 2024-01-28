@@ -13,8 +13,8 @@ import (
 // generateNewVisionImportRecipe generates a new recipe from an image.
 func generateRecipeWithImportVision(r *RecipeManager) error {
 	// New recipe, there shouldn't be a history
-	if r.RecipeHistoryMessages != nil || len(r.RecipeHistoryMessages) > 0 {
-		return errors.New("RecipeHistoryMessages was not empty")
+	if r.RecipeHistoryEntries != nil || len(r.RecipeHistoryEntries) > 0 {
+		return errors.New("RecipeHistoryEntries was not empty")
 	}
 
 	sysPromptTemplate := r.Cfg.OpenaiPrompts.GenNewVisionImportArgsSys
@@ -62,7 +62,7 @@ func generateRecipeWithImportVision(r *RecipeManager) error {
 
 	// Set the recipe def
 	r.RecipeDef = &functionCallArgument
-	r.NextRecipeHistoryMessage = models.RecipeHistoryMessage{
+	r.NextRecipeHistoryEntry = models.RecipeHistoryEntry{
 		UserPrompt:     r.UserPrompt,
 		RecipeResponse: functionCallArgument,
 		RecipeType:     models.RecipeTypeImportVision,

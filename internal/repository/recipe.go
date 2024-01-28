@@ -45,29 +45,28 @@ func (r *RecipeRepository) GetRecipeByID(recipeID uint) (*models.Recipe, error) 
 func (r *RecipeRepository) GetHistoryByID(historyID uint) (*models.RecipeHistory, error) {
 	history := new(models.RecipeHistory)
 
-	err := r.DB.Preload("Messages", func(db *gorm.DB) *gorm.DB {
+	err := r.DB.Preload("Entries", func(db *gorm.DB) *gorm.DB {
 		return db.Order("created_at ASC")
 	}).First(history, historyID).Error
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("first message in history: %v", history.Messages[0].RecipeResponse)
 	return history, nil
 }
 
-// GetMessagesAfterID retrieves messages belonging to a specific RecipeHistory
+// GetRecipeHistoryEntriesAfterID retrieves entries belonging to a specific RecipeHistory
 // and having an ID greater than a given value.
-func (r *RecipeRepository) GetMessagesAfterID(historyID uint, afterID uint) ([]models.RecipeHistoryMessage, error) {
-	var messages []models.RecipeHistoryMessage
+func (r *RecipeRepository) GetRecipeHistoryEntriesAfterID(historyID uint, afterID uint) ([]models.RecipeHistoryEntry, error) {
+	var entries []models.RecipeHistoryEntry
 
 	result := r.DB.Where("recipe_chat_history_id = ? AND id > ?", historyID, afterID).
-		Order("id ASC").Find(&messages)
+		Order("id ASC").Find(&entries)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	return messages, nil
+	return entries, nil
 }
 
 // CreateRecipe creates a new recipe.
@@ -118,10 +117,10 @@ func (r *RecipeRepository) UpdateRecipeImageURL(recipeID uint, imageURL string) 
 	return err
 }
 
-// UpdateRecipeDef updates the core fields of a recipe and appends new messages to the history.
+// UpdateRecipeDef updates the core fields of a recipe and appends the new recipe history entry to the history.
 //
 // Core fields: "Title", "Ingredients", "Instructions", "CookTime", "LinkedRecipeSuggestions", "ImagePrompt"
-func (r *RecipeRepository) UpdateRecipeDef(recipe *models.Recipe, newRecipeHistoryMessage models.RecipeHistoryMessage) error {
+func (r *RecipeRepository) UpdateRecipeDef(recipe *models.Recipe, newRecipeHistoryEntry models.RecipeHistoryEntry) error {
 	// Start a new transaction.
 	tx := r.DB.Begin()
 	if tx.Error != nil {
@@ -153,13 +152,13 @@ func (r *RecipeRepository) UpdateRecipeDef(recipe *models.Recipe, newRecipeHisto
 		return err
 	}
 
-	newRecipeHistoryMessage.RecipeHistoryID = recipe.HistoryID
+	newRecipeHistoryEntry.RecipeHistoryID = recipe.HistoryID
 
-	// Insert the new message into the database
-	err = tx.Create(&newRecipeHistoryMessage).Error
+	// Insert the new recipe history entry into the database
+	err = tx.Create(&newRecipeHistoryEntry).Error
 	if err != nil {
 		tx.Rollback()
-		log.Printf("Error creating new recipe history message: %v", err)
+		log.Printf("Error creating new recipe history entry: %v", err)
 		return err
 	}
 
