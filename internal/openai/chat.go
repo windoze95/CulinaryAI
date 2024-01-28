@@ -18,12 +18,12 @@ func generateRecipeWithChat(r *RecipeManager) error {
 
 	// Build the chat completion message stream
 	sysPromptTemplate := r.Cfg.OpenaiPrompts.GenNewRecipeSys
-	userPromptTemplate := r.Cfg.OpenaiPrompts.GenNewRecipeUser
+	// userPromptTemplate := r.Cfg.OpenaiPrompts.GenNewRecipeUser
 	sysPrompt := r.Cfg.OpenaiPrompts.FillSysPrompt(sysPromptTemplate, r.UnitSystem, r.Requirements)
-	userPrompt := r.Cfg.OpenaiPrompts.FillUserPrompt(userPromptTemplate, r.UserPrompt)
+	// userPrompt := r.Cfg.OpenaiPrompts.FillUserPrompt(userPromptTemplate, r.UserPrompt)
 	chatCompletionMessages := []openai.ChatCompletionMessage{
 		createSysMsg(sysPrompt),
-		createUserMsg(userPrompt),
+		createUserMsg(r.UserPrompt),
 	}
 
 	// Create the request

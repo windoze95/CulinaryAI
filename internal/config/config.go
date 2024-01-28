@@ -176,6 +176,8 @@ func (c *Config) LoadOpenaiPrompts() error {
 		return fmt.Errorf("failed to get all parameters: %v", err)
 	}
 
+	prompts.GenNewRecipeSys = OpenaiPromptTemplate(os.Getenv("HEROKU_OPENAI_PROMPT_GEN_NEW_RECIPE_SYS"))
+
 	c.OpenaiPrompts = *prompts
 
 	log.Printf("openai prompts: %s", c.OpenaiPrompts.GenNewRecipeSys)
