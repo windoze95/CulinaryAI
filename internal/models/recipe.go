@@ -11,11 +11,11 @@ type Recipe struct {
 	Title              string
 	Version            int          `gorm:"default:1"`
 	Ingredients        []Ingredient `gorm:"type:jsonb"`
-	Instructions       []string     `gorm:"type:text[]"`
+	Instructions       []string     `gorm:"type:json"`
 	CookTime           int
 	UnitSystem         UnitSystem `gorm:"type:int"`
 	LinkedRecipes      []*Recipe  `gorm:"many2many:recipe_linked_recipes;association_jointable_foreignkey:link_recipe_id"`
-	LinkSuggestions    []string   `gorm:"type:text[]"`
+	LinkSuggestions    []string   `gorm:"type:json"`
 	Hashtags           []*Tag     `gorm:"many2many:recipe_tags;"`
 	ImagePrompt        string
 	ImageURL           string
