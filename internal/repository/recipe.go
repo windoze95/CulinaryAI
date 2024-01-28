@@ -132,12 +132,12 @@ func (r *RecipeRepository) UpdateRecipeDef(recipe *models.Recipe, newRecipeHisto
 	err := tx.Model(&models.Recipe{}).
 		Where("id = ?", recipe.ID).
 		Updates(map[string]interface{}{
-			"Title":                   recipe.Title,
-			"Ingredients":             recipe.Ingredients,
-			"Instructions":            recipe.Instructions,
-			"CookTime":                recipe.CookTime,
-			"LinkedRecipeSuggestions": recipe.LinkSuggestions,
-			"ImagePrompt":             recipe.ImagePrompt,
+			"Title":           recipe.Title,
+			"Ingredients":     recipe.Ingredients,
+			"Instructions":    recipe.Instructions,
+			"CookTime":        recipe.CookTime,
+			"LinkSuggestions": recipe.LinkSuggestions,
+			"ImagePrompt":     recipe.ImagePrompt,
 		}).Error
 	if err != nil {
 		tx.Rollback()
