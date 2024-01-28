@@ -52,19 +52,20 @@ func (s *UserService) CreateUser(username, firstName, email, password string) (*
 		Username:  username,
 		FirstName: firstName,
 		Email:     email,
-		Auth: models.UserAuth{
+		Auth: &models.UserAuth{
 			HashedPassword: hashedPasswordStr,
 			AuthType:       models.Standard,
 		},
-		Subscription: models.Subscription{
+		Subscription: &models.Subscription{
 			SubscriptionTier: models.Free,
 			ExpiresAt:        time.Now().AddDate(0, 1, 0), // One month from now
 		},
-		Settings: models.UserSettings{
+		Settings: &models.UserSettings{
 			KeepScreenAwake: true, // Default value
 		},
-		Personalization: models.Personalization{
+		Personalization: &models.Personalization{
 			UnitSystem: models.USCustomary, // Default value
+			// UID:        uuid.New(),
 		},
 		// CollectedRecipes: []*models.Recipe{},
 	}

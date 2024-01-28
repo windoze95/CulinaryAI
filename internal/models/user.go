@@ -11,14 +11,14 @@ import (
 // User is the model for a user.
 type User struct {
 	gorm.Model
-	Username         string          `gorm:"unique;index"`
-	FirstName        string          `gorm:"default:null"`
-	Email            string          `gorm:"unique;default:null"`
-	Auth             UserAuth        `gorm:"foreignKey:UserID"`
-	Subscription     Subscription    `gorm:"foreignKey:UserID"`
-	Settings         UserSettings    `gorm:"foreignKey:UserID"`
-	Personalization  Personalization `gorm:"foreignKey:UserID"`
-	CollectedRecipes []*Recipe       `gorm:"many2many:user_collected_recipes;"`
+	Username         string           `gorm:"unique;index"`
+	FirstName        string           `gorm:"default:null"`
+	Email            string           `gorm:"unique;default:null"`
+	Auth             *UserAuth        `gorm:"foreignKey:UserID"`
+	Subscription     *Subscription    `gorm:"foreignKey:UserID"`
+	Settings         *UserSettings    `gorm:"foreignKey:UserID"`
+	Personalization  *Personalization `gorm:"foreignKey:UserID"`
+	CollectedRecipes []*Recipe        `gorm:"many2many:user_collected_recipes;"`
 }
 
 // UserAuth is the model for a user's authentication information.
