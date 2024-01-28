@@ -38,7 +38,7 @@ func (r *RecipeRepository) GetRecipeByID(recipeID uint) (*models.Recipe, error) 
 		return nil, err
 	}
 
-	log.Printf("Recipe ingredients: %v", recipe.Ingredients)
+	log.Printf("Recipe ingredients - repo:41: %v", recipe.Ingredients)
 
 	return &recipe, nil
 }
@@ -128,6 +128,8 @@ func (r *RecipeRepository) UpdateRecipeDef(recipe *models.Recipe, newRecipeHisto
 	if tx.Error != nil {
 		return tx.Error
 	}
+
+	log.Printf("Recipe ingredients - repo:132: %v", recipe.Ingredients)
 
 	// Update core fields of the recipe.
 	err := tx.Model(&models.Recipe{}).
