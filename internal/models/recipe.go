@@ -3,20 +3,21 @@ package models
 import (
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
+	"github.com/lib/pq"
 )
 
 // Recipe is the model for a recipe.
 type Recipe struct {
 	gorm.Model
 	Title              string
-	Version            int          `gorm:"default:1"`
-	Ingredients        []Ingredient `gorm:"type:jsonb"`
-	Instructions       []string     `gorm:"type:json"`
+	Version            int            `gorm:"default:1"`
+	Ingredients        []Ingredient   `gorm:"type:jsonb"`
+	Instructions       pq.StringArray `gorm:"type:text[]"`
 	CookTime           int
-	UnitSystem         UnitSystem `gorm:"type:int"`
-	LinkedRecipes      []*Recipe  `gorm:"many2many:recipe_linked_recipes;association_jointable_foreignkey:link_recipe_id"`
-	LinkSuggestions    []string   `gorm:"type:json"`
-	Hashtags           []*Tag     `gorm:"many2many:recipe_tags;"`
+	UnitSystem         UnitSystem     `gorm:"type:int"`
+	LinkedRecipes      []*Recipe      `gorm:"many2many:recipe_linked_recipes;association_jointable_foreignkey:link_recipe_id"`
+	LinkSuggestions    pq.StringArray `gorm:"type:text[]"`
+	Hashtags           []*Tag         `gorm:"many2many:recipe_tags;"`
 	ImagePrompt        string
 	ImageURL           string
 	CreatedByID        uint
