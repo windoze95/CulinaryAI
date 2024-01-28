@@ -38,6 +38,8 @@ func (r *RecipeRepository) GetRecipeByID(recipeID uint) (*models.Recipe, error) 
 		return nil, err
 	}
 
+	log.Printf("Recipe ingredients: %v", recipe.Ingredients)
+
 	return &recipe, nil
 }
 
