@@ -3,7 +3,6 @@ package openai
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	openai "github.com/sashabaranov/go-openai"
 	"github.com/windoze95/saltybytes-api/internal/models"
@@ -53,8 +52,6 @@ func generateRecipeWithChat(r *RecipeManager) error {
 
 	// Set the recipe def
 	r.RecipeDef = &functionCallArgument
-
-	log.Printf("Recipe ingredients - openai-chat:57: %v", r.RecipeDef.Ingredients)
 
 	// Set the next history message
 	r.NextRecipeHistoryMessage = models.RecipeHistoryMessage{

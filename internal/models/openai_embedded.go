@@ -45,9 +45,11 @@ type Ingredient struct {
 	Amount float64 `json:"amount"`
 }
 
+// Ingredients is a slice of Ingredient.
+// This is a workaround for GORM to embed a slice of structs into a JSONB field.
 type Ingredients []Ingredient
 
-// Scan is a GORM hook that scans jsonb into a Ingredient.
+// Scan is a GORM hook that scans jsonb into Ingredients.
 func (j *Ingredients) Scan(value interface{}) error {
 	bytes, ok := value.([]byte)
 	if !ok {
@@ -61,7 +63,7 @@ func (j *Ingredients) Scan(value interface{}) error {
 	return err
 }
 
-// Value is a GORM hook that returns json value of a Ingredient.
+// Value is a GORM hook that returns json value of Ingredients.
 func (j Ingredients) Value() (driver.Value, error) {
 	return json.Marshal(j)
 }
