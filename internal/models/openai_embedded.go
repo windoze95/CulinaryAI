@@ -9,11 +9,11 @@ import (
 
 // RecipeDef is a struct that represents the JSON schema that is passed to the OpenAI API for recipe generation using function calling.
 type RecipeDef struct {
-	Title        string       `json:"title"`
-	Ingredients  []Ingredient `json:"ingredients"`
-	Instructions []string     `json:"instructions"`
-	CookTime     int          `json:"cook_time"`
-	ImagePrompt  string       `json:"image_prompt"`
+	Title        string        `json:"title"`
+	Ingredients  []*Ingredient `json:"ingredients"`
+	Instructions []string      `json:"instructions"`
+	CookTime     int           `json:"cook_time"`
+	ImagePrompt  string        `json:"image_prompt"`
 	// UnitSystem              UnitSystem   `json:"unit_system"`
 	Hashtags                []string `json:"hashtags"`
 	LinkedRecipeSuggestions []string `json:"linked_recipe_suggestions"`

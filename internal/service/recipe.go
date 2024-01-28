@@ -25,24 +25,24 @@ type RecipeService struct {
 
 // RecipeResponse is the response object for recipe-related operations.
 type RecipeResponse struct {
-	ID                     uint                `json:"id"`
-	Title                  string              `json:"title"`
-	Ingredients            []models.Ingredient `json:"ingredients"`
-	Instructions           []string            `json:"instructions"`
-	CookTime               int                 `json:"cook_time"`
-	UnitSystem             models.UnitSystem   `json:"unit_system"`
-	LinkedRecipes          []*models.Recipe    `json:"linked_recipes"`
-	LinkSuggestions        []string            `json:"link_suggestions"`
-	Hashtags               []*models.Tag       `json:"hashtags"`
-	ImageURL               string              `json:"image_url"`
-	CreatedByID            uint                `json:"created_by_id"`
-	CreatedByUsername      string              `json:"created_by_username"`
-	HistoryID              uint                `json:"chat_history_id"`
-	ForkedFromID           uint                `json:"forked_from_id"`
-	ForkedFromName         string              `json:"forked_from_name"`
-	UserUnitSystem         models.UnitSystem   `json:"user_unit_system"`
-	PersonalizationUID     uuid.UUID           `json:"personalization_uid"`
-	UserPersonalizationUID uuid.UUID           `json:"user_personalization_uid"`
+	ID                     uint                 `json:"id"`
+	Title                  string               `json:"title"`
+	Ingredients            []*models.Ingredient `json:"ingredients"`
+	Instructions           []string             `json:"instructions"`
+	CookTime               int                  `json:"cook_time"`
+	UnitSystem             models.UnitSystem    `json:"unit_system"`
+	LinkedRecipes          []*models.Recipe     `json:"linked_recipes"`
+	LinkSuggestions        []string             `json:"link_suggestions"`
+	Hashtags               []*models.Tag        `json:"hashtags"`
+	ImageURL               string               `json:"image_url"`
+	CreatedByID            uint                 `json:"created_by_id"`
+	CreatedByUsername      string               `json:"created_by_username"`
+	HistoryID              uint                 `json:"chat_history_id"`
+	ForkedFromID           *uint                `json:"forked_from_id"`
+	ForkedFromName         *string              `json:"forked_from_name"`
+	UserUnitSystem         models.UnitSystem    `json:"user_unit_system"`
+	PersonalizationUID     uuid.UUID            `json:"personalization_uid"`
+	UserPersonalizationUID uuid.UUID            `json:"user_personalization_uid"`
 }
 
 // NewRecipeService is the constructor function for initializing a new RecipeService
@@ -312,14 +312,14 @@ func (s *RecipeService) AssociateTagsWithRecipe(recipe *models.Recipe, tags []st
 
 // toRecipeResponse converts a Recipe to a RecipeResponse
 func toRecipeResponse(r *models.Recipe) *RecipeResponse {
-	var forkedFromID uint
+	var forkedFromID *uint
 	if r.ForkedFromID != nil && *r.ForkedFromID != 0 {
-		forkedFromID = *r.ForkedFromID
+		forkedFromID = r.ForkedFromID
 	}
 
-	var forkedFromName string
+	var forkedFromName *string
 	if r.ForkedFrom != nil {
-		forkedFromName = r.ForkedFrom.Title
+		forkedFromName = &r.ForkedFrom.Title
 	}
 
 	return &RecipeResponse{
