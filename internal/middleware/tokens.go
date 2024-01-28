@@ -8,40 +8,7 @@ import (
 	"github.com/windoze95/saltybytes-api/internal/config"
 )
 
-// func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		cookie, err := c.Cookie("auth_token") // Fetch auth_token cookie
-// 		if err != nil {
-// 			util.ClearAuthTokenCookie(c)
-// 			c.JSON(http.StatusUnauthorized, gin.H{"message": "No token provided", "forceLogout": true})
-// 			c.Abort()
-// 			return
-// 		}
-
-// 		tokenString := cookie // Token is fetched from the cookie
-
-// 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-// 			return []byte(cfg.Env.JwtSecretKey.Value()), nil
-// 		})
-// 		if err != nil {
-// 			util.ClearAuthTokenCookie(c)
-// 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid or expired token", "forceLogout": true})
-// 			c.Abort()
-// 			return
-// 		}
-
-// 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-// 			c.Set("user_id", claims["user_id"])
-// 			c.Next()
-// 		} else {
-// 			util.ClearAuthTokenCookie(c)
-// 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "forceLogout": true})
-// 			c.Abort()
-// 			return
-// 		}
-// 	}
-// }
-
+// VerifyTokenMiddleware verifies the JWT token provided in the Authorization header.
 func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -56,9 +23,8 @@ func VerifyTokenMiddleware(cfg *config.Config) gin.HandlerFunc {
 			return
 		}
 
+		// Check if the token is valid
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			// c.Set("user_id", claims["user_id"])
-			// c.Next()
 			// Type assert to float64 (default for JSON numbers)
 			if idFloat, ok := claims["user_id"].(float64); ok {
 				// Convert to uint

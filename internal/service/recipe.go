@@ -8,38 +8,44 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/windoze95/saltybytes-api/internal/config"
 	"github.com/windoze95/saltybytes-api/internal/models"
 	"github.com/windoze95/saltybytes-api/internal/openai"
 	"github.com/windoze95/saltybytes-api/internal/repository"
 	"github.com/windoze95/saltybytes-api/internal/s3"
-	"github.com/windoze95/saltybytes-api/internal/util"
 )
 
+// RecipeService is the business logic layer for recipe-related operations.
 type RecipeService struct {
 	Cfg  *config.Config
 	Repo *repository.RecipeRepository
 }
 
-// Recipe response struct
+// RecipeResponse is the response object for recipe-related operations.
 type RecipeResponse struct {
-	ID                  uint         `json:"ID"`
-	Title               string       `json:"title"`
-	MainRecipeJSON      string       `json:"mainRecipeJSON"`
-	SubRecipesJSON      string       `json:"subRecipesJSON"`
-	Hashtags            []models.Tag `json:"hashtags"`
-	ImageURL            string       `json:"imageURL"`
-	GeneratedByUserID   uint         `json:"generatedByUserID"`
-	GeneratedByUsername string       `json:"generatedByUsername"`
-	GuidingContentID    uint         `json:"guidingContentID"`
-	ChatHistoryID       uint         `json:"chatHistoryID"`
-	SpinOnRecipeID      uint         `json:"spinOnRecipeID"`
-	SpinOnRecipeName    string       `json:"spinOnRecipeName"`
-	GenerationComplete  bool         `json:"generationComplete"`
+	ID                     uint                `json:"id"`
+	Title                  string              `json:"title"`
+	Ingredients            []models.Ingredient `json:"ingredients"`
+	Instructions           []string            `json:"instructions"`
+	CookTime               int                 `json:"cook_time"`
+	UnitSystem             models.UnitSystem   `json:"unit_system"`
+	LinkedRecipes          []*models.Recipe    `json:"linked_recipes"`
+	LinkSuggestions        []string            `json:"link_suggestions"`
+	Hashtags               []*models.Tag       `json:"hashtags"`
+	ImageURL               string              `json:"image_url"`
+	CreatedByID            uint                `json:"created_by_id"`
+	CreatedByUsername      string              `json:"created_by_username"`
+	HistoryID              uint                `json:"chat_history_id"`
+	ForkedFromID           uint                `json:"forked_from_id"`
+	ForkedFromName         string              `json:"forked_from_name"`
+	UserUnitSystem         models.UnitSystem   `json:"user_unit_system"`
+	PersonalizationUID     uuid.UUID           `json:"personalization_uid"`
+	UserPersonalizationUID uuid.UUID           `json:"user_personalization_uid"`
 }
 
-// Constructor function for initializing a new RecipeService
+// NewRecipeService is the constructor function for initializing a new RecipeService
 func NewRecipeService(cfg *config.Config, repo *repository.RecipeRepository) *RecipeService {
 	return &RecipeService{
 		Cfg:  cfg,
@@ -47,6 +53,7 @@ func NewRecipeService(cfg *config.Config, repo *repository.RecipeRepository) *Re
 	}
 }
 
+// GetRecipeByID fetches a recipe by its ID.
 func (s *RecipeService) GetRecipeByID(recipeID uint) (*RecipeResponse, error) {
 	// Fetch the recipe by its ID from the repository
 	recipe, err := s.Repo.GetRecipeByID(recipeID)
@@ -54,64 +61,41 @@ func (s *RecipeService) GetRecipeByID(recipeID uint) (*RecipeResponse, error) {
 		return nil, err
 	}
 
-	// if recipe.GenerationComplete {
-
-	// 	// Deserialize the GeneratedRecipeJSON field back into the GeneratedRecipe struct
-	// 	if err := recipe.DeserializeGeneratedRecipe(); err != nil {
-	// 		log.Printf("Failed to deserialize recipe: %v", err)
-	// 		return nil, fmt.Errorf("failed to deserialize recipe: %w", err)
-	// 	}
-	// }
-
 	// Create a RecipeResponse from the Recipe
 	recipeResponse := toRecipeResponse(recipe)
 
 	return recipeResponse, nil
 }
 
-type ChatHistoryResponse struct {
-	ChatHistory *models.RecipeChatHistory `json:"chatHistory"`
+// HistoryResponse is the response object for recipe history-related operations.
+type HistoryResponse struct {
+	History *models.RecipeHistory `json:"chat_history"`
 }
 
-func (s *RecipeService) GetRecipeChatHistoryByID(chatHistoryID uint) ([]models.RecipeChatHistoryMessage, error) {
+// GetRecipeHistoryByID fetches a recipe history by its ID.
+func (s *RecipeService) GetRecipeHistoryByID(historyID uint) ([]models.RecipeHistoryMessage, error) {
 	// Fetch the recipe by its ID from the repository
-	chatHistory, err := s.Repo.GetChatHistoryByID(chatHistoryID)
+	history, err := s.Repo.GetHistoryByID(historyID)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("chatHistory: %v", chatHistory)
-
-	// recipeManager := &openai.RecipeManager{
-	// 	RecipeChatHistoryMessages: chatHistory.Messages,
-	// }
-	// err = recipeManager.SetRecipeChatHistoryMessages()
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to set recipe chat history messages: %w", err)
-	// }
-
-	// return recipeManager.RecipeChatHistoryMessages, nil
-
-	return chatHistory.Messages, nil
+	return history.Messages, nil
 }
 
-func (s *RecipeService) CreateRecipe(user *models.User, userPrompt string) (*RecipeResponse, *models.Recipe, error) {
-	if user.GuidingContent.ID == 0 {
-		log.Printf("user %d GuidingContent is nil", user.ID)
-		return nil, nil, errors.New("user's GuidingContent is nil")
+// InitGenerateRecipeWithChat initializes a new recipe with chat.
+func (s *RecipeService) InitGenerateRecipeWithChat(user *models.User) (*RecipeResponse, *models.Recipe, error) {
+	if user.Personalization.ID == 0 {
+		log.Printf("user %d Personalization is nil", user.ID)
+		return nil, nil, errors.New("user's Personalization is nil")
 	}
 
 	// Populate initial fields of the Recipe struct
 	recipe := &models.Recipe{
-		GeneratedBy: user,
-		// GeneratedByUserID: user.ID, // Set from user's ID
-		InitialPrompt:  userPrompt,
-		GuidingContent: &user.GuidingContent, // Set from user's existing GuidingContent
-		// GuidingContentID:  user.GuidingContent.ID, // Set from user's existing GuidingContent ID
-		GuidingContentUID: user.GuidingContent.UID, // Set from user's existing GuidingContent
-		ChatHistory: &models.RecipeChatHistory{
-			// MessagesJSON: []string{},
-			Messages: []models.RecipeChatHistoryMessage{},
+		CreatedBy:          user,
+		PersonalizationUID: user.Personalization.UID, // Set from user's existing Personalization
+		History: &models.RecipeHistory{
+			Messages: []models.RecipeHistoryMessage{},
 		},
 	}
 
@@ -120,142 +104,153 @@ func (s *RecipeService) CreateRecipe(user *models.User, userPrompt string) (*Rec
 		return nil, nil, fmt.Errorf("failed to save recipe record: %w", err)
 	}
 
-	log.Printf("recipe ID: %v", recipe.ID)
-
 	recipeResponse := toRecipeResponse(recipe)
 
 	// The recipe now has an ID generated by the database
 	return recipeResponse, recipe, nil
 }
 
-func (s *RecipeService) CompleteRecipeGeneration(recipe *models.Recipe, user *models.User) {
+// FinishGenerateRecipeWithChat finishes generating a recipe with chat.
+func (s *RecipeService) FinishGenerateRecipeWithChat(recipe *models.Recipe, user *models.User, userPrompt string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
-	// // Use a Done channel to signal completion
-	// done := make(chan bool)
-	errChan := make(chan error)
+	recipeErrChan := make(chan error)
+	imageErrChan := make(chan error)
 
-	// Start the recipe generation process in a goroutine
-	go func(ctx context.Context, errChan chan<- error) {
-		// if err := s.generateAndStoreRecipe(ctx, recipe, user); err != nil {
-		// 	errChan <- err
-		// 	return
-		// }
-		// done <- true
-		key, err := chooseAPIKey(s.Cfg, user)
-		if err != nil {
-			errChan <- err
-			return
-		}
+	recipeManager := &openai.RecipeManager{
+		UserPrompt:   userPrompt,
+		UnitSystem:   user.Personalization.GetUnitSystemText(),
+		Requirements: user.Personalization.Requirements,
+		Cfg:          s.Cfg,
+	}
 
-		recipeManager := &openai.RecipeManager{
-			InitialRequestPrompt: recipe.InitialPrompt,
-			UnitSystem:           recipe.GuidingContent.GetUnitSystemText(),
-			Requirements:         recipe.GuidingContent.Requirements,
-			// RecipeChatHistoryMessagesJSON: &recipe.ChatHistory.Messages,
-		}
-
-		if err := recipeManager.GenerateNewRecipe(key); err != nil {
-			errChan <- err
+	// goroutine to handle recipe generation
+	go func(ctx context.Context, recipeErrChan chan<- error) {
+		if err := recipeManager.GenerateRecipeWithChat(); err != nil {
+			recipeErrChan <- err
 			return
 		}
 
 		if err := populateRecipeCoreFields(recipe, recipeManager); err != nil {
-			errChan <- err
+			recipeErrChan <- err
 			return
 		}
 
-		if err := s.Repo.UpdateRecipeCoreFields(recipe, recipeManager.NextRecipeChatHistoryMessage); err != nil {
-			errChan <- err
+		if err := s.Repo.UpdateRecipeDef(recipe, recipeManager.NextRecipeHistoryMessage); err != nil {
+			recipeErrChan <- err
 			return
 		}
 
-		if err := s.AssociateTagsWithRecipe(recipe, recipeManager.Hashtags); err != nil {
-			errChan <- err
+		if err := s.AssociateTagsWithRecipe(recipe, recipeManager.RecipeDef.Hashtags); err != nil {
+			log.Println(err)
+		}
+
+		recipeErrChan <- nil
+	}(ctx, recipeErrChan)
+
+	// Goroutine to handle image generation and upload
+	go func(ctx context.Context, imageErrChan chan<- error) {
+		if err := recipeManager.GenerateRecipeImage(); err != nil {
+			imageErrChan <- err
 			return
 		}
 
-		if err = generateAndUploadImage(s, recipe, recipeManager, key); err != nil {
-			errChan <- err
-			return
-		}
+		imageErrChan <- nil
+	}(ctx, imageErrChan)
 
-		if err := s.Repo.UpdateRecipeImageURL(recipe.ID, recipe.ImageURL); err != nil {
-			errChan <- err
-			return
-		}
-
-		errChan <- nil
-	}(ctx, errChan)
-
+	// Wait for the recipe generation goroutine to finish or timeout
 	select {
-	case err := <-errChan:
+	case err := <-recipeErrChan:
 		if err != nil {
 			log.Printf("error: %v", err)
+			e := s.DeleteRecipe(recipe.ID)
+			if e != nil {
+				log.Printf("error: failed to delete recipe: %v", e)
+				return
+			}
+			log.Printf("recipe %d deleted", recipe.ID)
 			return
 		}
-
-		if err := s.Repo.UpdateRecipeGenerationStatus(recipe.ID, true); err != nil {
-			log.Printf("error: failed to update GenerationComplete: %v", err)
-			return
-		}
-
+		// Offloading failed recipes to frontend, Frontend will look for new recipe history messages
+		// if err := s.Repo.UpdateRecipeGenerationStatus(recipe.ID, true); err != nil {
+		// 	log.Printf("error: failed to update GenerationComplete: %v", err)
+		// 	return
+		// }
 	case <-ctx.Done():
 		err := errors.New("incomplete recipe generation: timed out after 5 minutes")
-		log.Println("error:", err)
+		log.Printf("error: %v", err)
+		e := s.DeleteRecipe(recipe.ID)
+		if e != nil {
+			log.Printf("error: failed to delete recipe: %v", e)
+			return
+		}
+		log.Printf("recipe %d deleted", recipe.ID)
+		return
+	}
+
+	// Wait for the image generation goroutine to finish or timeout
+	select {
+	case err := <-imageErrChan:
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		var recipeImageURL string
+		if imageURL, err := uploadRecipeImage(recipe.ID, recipeManager, s.Cfg); err != nil {
+			log.Println(err)
+			return
+		} else {
+			recipeImageURL = imageURL
+		}
+
+		if err := s.Repo.UpdateRecipeImageURL(recipe.ID, recipeImageURL); err != nil {
+			log.Println(err)
+			return
+		}
+	case <-ctx.Done():
+		err := errors.New("incomplete recipe image generation: timed out after 5 minutes")
+		log.Println(err)
 		return
 	}
 }
 
-// 	select {
-// 	case <-done:
-// 		return nil
-// 	case err := <-errChan:
-// 		return err
-// 	case <-ctx.Done():
-// 		return errors.New("recipe generation timed out")
-// 	}
-// }
+// DeleteRecipe deletes a recipe by its ID.
+func (s *RecipeService) DeleteRecipe(recipeID uint) error {
+	// Delete the recipe from the database
+	if err := s.Repo.DeleteRecipe(recipeID); err != nil {
+		return fmt.Errorf("failed to delete recipe: %w", err)
+	}
+
+	// Delete the recipe image from S3
+	s3Key := s3.GenerateS3Key(recipeID)
+	if err := s3.DeleteRecipeImageFromS3(s.Cfg, s3Key); err != nil {
+		return fmt.Errorf("failed to delete recipe image from S3: %w", err)
+	}
+
+	return nil
+}
 
 // populateRecipeFields populates the fields of the Recipe struct.
 func populateRecipeCoreFields(recipe *models.Recipe, recipeManager *openai.RecipeManager) error {
-	recipe.Title = recipeManager.Title
-
-	mainRecipeJSON, err := util.SerializeToJSONString(recipeManager.MainRecipe)
-	if err != nil {
-		return errors.New("failed to serialize main recipe: " + err.Error())
-	}
-	recipe.MainRecipeJSON = mainRecipeJSON
-
-	subRecipesJSON, err := util.SerializeToJSONString(recipeManager.SubRecipes)
-	if err != nil {
-		return errors.New("failed to serialize sub recipes: " + err.Error())
-	}
-	recipe.SubRecipesJSON = subRecipesJSON
-
-	recipe.ImagePrompt = recipeManager.ImagePrompt
-
-	if recipe.ChatHistory == nil {
-		return errors.New("recipe.ChatHistory is nil")
-	}
-	// Check if the lengths are different
-	// recipeMessagesJSON := recipe.ChatHistory.MessagesJSON
-	recipeMessages := recipe.ChatHistory.Messages
-	// managerMessagesJSON := recipeManager.RecipeChatHistoryMessagesJSON
-	managerMessages := recipeManager.RecipeChatHistoryMessages
-	if len(recipeMessages) != len(managerMessages) {
-		return errors.New("recipe.ChatHistory.MessagesJSON and recipeManager.RecipeChatHistoryMessagesJSON have different lengths")
-	}
-	// // Compare elements
-	// for i, v := range recipeMessages {
-	// 	if v != managerMessages[i] {
-	// 		return errors.New("recipe.ChatHistory.MessagesJSON and recipeManager.RecipeChatHistoryMessagesJSON have different elements")
-	// 	}
+	// ingredientsJSON, err := util.SerializeToJSONString(recipeManager.RecipeDef.Ingredients)
+	// if err != nil {
+	// 	return errors.New("failed to serialize ingredients: " + err.Error())
 	// }
+	recipe.Title = recipeManager.RecipeDef.Title
+	recipe.Ingredients = recipeManager.RecipeDef.Ingredients
+	recipe.Instructions = recipeManager.RecipeDef.Instructions
+	recipe.CookTime = recipeManager.RecipeDef.CookTime
+	recipe.LinkSuggestions = recipeManager.RecipeDef.LinkedRecipeSuggestions
+	recipe.ImagePrompt = recipeManager.RecipeDef.ImagePrompt
+
+	if recipe.History == nil {
+		return errors.New("recipe history is nil")
+	}
+
 	// Append the new message history to the existing messages history
-	// recipe.ChatHistory.MessagesJSON = append(recipe.ChatHistory.MessagesJSON, recipeManager.NextRecipeChatHistoryMessagesJSON...)
-	recipe.ChatHistory.Messages = append(recipe.ChatHistory.Messages, recipeManager.RecipeChatHistoryMessages...)
+	recipe.History.Messages = append(recipe.History.Messages, recipeManager.RecipeHistoryMessages...)
 
 	return validateRecipeCoreFields(recipe)
 }
@@ -263,186 +258,28 @@ func populateRecipeCoreFields(recipe *models.Recipe, recipeManager *openai.Recip
 // validateRecipeFields validates that the Recipe's required fields are populated.
 func validateRecipeCoreFields(recipe *models.Recipe) error {
 	if recipe.Title == "" ||
-		recipe.MainRecipeJSON == "" ||
-		recipe.SubRecipesJSON == "" ||
+		recipe.Ingredients == nil ||
+		recipe.Instructions == nil ||
 		recipe.ImagePrompt == "" ||
-		recipe.ChatHistory.Messages == nil {
+		recipe.History.Messages == nil {
 		return errors.New("missing required fields in Recipe")
 	}
 
 	return nil
 }
 
-// generateAndUploadImage handles the logic related to generating and uploading an image.
-func generateAndUploadImage(s *RecipeService, recipe *models.Recipe, recipeManager *openai.RecipeManager, key string) error {
-	if err := recipeManager.GenerateRecipeImage(key); err != nil {
-		return errors.New("failed to create recipe image: " + err.Error())
-	}
-
-	s3Key := s3.GenerateS3Key(recipe.ID)
-	imageURL, err := s3.UploadRecipeImageToS3(s.Cfg, recipeManager.ImageBytes, s3Key)
+// uploadRecipeImage uploads the recipe image to S3 and returns the new image URL.
+func uploadRecipeImage(recipeId uint, recipeManager *openai.RecipeManager, cfg *config.Config) (string, error) {
+	s3Key := s3.GenerateS3Key(recipeId)
+	imageURL, err := s3.UploadRecipeImageToS3(cfg, recipeManager.ImageBytes, s3Key)
 	if err != nil {
-		return errors.New("failed to upload image to S3: " + err.Error())
+		return "", errors.New("failed to upload image to S3: " + err.Error())
 	}
 
-	recipe.ImageURL = imageURL
-
-	// if err := s.Repo.UpdateRecipeImageURL(recipe, imageURL); err != nil {
-	// 	return errors.New("failed to update recipe with image URL: " + err.Error())
-	// }
-
-	return nil
+	return imageURL, nil
 }
 
-// func (s *RecipeService) generateAndStoreRecipe(ctx context.Context, recipe *models.Recipe, user *models.User) error {
-// 		// Generate the full recipe
-// 		// s.generateGeneratedRecipe(recipe, user, ctx)
-// 		// Choose an api key
-// 		key, err := chooseAPIKey(s.Cfg, user)
-// 		if err != nil {
-// 			log.Printf("error: %v", err)
-
-// 			return
-// 		}
-
-// 		recipeManager := &openai.RecipeManager{}
-// 		recipeManager.InitialRequestPrompt = recipe.InitialPrompt
-// 		recipeManager.FollowupPrompt = ""
-// 		recipeManager.Requirements = user.GuidingContent.Requirements
-// 		recipeManager.RecipeChatMessageJSON = &recipe.ChatHistory.Messages
-
-// 		err = recipeManager.GenerateNewRecipe(key)
-// 		if err != nil {
-// 			log.Printf("error: %v", err)
-
-// 			return
-// 		}
-
-// 		// // Create a new chat service instance with the user's decrypted key
-// 		// chatService, err := openai.NewOpenaiClient(key)
-// 		// if err != nil {
-// 		// 	log.Printf("error: failed to create chat service: %v", err)
-// 		// 	// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create chat service: " + err.Error()})
-// 		// 	return
-// 		// }
-
-// 		// Create the chat completion with the user's prompt
-
-// 		// RecipeManager, chatContext, err := chatService.CreateRecipeChatCompletion(recipe, user.GuidingContent)
-// 		// if err != nil {
-// 		// 	log.Printf("error: failed to create recipe chat completion: %v", err)
-// 		// 	// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create recipe: " + err.Error()})
-// 		// 	return
-// 		// }
-
-// 		// recipe.GeneratedRecipe = *recipeContent
-
-// 		// // Serialize GeneratedRecipe to JSON
-// 		// if err := recipe.SerializeGeneratedRecipe(); err != nil {
-// 		// 	log.Printf("error: failed to serialize GeneratedRecipe: %v", err)
-// 		// 	// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to serialize GeneratedRecipe: " + err.Error()})
-// 		// 	return
-// 		// }
-
-// 		// if err := s.Repo.UpdateRecipeTitle(recipe, RecipeManager.Title); err != nil {
-// 		// 	log.Printf("error: failed to update recipe title: %v", err)
-// 		// 	return
-// 		// }
-
-// 		// Set the recipe core fields
-// 		recipe.Title = recipeManager.Title
-// 		mainRecipeJSON, err := util.SerializeToJSONString(recipeManager.MainRecipe)
-// 		if err != nil {
-// 			log.Printf("error: failed to serialize main recipe: %v", err)
-// 			return
-// 		}
-// 		recipe.MainRecipeJSON = mainRecipeJSON
-// 		subRecipesJSON, err := util.SerializeToJSONString(recipeManager.SubRecipes)
-// 		if err != nil {
-// 			log.Printf("error: failed to serialize sub recipes: %v", err)
-// 			return
-// 		}
-// 		recipe.SubRecipesJSON = subRecipesJSON
-// 		recipe.ImagePrompt = recipeManager.ImagePrompt
-// 		recipe.ChatHistory.Messages = *recipeManager.RecipeChatMessageJSON
-// 		// recipe.ChatContext = chatContext
-
-// 		// Update the existing recipe's core fields
-// 		if err := s.Repo.UpdateRecipeCoreFields(recipe); err != nil {
-// 			log.Printf("error: failed to update recipe core fields: %v", err)
-// 			return
-// 		}
-
-// 		// Associate tags with the recipe
-// 		if err := s.AssociateTagsWithRecipe(recipe, recipeManager.Hashtags); err != nil {
-// 			log.Printf("error: failed to associate tags with recipe: %v", err)
-// 			return
-// 		}
-
-// 		// imageService, err := openai.NewOpenaiClient(key)
-// 		// if err != nil {
-// 		// 	log.Printf("error: failed to create image service: %v", err)
-// 		// 	// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create image service: " + err.Error()})
-// 		// 	return
-// 		// }
-
-// 		// imageBytes, err := imageService.CreateImage(recipeManager.ImagePrompt)
-// 		// if err != nil {
-// 		// 	log.Printf("error: failed to create recipe image: %v", err)
-// 		// 	// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create recipe image: " + err.Error()})
-// 		// 	return
-// 		// }
-
-// 		err = recipeManager.GenerateRecipeImage(key)
-// 		if err != nil {
-// 			log.Printf("error: failed to create recipe image: %v", err)
-// 			// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create recipe image: " + err.Error()})
-// 			return
-// 		}
-
-// 		s3Key := s3.GenerateS3Key(recipe.ID)
-
-// 		imageURL, err := s3.UploadRecipeImageToS3(s.Cfg, recipeManager.ImageBytes, s3Key)
-// 		if err != nil {
-// 			log.Printf("error: failed to upload image to S3: %v", err)
-// 			// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload image to S3: " + err.Error()})
-// 			return
-// 		}
-
-// 		// Update the ImageURL field in the database using the repository
-// 		if err := s.Repo.UpdateRecipeImageURL(recipe, imageURL); err != nil {
-// 			log.Printf("error: failed to update recipe with image URL: %v", err)
-// 			return
-// 		}
-
-// 		// Signal completion
-// 		done <- true
-// 	}(ctx)
-
-// 	// Wait for the goroutine to finish or timeout
-// 	select {
-// 	case success := <-done:
-// 		if success {
-// 			// Mark the generation as complete
-// 			if err := s.Repo.UpdateRecipeGenerationStatus(recipe, true); err != nil {
-// 				// Log error
-// 				log.Println("error: Failed to update GenerationComplete:", err)
-// 			}
-// 		} else {
-// 			// Log the failure case
-// 			// More specific logging of the error is handled in the goroutine
-// 			log.Println("error: Failed to generate recipe")
-// 		}
-// 	case <-ctx.Done():
-// 		// Log the timeout case
-// 		log.Println("error: Incomplete recipe generation: timed out after 5 minutes")
-// 	}
-
-// 	// Close the Done channel
-// 	close(done)
-// }
-
-// Checks if each hashtag exists as a Tag in the database.
+// AssociateTagsWithRecipe checks if each hashtag exists as a Tag in the database.
 // If it does, it uses the existing Tag's ID and Name.
 func (s *RecipeService) AssociateTagsWithRecipe(recipe *models.Recipe, tags []string) error {
 	var associatedTags []models.Tag
@@ -465,57 +302,47 @@ func (s *RecipeService) AssociateTagsWithRecipe(recipe *models.Recipe, tags []st
 		}
 	}
 
-	recipe.Hashtags = associatedTags
 	if err := s.Repo.UpdateRecipeTagsAssociation(recipe.ID, associatedTags); err != nil {
 		return fmt.Errorf("failed to update recipe with tags: %v", err)
 	}
+	// recipe.Hashtags = associatedTags
 
 	return nil
 }
 
-// Convert a Recipe to a RecipeResponse
+// toRecipeResponse converts a Recipe to a RecipeResponse
 func toRecipeResponse(r *models.Recipe) *RecipeResponse {
-	var spinOnRecipeID uint
-	if r.SpinOnRecipeID != nil && *r.SpinOnRecipeID != 0 {
-		spinOnRecipeID = *r.SpinOnRecipeID
+	var forkedFromID uint
+	if r.ForkedFromID != nil && *r.ForkedFromID != 0 {
+		forkedFromID = *r.ForkedFromID
 	}
 
-	var spinOnRecipeName string
-	if r.SpinOnRecipe != nil {
-		spinOnRecipeName = r.SpinOnRecipe.Title
+	var forkedFromName string
+	if r.ForkedFrom != nil {
+		forkedFromName = r.ForkedFrom.Title
 	}
 
 	return &RecipeResponse{
-		ID:                  r.ID,
-		Title:               r.Title,
-		MainRecipeJSON:      r.MainRecipeJSON,
-		SubRecipesJSON:      r.SubRecipesJSON,
-		Hashtags:            r.Hashtags,
-		ImageURL:            r.ImageURL,
-		GeneratedByUserID:   r.GeneratedByUserID,
-		GeneratedByUsername: r.GeneratedBy.Username,
-		GuidingContentID:    r.GuidingContentID,
-		ChatHistoryID:       r.ChatHistoryID,
-		SpinOnRecipeID:      spinOnRecipeID,
-		SpinOnRecipeName:    spinOnRecipeName,
-		GenerationComplete:  r.GenerationComplete,
+		ID:                 r.ID,
+		Title:              r.Title,
+		Ingredients:        r.Ingredients,
+		Instructions:       r.Instructions,
+		CookTime:           r.CookTime,
+		UnitSystem:         r.UnitSystem,
+		LinkedRecipes:      r.LinkedRecipes,
+		LinkSuggestions:    r.LinkSuggestions,
+		Hashtags:           r.Hashtags,
+		ImageURL:           r.ImageURL,
+		CreatedByID:        r.CreatedByID,
+		CreatedByUsername:  r.CreatedBy.Username,
+		HistoryID:          r.HistoryID,
+		ForkedFromID:       forkedFromID,
+		ForkedFromName:     forkedFromName,
+		PersonalizationUID: r.PersonalizationUID,
 	}
 }
 
-func chooseAPIKey(cfg *config.Config, user *models.User) (string, error) {
-	var key string
-	if user.Settings.EncryptedOpenAIKey != "" {
-		decryptedKey, err := util.DecryptOpenAIKey(cfg.Env.OpenAIKeyEncryptionKey.Value(), user.Settings.EncryptedOpenAIKey)
-		if err != nil {
-			return "", fmt.Errorf("failed to decrypt API key: %v", err)
-		}
-		key = decryptedKey
-	} else {
-		key = cfg.Env.PublicOpenAIKey.Value()
-	}
-	return key, nil
-}
-
+// cleanHashtag formats a hashtag string.
 func cleanHashtag(hashtag string) string {
 	// Convert to lowercase
 	hashtag = strings.ToLower(hashtag)

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"runtime"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
@@ -13,28 +12,36 @@ import (
 	"github.com/windoze95/saltybytes-api/internal/router"
 )
 
+// init is called before the main function.
 func init() {
+	// Configure the logger
 	ConfigureLogger()
+
+	// Configure the runtime
 	ConfigureRuntime()
 }
 
+// Entry point for the API.
 func main() {
-	cfg, err := config.LoadConfig("configs/config.json")
-	if err != nil {
+	// Load the config
+	var cfg *config.Config
+	if c, err := config.LoadConfig("configs/config.json"); err != nil {
 		log.Fatalf("Error loading config: %v", err)
+	} else {
+		cfg = c
 	}
-	// Reload API keys file every hour
-	ticker := time.NewTicker(1 * time.Hour) // 1 hour
-	go func() {
-		for range ticker.C {
-			cfg.RefreshAPIKeys()
-			cfg.RefreshPrompts()
-		}
-	}()
 
-	err = config.CheckConfigFields(cfg)
-	if err != nil {
+	// Check that all ENV variables are set
+	if err := cfg.CheckConfigEnvFields(); err != nil {
 		log.Fatalf("Error checking config fields: %v", err)
+	}
+
+	// Load API keys and prompts
+	if err := cfg.LoadOpenaiKeys(); err != nil {
+		log.Fatalf("Error loading OpenAI keys: %v", err)
+	}
+	if err := cfg.LoadOpenaiPrompts(); err != nil {
+		log.Fatalf("Error loading OpenAI prompts: %v", err)
 	}
 
 	// Connect to the database
@@ -43,16 +50,6 @@ func main() {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}
 	defer database.Close()
-
-	// // Load new store
-	// store := sessions.NewCookieStore([]byte(cfg.Env.SessionKey.Value()))
-	// store.Options = &sessions.Options{
-	// 	Path: "/",
-	// 	// MaxAge:   86400 * 7, // 7 days
-	// 	HttpOnly: true,
-	// 	Secure:   true,
-	// 	SameSite: http.SameSiteStrictMode,
-	// }
 
 	// Create a new gin router
 	r := router.SetupRouter(cfg, database)

@@ -2,14 +2,13 @@
     "env": {
         "port": "PORT",
         "database_url": "HEROKU_POSTGRESQL_BRONZE_URL",
-        "openai_key_encryption_key": "OPENAI_KEY_ENCRYPTION_KEY",
         "jwt_secret_key": "JWT_SECRET_KEY",
-        "public_openai_key": "PUBLIC_OPENAI_KEY",
         "aws_region": "AWS_REGION",
         "aws_access_key_id": "AWS_ACCESS_KEY_ID",
         "aws_secret_access_key": "AWS_SECRET_ACCESS_KEY",
         "s3_bucket": "S3_BUCKET",
-        "openai_prompts_file_path": "OPENAI_PROMPTS_FILE_PATH",
-        "openai_keys_file_path": "OPENAI_KEYS_FILE_PATH"
+        "id_header": "ID_HEADER",
+        "openai_prompts_path": "OPENAI_PROMPTS_PATH",
+        "openai_keys_path": "OPENAI_KEYS_PATH"
     }
 }

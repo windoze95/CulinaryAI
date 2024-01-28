@@ -3,14 +3,13 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
 	"reflect"
 	"strings"
 	"sync"
 )
 
+// Config struct to hold the configuration.
 type Config struct {
 	Env Env `json:"env"`
 	// Prompts are actually the templates to construct the usable prompts.
@@ -21,23 +20,24 @@ type Config struct {
 	Mutex                 sync.RWMutex
 }
 
+// Env struct to hold the environment variables.
 type Env struct {
-	Port                   EnvVar `json:"port"`
-	DatabaseUrl            EnvVar `json:"database_url"`
-	OpenAIKeyEncryptionKey EnvVar `json:"openai_key_encryption_key"`
-	JwtSecretKey           EnvVar `json:"jwt_secret_key"`
-	PublicOpenAIKey        EnvVar `json:"public_openai_key"`
-	AWSRegion              EnvVar `json:"aws_region"`
-	AWSAccessKeyID         EnvVar `json:"aws_access_key_id"`
-	AWSSecretAccessKey     EnvVar `json:"aws_secret_access_key"`
-	S3Bucket               EnvVar `json:"s3_bucket"`
-	OpenaiPromptsFilePath  EnvVar `json:"openai_prompts_file_path"`
-	OpenaiKeysFilePath     EnvVar `json:"openai_keys_file_path"`
+	Port               EnvVar `json:"port"`
+	DatabaseUrl        EnvVar `json:"database_url"`
+	JwtSecretKey       EnvVar `json:"jwt_secret_key"`
+	AWSRegion          EnvVar `json:"aws_region"`
+	AWSAccessKeyID     EnvVar `json:"aws_access_key_id"`
+	AWSSecretAccessKey EnvVar `json:"aws_secret_access_key"`
+	S3Bucket           EnvVar `json:"s3_bucket"`
+	IdHeader           EnvVar `json:"id_header"`
+	OpenaiPromptsPath  EnvVar `json:"openai_prompts_path"`
+	OpenaiKeysPath     EnvVar `json:"openai_keys_path"`
 }
 
+// EnvVar is a string that represents an environment variable.
 type EnvVar string
 
-// Value returns the value of the environment variable
+// Value returns the value of the environment variable.
 func (e EnvVar) Value() string {
 	return os.Getenv(string(e))
 }
@@ -45,32 +45,20 @@ func (e EnvVar) Value() string {
 // Prompts are actually the templates to construct the usable prompts.
 // Use the FillSysPrompt and FillUserPrompt methods to retrieve a prompt.
 type OpenaiPrompts struct {
-	GenNewRecipeSys              OpenaiPromptTemplate `json:"gen_new_recipe_sys"`
-	GenNewRecipeUser             OpenaiPromptTemplate `json:"gen_new_recipe_user"`
-	GenNewVisionImportArgsSys    OpenaiPromptTemplate `json:"gen_new_vision_import_args_sys"`
-	GenNewVisionImportArgsUser   OpenaiPromptTemplate `json:"gen_new_vision_import_args_user"`
-	GenNewVisionImportRecipeSys  OpenaiPromptTemplate `json:"gen_new_vision_import_recipe_sys"`
-	GenNewVisionImportRecipeUser OpenaiPromptTemplate `json:"gen_new_vision_import_recipe_user"`
-	RegenRecipeSys               OpenaiPromptTemplate `json:"regen_recipe_sys"`
-	RegenRecipeUser              OpenaiPromptTemplate `json:"regen_recipe_user"`
+	GenNewRecipeSys              OpenaiPromptTemplate `json:"/saltybytes/openai_prompts/gen_new_recipe_sys"`
+	GenNewRecipeUser             OpenaiPromptTemplate `json:"/saltybytes/openai_prompts/gen_new_recipe_user"`
+	GenNewVisionImportArgsSys    OpenaiPromptTemplate `json:"/saltybytes/openai_prompts/gen_new_vision_import_args_sys"`
+	GenNewVisionImportArgsUser   OpenaiPromptTemplate `json:"/saltybytes/openai_prompts/gen_new_vision_import_args_user"`
+	GenNewVisionImportRecipeSys  OpenaiPromptTemplate `json:"/saltybytes/openai_prompts/gen_new_vision_import_recipe_sys"`
+	GenNewVisionImportRecipeUser OpenaiPromptTemplate `json:"/saltybytes/openai_prompts/gen_new_vision_import_recipe_user"`
+	RegenRecipeSys               OpenaiPromptTemplate `json:"/saltybytes/openai_prompts/regen_recipe_sys"`
+	RegenRecipeUser              OpenaiPromptTemplate `json:"/saltybytes/openai_prompts/regen_recipe_user"`
 }
 
+// OpenaiPromptTemplate is a string that represents an OpenAI prompt template.
 type OpenaiPromptTemplate string
 
 // LoadConfig reads a JSON configuration file and returns a Config struct.
-// Other (all untracked) config files are expected to maintain the same format as config.json.
-// Example:
-// {
-//   "openai_prompts": {
-//     "gen_new_recipe_sys": ...
-// },
-//
-// {
-//   "openai_keys": [
-//     "key1",
-//     ...
-//   ]
-// }
 func LoadConfig(filePath string) (*Config, error) {
 	file, err := os.ReadFile(filePath)
 	if err != nil {
@@ -82,16 +70,13 @@ func LoadConfig(filePath string) (*Config, error) {
 		return nil, err
 	}
 
-	config.RefreshAPIKeys()
-	config.RefreshPrompts()
-
 	return &config, nil
 }
 
 // CheckConfigFields validates that all fields in Config are populated
 // and their Value method (if available) will not return an error.
-func CheckConfigFields(config *Config) error {
-	return checkFieldsRecursive(reflect.ValueOf(config))
+func (c *Config) CheckConfigEnvFields() error {
+	return checkFieldsRecursive(reflect.ValueOf(c.Env))
 }
 
 // checkFieldsRecursive recursively checks each field.
@@ -136,30 +121,6 @@ func isZeroValue(v reflect.Value) bool {
 	return v.Interface() == reflect.Zero(v.Type()).Interface()
 }
 
-// RefreshPrompts reads the prompts file and updates the Config struct.
-func (c *Config) RefreshPrompts() {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
-
-	prompts, err := loadPromptsFromFile(c.Env.OpenaiPromptsFilePath.Value())
-	if err != nil {
-		log.Printf("Unable to refresh prompts: %v", err)
-		return
-	}
-
-	c.OpenaiPrompts = *prompts
-}
-
-// RefreshAPIKeys reads the API keys file and updates the Config struct.
-func (c *Config) RefreshAPIKeys() {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
-
-	keys := loadAPIKeysFromFile(c.Env.OpenaiKeysFilePath.Value())
-	c.OpenaiKeys = keys
-	c.CurrentOpenaiKeyIndex = 0
-}
-
 // GetCurrentAPIKey returns the current API key and rotates to the next one.
 func (c *Config) GetCurrentAPIKey() string {
 	c.Mutex.Lock()
@@ -175,50 +136,51 @@ func (c *Config) rotateAPIKey() {
 	c.CurrentOpenaiKeyIndex = (c.CurrentOpenaiKeyIndex + 1) % len(c.OpenaiKeys)
 }
 
-// loadAPIKeysFromFile reads a JSON file with API keys and returns a slice of keys.
-func loadAPIKeysFromFile(filePath string) []string {
-	bytes, err := ioutil.ReadFile(filePath)
+// LoadOpenaiKeys loads all OpenAI API keys from AWS SSM Parameter Store.
+func (c *Config) LoadOpenaiKeys() error {
+	// Initialize SSMService with AWS configuration
+	ssmService, err := NewSSMService(c.Env.AWSRegion.Value(), c.Env.AWSAccessKeyID.Value(), c.Env.AWSSecretAccessKey.Value())
 	if err != nil {
-		log.Printf("Unable to read API keys file: %v", err)
-		return []string{}
+		return fmt.Errorf("failed to create SSM service: %v", err)
 	}
 
-	var data struct {
-		OpenaiKeys []string `json:"openai_keys"`
+	// Fetch Secure Strings
+	apiKeys, err := ssmService.GetSecureParameterList(c.Env.OpenaiKeysPath.Value())
+	if err != nil {
+		return fmt.Errorf("failed to get all parameters: %v", err)
 	}
 
-	if err := json.Unmarshal(bytes, &data); err != nil {
-		log.Printf("Unable to parse API keys file: %v", err)
-		return []string{}
-	}
+	c.OpenaiKeys = apiKeys
 
-	return data.OpenaiKeys
+	return nil
 }
 
-// loadPromptsFromFile reads a JSON file with prompt templates and returns a Prompts struct.
-func loadPromptsFromFile(filePath string) (*OpenaiPrompts, error) {
-	file, err := ioutil.ReadFile(filePath)
+// LoadOpenaiPrompts loads all OpenAI prompts from AWS SSM Parameter Store.
+func (c *Config) LoadOpenaiPrompts() error {
+	// Initialize SSMService with AWS configuration
+	ssmService, err := NewSSMService(c.Env.AWSRegion.Value(), c.Env.AWSAccessKeyID.Value(), c.Env.AWSSecretAccessKey.Value())
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("failed to create SSM service: %v", err)
 	}
 
-	var data struct {
-		OpenaiPrompts OpenaiPrompts `json:"openai_prompts"`
+	prompts, err := ssmService.GetOpenaiPromptsFromParameters(c.Env.OpenaiPromptsPath.Value())
+	if err != nil {
+		return fmt.Errorf("failed to get all parameters: %v", err)
 	}
 
-	if err := json.Unmarshal(file, &data); err != nil {
-		return nil, err
-	}
+	c.OpenaiPrompts = *prompts
 
-	return &data.OpenaiPrompts, nil
+	return nil
 }
 
 // FillSysPrompt fetches a system prompt and replaces placeholders.
 func (p *OpenaiPrompts) FillSysPrompt(promptTemplate OpenaiPromptTemplate, unitSystem string, requirements string) string {
 	prompt := string(promptTemplate)
 
+	sanitizedRequirements := strings.Replace(requirements, "`", "", -1)
+
 	prompt = strings.Replace(prompt, "{unitSystem}", unitSystem, -1)
-	prompt = strings.Replace(prompt, "{requirements}", requirements, -1)
+	prompt = strings.Replace(prompt, "{requirements}", sanitizedRequirements, 1)
 
 	return prompt
 }
@@ -227,7 +189,9 @@ func (p *OpenaiPrompts) FillSysPrompt(promptTemplate OpenaiPromptTemplate, unitS
 func (p *OpenaiPrompts) FillUserPrompt(promptTemplate OpenaiPromptTemplate, userPrompt string) string {
 	prompt := string(promptTemplate)
 
-	prompt = strings.Replace(prompt, "{userPrompt}", userPrompt, -1)
+	sanitizedUserPrompt := strings.Replace(userPrompt, "`", "", -1)
+
+	prompt = strings.Replace(prompt, "{userPrompt}", sanitizedUserPrompt, 1)
 
 	return prompt
 }

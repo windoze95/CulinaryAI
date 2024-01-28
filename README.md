@@ -1,5 +1,5 @@
 # SaltyBytes API
 
-An AI-powered recipe generator that aligns with predefined dietary restrictions.
+An AI-enhanced culinary experience and platform.
 
 [SaltyBytes API](https://api.saltybytes.ai)

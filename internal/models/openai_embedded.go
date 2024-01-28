@@ -7,52 +7,59 @@ import (
 	"fmt"
 )
 
-type FunctionCallArgument struct {
-	Title       string            `json:"title"`
-	MainRecipe  GeneratedRecipe   `json:"main_recipe"`
-	SubRecipes  []GeneratedRecipe `json:"sub_recipes"`
-	ImagePrompt string            `json:"image_prompt"`
-	UnitSystem  string            `json:"unit_system"`
-	Hashtags    []string          `json:"hashtags"`
-	// ChatContext string   `json:"chat_context"`
-	// UnitSystem  string       `json:"-"`
-	// Hashtags    []string     `json:"-"`
-	// UnitSystem  string       `json:"unit_system"`
-	// Hashtags    []string     `json:"hashtags"`
+// RecipeDef is a struct that represents the JSON schema that is passed to the OpenAI API for recipe generation using function calling.
+type RecipeDef struct {
+	Title        string       `json:"title"`
+	Ingredients  []Ingredient `json:"ingredients"`
+	Instructions []string     `json:"instructions"`
+	CookTime     int          `json:"cook_time"`
+	ImagePrompt  string       `json:"image_prompt"`
+	// UnitSystem              UnitSystem   `json:"unit_system"`
+	Hashtags                []string `json:"hashtags"`
+	LinkedRecipeSuggestions []string `json:"linked_recipe_suggestions"`
 }
 
-// Scan scan value into Jsonb, implements sql.Scanner interface
-func (j *FunctionCallArgument) Scan(value interface{}) error {
+// Scan is a GORM hook that scans jsonb into a RecipeDef.
+func (j *RecipeDef) Scan(value interface{}) error {
 	bytes, ok := value.([]byte)
 	if !ok {
 		return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
 	}
 
-	result := FunctionCallArgument{}
+	result := RecipeDef{}
 	err := json.Unmarshal(bytes, &result)
-	*j = FunctionCallArgument(result)
+	*j = RecipeDef(result)
+
 	return err
 }
 
-// Value return json value, implement driver.Valuer interface
-func (j FunctionCallArgument) Value() (driver.Value, error) {
-	// if len(j) == 0 {
-	// 	return nil, nil
-	// }
-	// return json.RawMessage(j).MarshalJSON()
+// Value is a GORM hook that returns json value of a RecipeDef.
+func (j RecipeDef) Value() (driver.Value, error) {
 	return json.Marshal(j)
 }
 
+// Ingredient is a struct that represents an ingredient in a recipe.
 type Ingredient struct {
 	Name   string  `json:"name"`
 	Unit   string  `json:"unit"`
 	Amount float64 `json:"amount"`
 }
 
-// type Recipe struct {
-type GeneratedRecipe struct {
-	RecipeName   string       `json:"recipe_name"`
-	Ingredients  []Ingredient `json:"ingredients"`
-	Instructions []string     `json:"instructions"`
-	TimeToCook   float64      `json:"time_to_cook"`
+// Scan is a GORM hook that scans jsonb into a Ingredient.
+func (j *Ingredient) Scan(value interface{}) error {
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
+	}
+
+	result := Ingredient{}
+	err := json.Unmarshal(bytes, &result)
+	*j = Ingredient(result)
+
+	return err
+}
+
+// Value is a GORM hook that returns json value of a Ingredient.
+func (j Ingredient) Value() (driver.Value, error) {
+	return json.Marshal(j)
 }

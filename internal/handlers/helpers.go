@@ -5,6 +5,7 @@ import (
 	"strconv"
 )
 
+// parseUintParam parses a string into a uint.
 func parseUintParam(param string) (uint, error) {
 	parsed, err := strconv.ParseUint(param, 10, 64)
 	if err != nil {

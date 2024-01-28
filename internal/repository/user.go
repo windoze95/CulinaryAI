@@ -8,17 +8,19 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/lib/pq"
 	"github.com/windoze95/saltybytes-api/internal/models"
-	"github.com/windoze95/saltybytes-api/internal/util"
 )
 
+// UserRepository is a repository for interacting with users.
 type UserRepository struct {
 	DB *gorm.DB
 }
 
+// NewUserRepository creates a new UserRepository.
 func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{DB: db}
 }
 
+// CreateUser creates a new user.
 func (r *UserRepository) CreateUser(user *models.User) (*models.User, error) {
 	tx := r.DB.Begin()
 	if err := tx.Create(user).Error; err != nil {
@@ -37,11 +39,24 @@ func (r *UserRepository) CreateUser(user *models.User) (*models.User, error) {
 		return nil, err
 	}
 
-	// user = util.StripSensitiveUserData(user)
-
-	return util.StripSensitiveUserData(user), nil
+	return user, nil
 }
 
+// GetUserByID retrieves a user by their ID.
+func (r *UserRepository) GetUserByID(userID uint) (*models.User, error) {
+	var user models.User
+	if err := r.DB.Preload("Settings").
+		Preload("Personalization").
+		Preload("Subscription").
+		Where("id = ?", userID).
+		First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// GetUserAuthByUsername retrieves a user's authentication information by their username.
 func (r *UserRepository) GetUserAuthByUsername(username string) (*models.User, error) {
 	var user models.User
 	if err := r.DB.Preload("Auth").
@@ -53,74 +68,7 @@ func (r *UserRepository) GetUserAuthByUsername(username string) (*models.User, e
 	return &user, nil
 }
 
-// func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
-// 	// user, err := r.UserDB.GetUserByUsername(username)
-// 	// if err != nil {
-// 	// 	return nil, err
-// 	// }
-// 	var user models.User
-// 	if err := r.DB.Where("username = ?", username).
-// 		First(&user).Error; err != nil {
-// 		return nil, err
-// 	}
-// 	// return &user, nil
-
-// 	// user = util.StripSensitiveUserData(&user)
-
-// 	return util.StripSensitiveUserData(&user), nil
-// }
-
-func (r *UserRepository) GetUserByID(userID uint) (*models.User, error) {
-	// user, err := r.UserDB.GetPreloadedUserByID(userID)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	var user models.User
-	if err := r.DB.Preload("Settings").
-		Preload("GuidingContent").
-		Preload("Subscription").
-		Where("id = ?", userID).
-		First(&user).Error; err != nil {
-		return nil, err
-	}
-
-	// return util.StripSensitiveUserData(&user), nil
-	return &user, nil
-}
-
-// func (r *UserRepository) GetPreloadedUserByID(userID uint) (*models.User, error) {
-// 	// user, err := r.UserDB.GetPreloadedUserByID(userID)
-// 	// if err != nil {
-// 	// 	return nil, err
-// 	// }
-// 	var user models.User
-// 	if err := r.DB.Preload("Settings").
-// 		Preload("GuidingContent").
-// 		Where("id = ?", userID).
-// 		First(&user).Error; err != nil {
-// 		return nil, err
-// 	}
-
-// 	// user = util.StripSensitiveUserData(user)
-
-// 	return util.StripSensitiveUserData(&user), nil
-// }
-
-func (r *UserRepository) GetUserByFacebookID(facebookID string) (*models.User, error) {
-	// user, err := r.UserDB.GetUserByFacebookID(facebookID)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	var user models.User
-	if err := r.DB.Where("facebook_id = ?", facebookID).
-		First(&user).Error; err != nil {
-		return nil, err
-	}
-
-	return util.StripSensitiveUserData(&user), nil
-}
-
+// UpdateUserEmail updates a user's email address.
 func (r *UserRepository) UpdateUserEmail(userID uint, email string) error {
 	err := r.DB.Model(&models.User{}).
 		Where("id = ?", userID).
@@ -132,50 +80,45 @@ func (r *UserRepository) UpdateUserEmail(userID uint, email string) error {
 	return err
 }
 
-// func (r *UserRepository) GetUserByID(userID uint) (*models.User, error) {
-// 	var user models.User
-// 	if err := r.UserDB.GetUserByID(userID, &user); err != nil {
-// 		return nil, err
-// 	}
-// 	return &user, nil
-// }
-
-func (r *UserRepository) UpdateUserSettingsOpenAIKey(userID uint, encryptedOpenAIKey string) error {
-	// return r.UserDB.UpdateUserSettingsOpenAIKey(userID, encryptedOpenAIKey)
+// UpdateUserSettingsKeepScreenAwake updates a user's KeepScreenAwake setting.
+func (r *UserRepository) UpdateUserSettingsKeepScreenAwake(userID uint, keepScreenAwake bool) error {
 	err := r.DB.Model(&models.UserSettings{}).
 		Where("user_id = ?", userID).
-		Update("EncryptedOpenAIKey", encryptedOpenAIKey).Error
+		Update("KeepScreenAwake", keepScreenAwake).Error
 	if err != nil {
-		log.Printf("Error updating user settings openai key: %v", err)
+		log.Printf("Error updating user settings: %v", err)
 	}
 
 	return err
 }
 
-func (r *UserRepository) UpdateGuidingContent(userID uint, updatedGC *models.GuidingContent) error {
-	var existingGC models.GuidingContent
+// UpdatePersonalization updates a user's personalization settings.
+func (r *UserRepository) UpdatePersonalization(userID uint, updatedPersonalization *models.Personalization) error {
+	var existingPersonalization models.Personalization
 
 	// First, find the existing record
 	err := r.DB.Where("user_id = ?", userID).
-		First(&existingGC).Error
+		First(&existingPersonalization).Error
 	if err != nil {
-		log.Printf("Error retrieving existing guiding content: %v", err)
+		log.Printf("Error retrieving existing personalization: %v", err)
 		return err
 	}
 
 	// Update fields
-	existingGC.UnitSystem = updatedGC.UnitSystem
-	existingGC.Requirements = updatedGC.Requirements
+	existingPersonalization.UnitSystem = updatedPersonalization.UnitSystem
+	existingPersonalization.Requirements = updatedPersonalization.Requirements
+	existingPersonalization.UID = updatedPersonalization.UID
 
 	// Perform the update
-	err = r.DB.Save(&existingGC).Error
+	err = r.DB.Save(&existingPersonalization).Error
 	if err != nil {
-		log.Printf("Error saving updated guiding content: %v", err)
+		log.Printf("Error saving updated personalization: %v", err)
 	}
 
 	return err
 }
 
+// UsernameExists checks if a username already exists.
 func (r *UserRepository) UsernameExists(username string) (bool, error) {
 	lowercaseUsername := strings.ToLower(username)
 	var user models.User

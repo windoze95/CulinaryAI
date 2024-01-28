@@ -13,10 +13,12 @@ import (
 	"github.com/windoze95/saltybytes-api/internal/models"
 )
 
+// New creates a new database connection.
 func New(cfg *config.Config) (*gorm.DB, error) {
 	return connectToDatabaseWithRetry(cfg.Env.DatabaseUrl.Value())
 }
 
+// connectToDatabaseWithRetry connects to the database and retries if necessary.
 func connectToDatabaseWithRetry(dbURL string) (*gorm.DB, error) {
 	var database *gorm.DB
 	var err error
@@ -42,11 +44,11 @@ func connectToDatabaseWithRetry(dbURL string) (*gorm.DB, error) {
 		&models.UserAuth{},
 		&models.Subscription{},
 		&models.UserSettings{},
-		&models.GuidingContent{},
+		&models.Personalization{},
 		&models.Recipe{},
 		&models.Tag{},
-		&models.RecipeChatHistory{},
-		&models.RecipeChatHistoryMessage{},
+		&models.RecipeHistory{},
+		&models.RecipeHistoryMessage{},
 	)
 
 	return database, err

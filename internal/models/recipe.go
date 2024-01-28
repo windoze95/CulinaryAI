@@ -5,81 +5,63 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// Recipe is the model for a recipe.
 type Recipe struct {
 	gorm.Model
-	Title                  string
-	GeneratedRecipeVersion int `gorm:"type:int"`
-	// GeneratedRecipe        openai.GeneratedRecipe `gorm:"-"`
-	MainRecipeJSON     string `gorm:"type:text"`
-	SubRecipesJSON     string `gorm:"type:text"`
-	Hashtags           []Tag  `gorm:"many2many:recipe_tags;"`
+	Title              string
+	Version            int          `gorm:"default:1"`
+	Ingredients        []Ingredient `gorm:"type:jsonb"`
+	Instructions       []string     `gorm:"type:text[]"`
+	CookTime           int
+	UnitSystem         UnitSystem `gorm:"type:int"`
+	LinkedRecipes      []*Recipe  `gorm:"many2many:recipe_linked_recipes;association_jointable_foreignkey:link_recipe_id"`
+	LinkSuggestions    []string   `gorm:"type:text[]"`
+	Hashtags           []*Tag     `gorm:"many2many:recipe_tags;"`
 	ImagePrompt        string
 	ImageURL           string
-	GeneratedBy        *User `gorm:"foreignKey:GeneratedByUserID"`
-	GeneratedByUserID  uint
-	InitialPrompt      string
-	GuidingContentID   uint
-	GuidingContentUID  uuid.UUID
-	GuidingContent     *GuidingContent    `gorm:"foreignKey:GuidingContentID"`
-	ChatHistoryID      uint               `gorm:"unique;index"`
-	ChatHistory        *RecipeChatHistory `gorm:"foreignKey:ChatHistoryID"`
-	SpinOnRecipeID     *uint
-	SpinOnRecipe       *Recipe `gorm:"foreignKey:SpinOnRecipeID"`
-	GenerationComplete bool
+	CreatedByID        uint
+	CreatedBy          *User `gorm:"foreignKey:CreatedByID"`
+	PersonalizationUID uuid.UUID
+	UserEdited         bool           `gorm:"default:false"`
+	HistoryID          uint           `gorm:"unique;index"`
+	History            *RecipeHistory `gorm:"foreignKey:HistoryID"`
+	ForkedFromID       *uint
+	ForkedFrom         *Recipe    `gorm:"foreignKey:ForkedFromID"`
+	CreateType         RecipeType `gorm:"type:text"`
 }
 
-type RecipeChatHistory struct {
+// RecipeHistory is the model for a recipe history.
+type RecipeHistory struct {
 	gorm.Model
-	// RecipeID     uint           `gorm:"uniqueIndex;"`
-	// MessagesJSON pq.StringArray `gorm:"type:text[]"`
-	Messages []RecipeChatHistoryMessage `gorm:"foreignKey:RecipeChatHistoryID"`
+	Messages []RecipeHistoryMessage `gorm:"foreignKey:RecipeHistoryID"`
 }
 
-type RecipeChatHistoryMessage struct {
+// RecipeHistoryMessage is the model for a recipe history message.
+type RecipeHistoryMessage struct {
 	gorm.Model
-	RecipeChatHistoryID uint // Foreign key (belongs to RecipeChatHistory)
-	UserPrompt          string
-	GeneratedResponse   FunctionCallArgument `gorm:"type:jsonb"` // Embedded struct
-	// GeneratedResponseJSON pgtype.JSONB `gorm:"type:text"`
+	RecipeHistoryID uint // Foreign key (belongs to RecipeHistory)
+	UserPrompt      string
+	RecipeType      RecipeType `gorm:"type:text"`
+	RecipeResponse  RecipeDef  `gorm:"type:jsonb"` // Embedded struct
 }
 
+// Tag is the model for a recipe hashtag.
 type Tag struct {
 	gorm.Model
 	Hashtag string `gorm:"index:idx_hashtag;unique"`
 }
 
-// // SerializeGeneratedRecipe serializes the GeneratedRecipe field to a JSON string
-// func (r *Recipe) SerializeGeneratedRecipe() error {
-// 	// Set the current version
-// 	r.GeneratedRecipeVersion = 1
+// RecipeType is the type for the RecipeType enum.
+type RecipeType string
 
-// 	// Create an anonymous struct with only the fields you want to serialize
-// 	tempStruct := struct {
-// 		MainRecipe  MainRecipe   `json:"main_recipe"`
-// 		SubRecipes  []MainRecipe `json:"sub_recipes"`
-// 		ImagePrompt string       `json:"image_prompt"`
-// 	}{
-// 		MainRecipe:  r.GeneratedRecipe.MainRecipe,
-// 		SubRecipes:  r.GeneratedRecipe.SubRecipes,
-// 		ImagePrompt: r.GeneratedRecipe.ImagePrompt,
-// 	}
-
-// 	generatedRecipeJSON, err := json.Marshal(tempStruct)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	r.GeneratedRecipeJSON = string(generatedRecipeJSON)
-// 	return nil
-// }
-
-// // DeserializeGeneratedRecipe deserializes the GeneratedRecipeJSON field back into the GeneratedRecipe struct
-// func (r *Recipe) DeserializeGeneratedRecipe() error {
-// 	// Use the version to determine how to deserialize GeneratedRecipe
-// 	switch r.GeneratedRecipeVersion {
-// 	case 1:
-// 		// Deserialize directly into the GeneratedRecipe field, populating all its fields
-// 		return json.Unmarshal([]byte(r.GeneratedRecipeJSON), &r.GeneratedRecipe)
-// 	default:
-// 		return fmt.Errorf("unsupported GeneratedRecipe version: %d", r.GeneratedRecipeVersion)
-// 	}
-// }
+// RecipeType enum values.
+const (
+	RecipeTypeChat            RecipeType = "chat"
+	RecipeTypeBasedOn         RecipeType = "based_on"
+	RecipeTypeRegenChat       RecipeType = "regen_chat"
+	RecipeTypeCopycat         RecipeType = "copycat"
+	RecipeTypeImportVision    RecipeType = "import_vision"
+	RecipeTypeImportLink      RecipeType = "import_link"
+	RecipeTypeImportCopypasta RecipeType = "import_text"
+	RecipeTypeManualEntry     RecipeType = "user_input"
+)

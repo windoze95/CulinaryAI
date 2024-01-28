@@ -11,10 +11,12 @@ import (
 	"io"
 )
 
+// CipherConfig is the configuration for the cipher.
 type CipherConfig struct {
 	EncryptionKey []byte
 }
 
+// GetOpenAIKeyCipherConfig gets the cipher config for the OpenAI key.
 func GetOpenAIKeyCipherConfig(encryptionKeyHex string) (*CipherConfig, error) {
 	if encryptionKeyHex == "" {
 		return nil, errors.New("openai key encryption key must be set")
@@ -28,6 +30,7 @@ func GetOpenAIKeyCipherConfig(encryptionKeyHex string) (*CipherConfig, error) {
 	}, nil
 }
 
+// EncryptOpenAIKey encrypts the OpenAI key with the secret key.
 func EncryptOpenAIKey(encryptionKeyHex string, plaintext string) (string, error) {
 	config, err := GetOpenAIKeyCipherConfig(encryptionKeyHex)
 	if err != nil {
@@ -36,6 +39,7 @@ func EncryptOpenAIKey(encryptionKeyHex string, plaintext string) (string, error)
 	return encrypt(config, plaintext)
 }
 
+// DecryptOpenAIKey decrypts the OpenAI key with the secret key.
 func DecryptOpenAIKey(encryptionKeyHex string, ciphertext string) (string, error) {
 	config, err := GetOpenAIKeyCipherConfig(encryptionKeyHex)
 	if err != nil {
@@ -44,7 +48,7 @@ func DecryptOpenAIKey(encryptionKeyHex string, ciphertext string) (string, error
 	return decrypt(config, ciphertext)
 }
 
-// Encrypt encrypts the plaintext with the secret key
+// encrypt encrypts the plaintext with the secret key.
 func encrypt(config *CipherConfig, plaintext string) (string, error) {
 	block, err := aes.NewCipher(config.EncryptionKey)
 	if err != nil {
@@ -63,7 +67,7 @@ func encrypt(config *CipherConfig, plaintext string) (string, error) {
 	return base64.URLEncoding.EncodeToString(ciphertext), nil
 }
 
-// Decrypt decrypts the ciphertext with the secret key
+// decrypt decrypts the ciphertext with the secret key.
 func decrypt(config *CipherConfig, ciphertext string) (string, error) {
 	block, err := aes.NewCipher(config.EncryptionKey)
 	if err != nil {
