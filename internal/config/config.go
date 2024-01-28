@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"reflect"
 	"strings"
@@ -127,7 +128,9 @@ func (c *Config) GetCurrentAPIKey() string {
 	defer c.Mutex.Unlock()
 
 	key := c.OpenaiKeys[c.CurrentOpenaiKeyIndex]
+
 	c.rotateAPIKey()
+
 	return key
 }
 
@@ -149,6 +152,9 @@ func (c *Config) LoadOpenaiKeys() error {
 	if err != nil {
 		return fmt.Errorf("failed to get all parameters: %v", err)
 	}
+
+	log.Printf("api keys path: %v", c.Env.OpenaiKeysPath.Value())
+	log.Printf("api keys: %v", apiKeys)
 
 	c.OpenaiKeys = apiKeys
 
