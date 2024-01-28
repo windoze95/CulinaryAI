@@ -25,7 +25,7 @@ type RecipeService struct {
 
 // RecipeResponse is the response object for recipe-related operations.
 type RecipeResponse struct {
-	ID                     uint               `json:"id"`
+	ID                     uint               `json:"ID"`
 	Title                  string             `json:"title"`
 	Ingredients            models.Ingredients `json:"ingredients"`
 	Instructions           []string           `json:"instructions"`

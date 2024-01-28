@@ -23,7 +23,7 @@ type UserService struct {
 
 // UserResponse is the response object for user-related operations.
 type UserResponse struct {
-	ID        uint   `json:"id"`
+	ID        uint   `json:"ID"`
 	Username  string `json:"username"`
 	FirstName string `json:"first_name"`
 	Email     string `json:"email"`
