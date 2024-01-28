@@ -10,10 +10,12 @@ import (
 	"github.com/windoze95/saltybytes-api/internal/util"
 )
 
+// RecipeHandler is the handler for recipe-related requests.
 type RecipeHandler struct {
 	Service *service.RecipeService
 }
 
+// NewRecipeHandler is the constructor function for initializing a new RecipeHandler.
 func NewRecipeHandler(recipeService *service.RecipeService) *RecipeHandler {
 	return &RecipeHandler{Service: recipeService}
 }
