@@ -11,7 +11,7 @@ type Recipe struct {
 	gorm.Model
 	Title              string
 	Version            int            `gorm:"default:1"`
-	Ingredients        []*Ingredient  `gorm:"type:jsonb"`
+	Ingredients        Ingredients    `gorm:"type:jsonb"`
 	Instructions       pq.StringArray `gorm:"type:text[]"`
 	CookTime           int
 	UnitSystem         UnitSystem     `gorm:"type:int"`

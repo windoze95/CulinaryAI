@@ -9,11 +9,11 @@ import (
 
 // RecipeDef is a struct that represents the JSON schema that is passed to the OpenAI API for recipe generation using function calling.
 type RecipeDef struct {
-	Title        string        `json:"title"`
-	Ingredients  []*Ingredient `json:"ingredients"`
-	Instructions []string      `json:"instructions"`
-	CookTime     int           `json:"cook_time"`
-	ImagePrompt  string        `json:"image_prompt"`
+	Title        string      `json:"title"`
+	Ingredients  Ingredients `json:"ingredients"`
+	Instructions []string    `json:"instructions"`
+	CookTime     int         `json:"cook_time"`
+	ImagePrompt  string      `json:"image_prompt"`
 	// UnitSystem              UnitSystem   `json:"unit_system"`
 	Hashtags                []string `json:"hashtags"`
 	LinkedRecipeSuggestions []string `json:"linked_recipe_suggestions"`
@@ -45,21 +45,23 @@ type Ingredient struct {
 	Amount float64 `json:"amount"`
 }
 
+type Ingredients []Ingredient
+
 // Scan is a GORM hook that scans jsonb into a Ingredient.
-func (j *Ingredient) Scan(value interface{}) error {
+func (j *Ingredients) Scan(value interface{}) error {
 	bytes, ok := value.([]byte)
 	if !ok {
 		return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
 	}
 
-	result := Ingredient{}
+	result := Ingredients{}
 	err := json.Unmarshal(bytes, &result)
-	*j = Ingredient(result)
+	*j = Ingredients(result)
 
 	return err
 }
 
 // Value is a GORM hook that returns json value of a Ingredient.
-func (j Ingredient) Value() (driver.Value, error) {
+func (j Ingredients) Value() (driver.Value, error) {
 	return json.Marshal(j)
 }
