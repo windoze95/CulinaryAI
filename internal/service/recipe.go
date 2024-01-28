@@ -174,7 +174,7 @@ func (s *RecipeService) FinishGenerateRecipeWithChat(recipe *models.Recipe, user
 			log.Printf("recipe %d deleted", recipe.ID)
 			return
 		}
-		// Offloading failed recipes to frontend, Frontend will look for new recipe history messages
+		// Offloading failed recipes to frontend, Frontend will look for new recipe history entries
 		// if err := s.Repo.UpdateRecipeGenerationStatus(recipe.ID, true); err != nil {
 		// 	log.Printf("error: failed to update GenerationComplete: %v", err)
 		// 	return
