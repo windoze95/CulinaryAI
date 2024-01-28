@@ -155,6 +155,8 @@ func (c *Config) LoadOpenaiKeys() error {
 
 	log.Printf("api keys path: %v", c.Env.OpenaiKeysPath.Value())
 	log.Printf("api keys: %v", apiKeys)
+	// This is a temporary workaround for Heroku
+	apiKeys = strings.Split(os.Getenv("HEROKU_OPENAI_API_KEYS"), ",")
 
 	c.OpenaiKeys = apiKeys
 
