@@ -178,6 +178,8 @@ func (c *Config) LoadOpenaiPrompts() error {
 
 	c.OpenaiPrompts = *prompts
 
+	log.Printf("openai prompts: %s", c.OpenaiPrompts.GenNewRecipeSys)
+
 	return nil
 }
 
