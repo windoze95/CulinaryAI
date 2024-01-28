@@ -12,7 +12,7 @@ import (
 // GenerateNewRecipe generates a new recipe.
 func generateRecipeWithChat(r *RecipeManager) error {
 	// New recipe, there shouldn't be a history
-	if r.RecipeHistoryMessages == nil || len(r.RecipeHistoryMessages) > 0 {
+	if r.RecipeHistoryMessages != nil || len(r.RecipeHistoryMessages) > 0 {
 		return errors.New("RecipeHistoryMessages was not empty")
 	}
 

@@ -13,7 +13,7 @@ import (
 // generateNewVisionImportRecipe generates a new recipe from an image.
 func generateRecipeWithImportVision(r *RecipeManager) error {
 	// New recipe, there shouldn't be a history
-	if r.RecipeHistoryMessages == nil || len(r.RecipeHistoryMessages) > 0 {
+	if r.RecipeHistoryMessages != nil || len(r.RecipeHistoryMessages) > 0 {
 		return errors.New("RecipeHistoryMessages was not empty")
 	}
 
