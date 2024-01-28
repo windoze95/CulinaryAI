@@ -69,18 +69,20 @@ func (s *RecipeService) GetRecipeByID(recipeID uint) (*RecipeResponse, error) {
 
 // HistoryResponse is the response object for recipe history-related operations.
 type HistoryResponse struct {
-	History *models.RecipeHistory `json:"chat_history"`
+	Messages []models.RecipeHistoryMessage `json:"chat_history"`
 }
 
 // GetRecipeHistoryByID fetches a recipe history by its ID.
-func (s *RecipeService) GetRecipeHistoryByID(historyID uint) ([]models.RecipeHistoryMessage, error) {
+func (s *RecipeService) GetRecipeHistoryByID(historyID uint) (*HistoryResponse, error) {
 	// Fetch the recipe by its ID from the repository
 	history, err := s.Repo.GetHistoryByID(historyID)
 	if err != nil {
 		return nil, err
 	}
 
-	return history.Messages, nil
+	historyResponse := &HistoryResponse{Messages: history.Messages}
+
+	return historyResponse, nil
 }
 
 // InitGenerateRecipeWithChat initializes a new recipe with chat.
