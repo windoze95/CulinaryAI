@@ -43,16 +43,16 @@ func (r *RecipeRepository) GetRecipeByID(recipeID uint) (*models.Recipe, error) 
 
 // GetHistoryByID retrieves a recipe history by its ID.
 func (r *RecipeRepository) GetHistoryByID(historyID uint) (*models.RecipeHistory, error) {
-	var history models.RecipeHistory
+	var history *models.RecipeHistory
 
 	err := r.DB.Preload("Messages", func(db *gorm.DB) *gorm.DB {
 		return db.Order("created_at ASC")
-	}).First(&history, historyID).Error
+	}).First(history, historyID).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return &history, nil
+	return history, nil
 }
 
 // GetMessagesAfterID retrieves messages belonging to a specific RecipeHistory

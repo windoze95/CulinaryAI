@@ -46,7 +46,8 @@ func (h *RecipeHandler) GetRecipe(c *gin.Context) {
 
 // GetRecipeHistory returns a recipe history by ID.
 func (h *RecipeHandler) GetRecipeHistory(c *gin.Context) {
-	historyIDStr := c.Param("recipe_chat_history_id")
+	historyIDStr := c.Param("chat_history_id")
+	log.Printf("historyIDStr: %v", historyIDStr)
 	historyID, err := parseUintParam(historyIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid recipe history ID"})
