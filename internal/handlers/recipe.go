@@ -46,7 +46,7 @@ func (h *RecipeHandler) GetRecipe(c *gin.Context) {
 
 // GetRecipeHistory returns a recipe history by ID.
 func (h *RecipeHandler) GetRecipeHistory(c *gin.Context) {
-	historyIDStr := c.Params.ByName("chat_history_id")
+	historyIDStr := c.Param("history_id")
 	log.Printf("historyIDStr: %v", historyIDStr)
 	historyID, err := parseUintParam(historyIDStr)
 	if err != nil {
