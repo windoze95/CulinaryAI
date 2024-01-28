@@ -40,6 +40,7 @@ func main() {
 	if err := cfg.LoadOpenaiKeys(); err != nil {
 		log.Fatalf("Error loading OpenAI keys: %v", err)
 	}
+	log.Printf("Loaded OpenAI keys: %v", cfg.OpenaiKeys)
 	if err := cfg.LoadOpenaiPrompts(); err != nil {
 		log.Fatalf("Error loading OpenAI prompts: %v", err)
 	}

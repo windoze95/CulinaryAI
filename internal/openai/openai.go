@@ -49,6 +49,7 @@ func (rm *RecipeManager) GenerateRecipeImage() error {
 
 // newOpenaiClient creates a new OpenAI client.
 func newOpenaiClient(cfg *config.Config) (*OpenaiClient, error) {
+	log.Printf("current api key string: %v", cfg.GetCurrentAPIKey())
 	return &OpenaiClient{
 		Client: openai.NewClient(cfg.GetCurrentAPIKey()),
 	}, nil
