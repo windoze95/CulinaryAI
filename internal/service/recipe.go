@@ -37,7 +37,7 @@ type RecipeResponse struct {
 	ImageURL               string             `json:"image_url"`
 	CreatedByID            uint               `json:"created_by_id"`
 	CreatedByUsername      string             `json:"created_by_username"`
-	HistoryID              uint               `json:"chat_history_id"`
+	HistoryID              uint               `json:"history_id"`
 	ForkedFromID           *uint              `json:"forked_from_id"`
 	ForkedFromName         *string            `json:"forked_from_name"`
 	UserUnitSystem         models.UnitSystem  `json:"user_unit_system"`
