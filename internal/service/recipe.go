@@ -167,13 +167,14 @@ func (s *RecipeService) FinishGenerateRecipeWithChat(recipe *models.Recipe, user
 	select {
 	case err := <-recipeErrChan:
 		if err != nil {
-			log.Printf("error: %v", err)
-			e := s.DeleteRecipe(recipe.ID)
+			recipeID := recipe.ID
+			log.Printf("Error finishing recipe %d generation: %v", recipeID, err)
+			e := s.DeleteRecipe(recipeID)
 			if e != nil {
-				log.Printf("error: failed to delete recipe: %v", e)
+				log.Printf("error: failed to delete recipe %d: %v", recipeID, e)
 				return
 			}
-			log.Printf("recipe %d deleted", recipe.ID)
+			log.Printf("recipe %d deleted", recipeID)
 			return
 		}
 		// Offloading failed recipes to frontend, Frontend will look for new recipe history entries
@@ -183,13 +184,14 @@ func (s *RecipeService) FinishGenerateRecipeWithChat(recipe *models.Recipe, user
 		// }
 	case <-ctx.Done():
 		err := errors.New("incomplete recipe generation: timed out after 5 minutes")
-		log.Printf("error: %v", err)
-		e := s.DeleteRecipe(recipe.ID)
+		recipeID := recipe.ID
+		log.Printf("Error finishing recipe %d generation: %v", recipeID, err)
+		e := s.DeleteRecipe(recipeID)
 		if e != nil {
-			log.Printf("error: failed to delete recipe: %v", e)
+			log.Printf("error: failed to delete recipe %d: %v", recipeID, e)
 			return
 		}
-		log.Printf("recipe %d deleted", recipe.ID)
+		log.Printf("recipe %d deleted", recipeID)
 		return
 	}
 
