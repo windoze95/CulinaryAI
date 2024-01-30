@@ -37,13 +37,13 @@ func generateRecipeWithImportVision(r *RecipeManager) error {
 	chatCompletionMessages = append(chatCompletionMessages, createUserMsg("Proceed."))
 
 	// Create the request
-	recipeDefReplyRequest, err := createRecipeDefRequest(chatCompletionMessages)
+	recipeDefRequest, err := createRecipeDefRequest(chatCompletionMessages, false)
 	if err != nil {
 		return err
 	}
 
 	// Generate the recipe def
-	resp, err := createChatCompletionWithRetry(recipeDefReplyRequest, r.Cfg)
+	resp, err := createChatCompletionWithRetry(recipeDefRequest, r.Cfg)
 	if err != nil {
 		return fmt.Errorf("failed to create chat completion: %v", err)
 	}
@@ -55,16 +55,18 @@ func generateRecipeWithImportVision(r *RecipeManager) error {
 	}
 
 	// Deserialize the recipe def
-	var functionCallArgument models.RecipeDef
+	var functionCallArgument FunctionCallArgument
 	if err = util.DeserializeFromJSONString(recipeDefJSON, &functionCallArgument); err != nil {
 		return fmt.Errorf("failed to deserialize FunctionCallArgument: %v", err)
 	}
 
 	// Set the recipe def
-	r.RecipeDef = &functionCallArgument
+	r.RecipeDef = &functionCallArgument.RecipeDef
+
+	// Set the next history message
 	r.NextRecipeHistoryEntry = models.RecipeHistoryEntry{
 		UserPrompt:     r.UserPrompt,
-		RecipeResponse: functionCallArgument,
+		RecipeResponse: functionCallArgument.RecipeDef,
 		RecipeType:     models.RecipeTypeImportVision,
 	}
 

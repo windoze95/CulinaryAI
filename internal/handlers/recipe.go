@@ -47,7 +47,6 @@ func (h *RecipeHandler) GetRecipe(c *gin.Context) {
 // GetRecipeHistory returns a recipe history by ID.
 func (h *RecipeHandler) GetRecipeHistory(c *gin.Context) {
 	historyIDStr := c.Param("history_id")
-	log.Printf("historyIDStr: %v", historyIDStr)
 	historyID, err := parseUintParam(historyIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid recipe history ID"})
@@ -81,7 +80,7 @@ func (h *RecipeHandler) GenerateRecipeWithChat(c *gin.Context) {
 
 	// Parse the request body for the user's prompt
 	var request struct {
-		UserPrompt string `json:"userPrompt"`
+		UserPrompt string `json:"user_prompt"`
 	}
 
 	if err := c.BindJSON(&request); err != nil {
@@ -89,13 +88,18 @@ func (h *RecipeHandler) GenerateRecipeWithChat(c *gin.Context) {
 		return
 	}
 
-	recipeResponse, recipe, err := h.Service.InitGenerateRecipeWithChat(user)
+	if request.UserPrompt == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User prompt is required"})
+		return
+	}
+
+	recipeResponse, err := h.Service.InitGenerateRecipeWithChat(user, request.UserPrompt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	go h.Service.FinishGenerateRecipeWithChat(recipe, user, request.UserPrompt)
+	// go h.Service.FinishGenerateRecipeWithChat(recipe, user, request.UserPrompt)
 
 	c.JSON(http.StatusOK, gin.H{"recipe": recipeResponse, "message": "Generating recipe"})
 }
