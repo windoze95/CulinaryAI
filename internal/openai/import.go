@@ -66,8 +66,8 @@ func generateRecipeWithImportVision(r *RecipeManager) error {
 	// Set the next history message
 	r.NextRecipeHistoryEntry = models.RecipeHistoryEntry{
 		UserPrompt:     r.UserPrompt,
-		RecipeResponse: functionCallArgument.RecipeDef,
-		RecipeType:     models.RecipeTypeImportVision,
+		RecipeResponse: &functionCallArgument.RecipeDef,
+		Type:           models.RecipeTypeImportVision,
 	}
 
 	return nil

@@ -5,18 +5,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"github.com/lib/pq"
 )
 
 // RecipeDef is a struct that represents the JSON schema that is passed to the OpenAI API for recipe generation using function calling.
 type RecipeDef struct {
-	Title        string      `json:"title"`
-	Ingredients  Ingredients `json:"ingredients"`
-	Instructions []string    `json:"instructions"`
-	CookTime     int         `json:"cook_time"`
-	ImagePrompt  string      `json:"image_prompt"`
+	Title             string         `json:"title" gorm:"column:title"`
+	Ingredients       Ingredients    `json:"ingredients" gorm:"type:jsonb;column:ingredients"`
+	Instructions      pq.StringArray `json:"instructions" gorm:"type:text[];column:instructions"`
+	CookTime          int            `json:"cook_time" gorm:"column:cook_time"`
+	ImagePrompt       string         `json:"image_prompt" gorm:"column:image_prompt"`
+	Hashtags          []string       `json:"hashtags"` // Hashtags is shadowed by the Hashtags field in the Recipe model
+	LinkedSuggestions pq.StringArray `json:"linked_recipe_suggestions" gorm:"type:text[];column:linked_recipe_suggestions"`
 	// UnitSystem              UnitSystem   `json:"unit_system"`
-	Hashtags                []string `json:"hashtags"`
-	LinkedRecipeSuggestions []string `json:"linked_recipe_suggestions"`
 }
 
 // Scan is a GORM hook that scans jsonb into a RecipeDef.

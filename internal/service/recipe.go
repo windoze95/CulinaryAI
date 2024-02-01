@@ -32,7 +32,7 @@ type RecipeResponse struct {
 	CookTime               int                `json:"cook_time"`
 	UnitSystem             models.UnitSystem  `json:"unit_system"`
 	LinkedRecipes          []*models.Recipe   `json:"linked_recipes"`
-	LinkSuggestions        []string           `json:"link_suggestions"`
+	LinkedSuggestions      []string           `json:"link_suggestions"`
 	Hashtags               []*models.Tag      `json:"hashtags"`
 	ImageURL               string             `json:"image_url"`
 	CreatedByID            uint               `json:"created_by_id"`
@@ -244,12 +244,15 @@ func populateRecipeCoreFields(recipe *models.Recipe, recipeManager *openai.Recip
 	// if err != nil {
 	// 	return errors.New("failed to serialize ingredients: " + err.Error())
 	// }
-	recipe.Title = recipeManager.RecipeDef.Title
-	recipe.Ingredients = recipeManager.RecipeDef.Ingredients
-	recipe.Instructions = recipeManager.RecipeDef.Instructions
-	recipe.CookTime = recipeManager.RecipeDef.CookTime
-	recipe.LinkSuggestions = recipeManager.RecipeDef.LinkedRecipeSuggestions
-	recipe.ImagePrompt = recipeManager.RecipeDef.ImagePrompt
+
+	// recipe.Title = recipeManager.RecipeDef.Title
+	// recipe.Ingredients = recipeManager.RecipeDef.Ingredients
+	// recipe.Instructions = recipeManager.RecipeDef.Instructions
+	// recipe.CookTime = recipeManager.RecipeDef.CookTime
+	// recipe.LinkSuggestions = recipeManager.RecipeDef.LinkedRecipeSuggestions
+	// recipe.ImagePrompt = recipeManager.RecipeDef.ImagePrompt
+
+	recipe.RecipeDef = *recipeManager.RecipeDef
 
 	if recipe.History == nil {
 		return errors.New("recipe history is nil")
@@ -336,7 +339,7 @@ func toRecipeResponse(r *models.Recipe) *RecipeResponse {
 		CookTime:           r.CookTime,
 		UnitSystem:         r.UnitSystem,
 		LinkedRecipes:      r.LinkedRecipes,
-		LinkSuggestions:    r.LinkSuggestions,
+		LinkedSuggestions:  r.LinkedSuggestions,
 		Hashtags:           r.Hashtags,
 		ImageURL:           r.ImageURL,
 		CreatedByID:        r.CreatedByID,

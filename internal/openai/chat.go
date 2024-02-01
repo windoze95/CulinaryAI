@@ -56,8 +56,8 @@ func generateRecipeWithChat(r *RecipeManager) error {
 	// Set the next history message
 	r.NextRecipeHistoryEntry = models.RecipeHistoryEntry{
 		UserPrompt:     r.UserPrompt,
-		RecipeResponse: functionCallArgument.RecipeDef,
-		RecipeType:     models.RecipeTypeChat,
+		RecipeResponse: &functionCallArgument.RecipeDef,
+		Type:           models.RecipeTypeChat,
 	}
 
 	return nil

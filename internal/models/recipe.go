@@ -3,22 +3,22 @@ package models
 import (
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
-	"github.com/lib/pq"
 )
 
 // Recipe is the model for a recipe.
 type Recipe struct {
 	gorm.Model
-	Title              string
-	Version            int            `gorm:"default:1"`
-	Ingredients        Ingredients    `gorm:"type:jsonb"` // Embedded slice of Ingredient
-	Instructions       pq.StringArray `gorm:"type:text[]"`
-	CookTime           int
-	UnitSystem         UnitSystem     `gorm:"type:int"`
-	LinkedRecipes      []*Recipe      `gorm:"many2many:recipe_linked_recipes;association_jointable_foreignkey:link_recipe_id"`
-	LinkSuggestions    pq.StringArray `gorm:"type:text[]"`
-	Hashtags           []*Tag         `gorm:"many2many:recipe_tags;"`
-	ImagePrompt        string
+	RecipeDef
+	// Title        string
+	Version int `gorm:"default:1"`
+	// Ingredients  Ingredients    `gorm:"type:jsonb"` // Embedded slice of Ingredient
+	// Instructions pq.StringArray `gorm:"type:text[]"`
+	// CookTime      int
+	UnitSystem    UnitSystem `gorm:"type:int"`
+	LinkedRecipes []*Recipe  `gorm:"many2many:recipe_linked_recipes;association_jointable_foreignkey:link_recipe_id"`
+	// LinkedSuggestions  pq.StringArray `gorm:"type:text[]"`
+	Hashtags []*Tag `gorm:"many2many:recipe_tags;"`
+	// ImagePrompt        string
 	ImageURL           string
 	CreatedByID        uint
 	CreatedBy          *User `gorm:"foreignKey:CreatedByID"`
@@ -31,10 +31,11 @@ type Recipe struct {
 	CreateType         RecipeType `gorm:"type:text"`
 }
 
-// RecipeHistory is the model for a recipe history.
+// RecipeHistory is the model for a recipe history and the current entry that is being used to represent the recipe.
 type RecipeHistory struct {
 	gorm.Model
-	Entries []RecipeHistoryEntry `gorm:"foreignKey:RecipeHistoryID"`
+	Entries       []RecipeHistoryEntry `gorm:"foreignKey:RecipeHistoryID"`
+	ActiveEntryID *uint                // Foreign key (belongs to RecipeHistoryEntry)
 }
 
 // RecipeHistoryEntry is the model for a recipe history entry.
@@ -42,8 +43,9 @@ type RecipeHistoryEntry struct {
 	gorm.Model
 	RecipeHistoryID uint // Foreign key (belongs to RecipeHistory)
 	UserPrompt      string
-	RecipeType      RecipeType `gorm:"type:text"`
-	RecipeResponse  RecipeDef  `gorm:"type:jsonb"` // Embedded struct
+	Type            RecipeType `gorm:"type:text"`
+	RecipeResponse  *RecipeDef `gorm:"type:jsonb"` // Embedded struct
+	Version         int        // To track the order of the entries
 }
 
 // Tag is the model for a recipe hashtag.

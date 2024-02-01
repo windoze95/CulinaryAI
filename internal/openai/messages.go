@@ -20,7 +20,7 @@ func processExistingRecipeHistoryEntries(historyIn []models.RecipeHistoryEntry) 
 		}
 
 		// Build the message stream
-		switch entryIn.RecipeType {
+		switch entryIn.Type {
 		case models.RecipeTypeManualEntry:
 			// Manual type entry is a special case where we want to simulate a revision of the recipe for context.
 			messagesOut = append(messagesOut, openai.ChatCompletionMessage{
