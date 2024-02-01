@@ -119,7 +119,7 @@ func (r *RecipeRepository) UpdateRecipeImageURL(recipeID uint, imageURL string) 
 
 // UpdateRecipeDef updates the core fields of a recipe and appends the new recipe history entry to the history.
 //
-// Core fields: "Title", "Ingredients", "Instructions", "CookTime", "LinkedRecipeSuggestions", "ImagePrompt"
+// Core fields: "Title", "Ingredients", "Instructions", "CookTime", "LinkedSuggestions", "ImagePrompt"
 func (r *RecipeRepository) UpdateRecipeDef(recipe *models.Recipe, newRecipeHistoryEntry models.RecipeHistoryEntry) error {
 	// Start a new transaction.
 	tx := r.DB.Begin()
